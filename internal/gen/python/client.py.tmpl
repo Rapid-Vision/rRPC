@@ -1,0 +1,64 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+import json
+import urllib.error
+import urllib.request
+
+{{- range $model := .Models}}
+@dataclass
+class {{className $model.Name}}:
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+    {{fieldName $field.Name}}: {{pythonType $field.Type}}
+{{- end}}
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
+        return {{className $model.Name}}(
+{{- range $field := $model.Fields}}
+            {{fieldName $field.Name}}={{decodeExpr $field.Type (print "data.get(\"" (jsonName $field.Name) "\")")}},
+{{- end}}
+        )
+{{- else}}
+    pass
+{{- end}}
+
+{{- end}}
+class RPCClient:
+    def __init__(self, base_url: str) -> None:
+        self.base_url = base_url.rstrip("/")
+
+    def _request(self, path: str, payload: Optional[Dict[str, Any]]) -> Any:
+        url = f"{self.base_url}/{path}"
+        data = None
+        if payload is not None:
+            data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(url, data=data, method="POST", headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req) as resp:
+                body = resp.read()
+        except urllib.error.HTTPError as err:
+            detail = err.read().decode("utf-8")
+            raise RuntimeError(f"rpc error: {detail}") from err
+        if not body:
+            return None
+        return json.loads(body.decode("utf-8"))
+
+{{- range $rpc := .RPCs}}
+    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{pythonType $rpc.Returns}}:
+{{- if hasParameters $rpc}}
+        payload = {
+{{- range $param := $rpc.Parameters}}
+            "{{jsonName $param.Name}}": {{fieldName $param.Name}},
+{{- end}}
+        }
+{{- else}}
+        payload = None
+{{- end}}
+        data = self._request("{{rpcMethodName $rpc.Name}}", payload)
+        value = data.get("{{resultField $rpc.Returns}}") if isinstance(data, dict) else data
+        return {{decodeExpr $rpc.Returns "value"}}
+
+{{- end}}

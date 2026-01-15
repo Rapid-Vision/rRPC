@@ -55,7 +55,7 @@ func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if outputDir == "" {
 		outputDir = "."
 	}
-	outputPath := filepath.Join(outputDir, "generated", serverPkg, "server.go")
+	outputPath := filepath.Join(outputDir, serverPkg, "server.go")
 	if !serverForce {
 		if _, statErr := os.Stat(outputPath); statErr == nil {
 			return fmt.Errorf("output file exists: %s (use --force to overwrite)", outputPath)

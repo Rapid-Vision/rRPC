@@ -57,7 +57,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 	if outputDir == "" {
 		outputDir = "."
 	}
-	baseDir := filepath.Join(outputDir, "generated", clientPkg)
+	baseDir := filepath.Join(outputDir, clientPkg)
 	clientPath := filepath.Join(baseDir, "client.py")
 	initPath := filepath.Join(baseDir, "__init__.py")
 	if !clientForce {

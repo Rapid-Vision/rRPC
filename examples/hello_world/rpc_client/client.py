@@ -27,9 +27,7 @@ class RPCClient:
         data = None
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            url, data=data, method="POST", headers={"Content-Type": "application/json"}
-        )
+        req = urllib.request.Request(url, data=data, method="POST", headers={"Content-Type": "application/json"})
         try:
             with urllib.request.urlopen(req) as resp:
                 body = resp.read()
@@ -40,9 +38,7 @@ class RPCClient:
             return None
         return json.loads(body.decode("utf-8"))
 
-    def hello_world(
-        self, name: str, surname: Optional[str] = None
-    ) -> GreetingMessageModel:
+    def hello_world(self, name: str, surname: Optional[str] = None) -> GreetingMessageModel:
         payload = {
             "name": name,
             "surname": surname,

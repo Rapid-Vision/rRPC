@@ -1,0 +1,72 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "{{.Title}}",
+    "version": "{{.Version}}"
+  },
+  "paths": {
+{{- range $i, $rpc := .RPCs}}
+    "/{{rpcRoute $rpc.Name}}": {
+      "post": {
+        "operationId": "{{rpcMethodName $rpc.Name}}",
+{{- if hasParameters $rpc}}
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/{{paramsSchemaName $rpc.Name}}"
+              }
+            }
+          }
+        },
+{{- end}}
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/{{resultSchemaName $rpc.Name}}"
+                }
+              }
+            }
+          }
+        }
+      }
+    }{{if lt (add $i 1) (len $.RPCs)}},{{end}}
+{{- end}}
+  },
+  "components": {
+    "schemas": {
+{{- range $i, $model := .Models}}
+      "{{modelSchemaName $model.Name}}": {
+        "type": "object",
+        "properties": {
+{{- range $j, $field := $model.Fields}}
+          "{{jsonName $field.Name}}": {{schemaJSON $field.Type}}{{if lt (add $j 1) (len $model.Fields)}},{{end}}
+{{- end}}
+        }{{if gt (len (requiredList $model.Fields)) 0}},
+        "required": {{toJSON (requiredList $model.Fields)}}{{end}}
+      }{{if or (gt (len $.RPCs) 0) (lt (add $i 1) (len $.Models))}},{{end}}
+{{- end}}
+{{- range $i, $rpc := .RPCs}}
+      "{{paramsSchemaName $rpc.Name}}": {
+        "type": "object",
+        "properties": {
+{{- range $j, $param := $rpc.Parameters}}
+          "{{jsonName $param.Name}}": {{schemaJSON $param.Type}}{{if lt (add $j 1) (len $rpc.Parameters)}},{{end}}
+{{- end}}
+        }{{if gt (len (requiredList $rpc.Parameters)) 0}},
+        "required": {{toJSON (requiredList $rpc.Parameters)}}{{end}}
+      },
+      "{{resultSchemaName $rpc.Name}}": {
+        "type": "object",
+        "properties": {
+          "{{resultField $rpc.Returns}}": {{schemaJSON $rpc.Returns}}
+        }
+      }{{if lt (add $i 1) (len $.RPCs)}},{{end}}
+{{- end}}
+    }
+  }
+}

@@ -11,17 +11,25 @@ import (
 
 var clientCmd = &cobra.Command{
 	Use:   "client",
-	Short: "Generate Python client code from a schema",
+	Short: "Generate client code from a schema",
 	RunE:  RunClientCmd,
 }
 
 func init() {
 	rootCmd.AddCommand(clientCmd)
+	clientCmd.Flags().String("lang", "python", "Output language")
 }
 
 func RunClientCmd(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected schema path argument")
+	}
+	lang, err := cmd.Flags().GetString("lang")
+	if err != nil {
+		return fmt.Errorf("read lang flag: %w", err)
+	}
+	if lang != "python" && lang != "py" {
+		return fmt.Errorf("unsupported language %q for client", lang)
 	}
 	schemaPath := args[0]
 	data, err := os.ReadFile(schemaPath)

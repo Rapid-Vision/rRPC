@@ -11,17 +11,25 @@ import (
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
-	Short: "Generate a go server from schema",
+	Short: "Generate server code from a schema",
 	RunE:  RunServerCmd,
 }
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
+	serverCmd.Flags().String("lang", "go", "Output language")
 }
 
 func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected schema path argument")
+	}
+	lang, err := cmd.Flags().GetString("lang")
+	if err != nil {
+		return fmt.Errorf("read lang flag: %w", err)
+	}
+	if lang != "go" {
+		return fmt.Errorf("unsupported language %q for server", lang)
 	}
 	schemaPath := args[0]
 	data, err := os.ReadFile(schemaPath)

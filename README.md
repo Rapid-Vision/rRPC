@@ -17,7 +17,11 @@ This project aims to provide a simple toolkit with following properties:
 - JSON over HTTP protocol
 - Capacity to generate an [OpenAPI](https://www.openapis.org/) schema
 
-At this moment this project aims to generate only a Go server and a python client.
+## Language support
+| Language | Server | Client |
+| --- | --- | --- |
+| Go | ✅ | ✅ |
+| Python | ❌ | ✅ |
 
 ## Installation
 ```bash

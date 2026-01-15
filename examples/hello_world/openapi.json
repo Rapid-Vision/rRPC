@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "rRPC API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/hello_world": {
+      "post": {
+        "operationId": "HelloWorld",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelloWorldParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelloWorldResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GreetingMessageModel": {
+        "type": "object",
+        "properties": {
+          "message": {"type":"string"}
+        },
+        "required": ["message"]
+      },
+      "HelloWorldParams": {
+        "type": "object",
+        "properties": {
+          "name": {"type":"string"},
+          "surname": {"nullable":true,"type":"string"}
+        },
+        "required": ["name"]
+      },
+      "HelloWorldResult": {
+        "type": "object",
+        "properties": {
+          "greeting_message": {"$ref":"#/components/schemas/GreetingMessageModel"}
+        }
+      }
+    }
+  }
+}

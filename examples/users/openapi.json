@@ -1,0 +1,208 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "rRPC API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/get_user": {
+      "post": {
+        "operationId": "GetUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetUserParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/list_users": {
+      "post": {
+        "operationId": "ListUsers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUsersResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/create_user": {
+      "post": {
+        "operationId": "CreateUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateUserResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_username_map": {
+      "post": {
+        "operationId": "GetUsernameMap",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUsernameMapResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/find_group_by_name": {
+      "post": {
+        "operationId": "FindGroupByName",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FindGroupByNameParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindGroupByNameResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserModel": {
+        "type": "object",
+        "properties": {
+          "id": {"format":"int32","type":"integer"},
+          "username": {"type":"string"},
+          "name": {"type":"string"},
+          "surname": {"nullable":true,"type":"string"}
+        },
+        "required": ["id","username","name"]
+      },
+      "GroupModel": {
+        "type": "object",
+        "properties": {
+          "name": {"type":"string"},
+          "users": {"items":{"$ref":"#/components/schemas/UserModel"},"type":"array"}
+        },
+        "required": ["name","users"]
+      },
+      "GetUserParams": {
+        "type": "object",
+        "properties": {
+          "user_id": {"format":"int32","type":"integer"}
+        },
+        "required": ["user_id"]
+      },
+      "GetUserResult": {
+        "type": "object",
+        "properties": {
+          "user": {"$ref":"#/components/schemas/UserModel"}
+        }
+      },
+      "ListUsersParams": {
+        "type": "object",
+        "properties": {
+        }
+      },
+      "ListUsersResult": {
+        "type": "object",
+        "properties": {
+          "result": {"items":{"$ref":"#/components/schemas/UserModel"},"type":"array"}
+        }
+      },
+      "CreateUserParams": {
+        "type": "object",
+        "properties": {
+          "name": {"type":"string"},
+          "surname": {"nullable":true,"type":"string"}
+        },
+        "required": ["name"]
+      },
+      "CreateUserResult": {
+        "type": "object",
+        "properties": {
+          "user": {"$ref":"#/components/schemas/UserModel"}
+        }
+      },
+      "GetUsernameMapParams": {
+        "type": "object",
+        "properties": {
+        }
+      },
+      "GetUsernameMapResult": {
+        "type": "object",
+        "properties": {
+          "result": {"additionalProperties":{"$ref":"#/components/schemas/UserModel"},"type":"object"}
+        }
+      },
+      "FindGroupByNameParams": {
+        "type": "object",
+        "properties": {
+          "name": {"type":"string"}
+        },
+        "required": ["name"]
+      },
+      "FindGroupByNameResult": {
+        "type": "object",
+        "properties": {
+          "group": {"$ref":"#/components/schemas/GroupModel"}
+        }
+      }
+    }
+  }
+}

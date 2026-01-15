@@ -1,0 +1,119 @@
+package {{.Package}}
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+)
+
+{{- range $index, $model := .Models}}
+{{- if gt $index 0}}
+
+{{- end}}
+type {{modelTypeName $model.Name}} struct {
+{{- range $field := $model.Fields}}
+	{{fieldName $field.Name}} {{goType $field.Type}} `json:"{{jsonName $field.Name}}"`
+{{- end}}
+}
+{{- end}}
+
+{{- range $rpc := .RPCs}}
+
+type {{rpcParamsName $rpc.Name}} struct {
+{{- range $param := $rpc.Parameters}}
+	{{fieldName $param.Name}} {{goType $param.Type}} `json:"{{jsonName $param.Name}}"`
+{{- end}}
+}
+
+type {{rpcResultName $rpc.Name}} struct {
+	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
+}
+{{- end}}
+
+type RPCClient struct {
+	baseURL string
+	client  *http.Client
+}
+
+func NewRPCClient(baseURL string) *RPCClient {
+	return NewRPCClientWithHTTP(baseURL, nil)
+}
+
+func NewRPCClientWithHTTP(baseURL string, client *http.Client) *RPCClient {
+	if client == nil {
+		client = http.DefaultClient
+	}
+	return &RPCClient{
+		baseURL: strings.TrimRight(baseURL, "/"),
+		client:  client,
+	}
+}
+
+{{- range $rpc := .RPCs}}
+
+func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 0}}params {{rpcParamsName $rpc.Name}}{{- end}}) ({{rpcResultName $rpc.Name}}, error) {
+	var res {{rpcResultName $rpc.Name}}
+	var payload any
+	{{- if gt (len $rpc.Parameters) 0}}
+	payload = params
+	{{- else}}
+	payload = nil
+	{{- end}}
+	if err := c.doRequest("{{rpcPath $rpc.Name}}", payload, &res); err != nil {
+		return {{rpcResultName $rpc.Name}}{}, err
+	}
+	return res, nil
+}
+{{- end}}
+
+type rpcError struct {
+	Message string `json:"message"`
+}
+
+func (c *RPCClient) doRequest(path string, payload any, out any) error {
+	url := c.baseURL + path
+	var body io.Reader
+	if payload != nil {
+		raw, err := json.Marshal(payload)
+		if err != nil {
+			return fmt.Errorf("encode payload: %w", err)
+		}
+		body = bytes.NewReader(raw)
+	}
+	req, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return fmt.Errorf("create request: %w", err)
+	}
+	if payload != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("read response: %w", err)
+	}
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var rpcErr rpcError
+		if len(raw) > 0 {
+			_ = json.Unmarshal(raw, &rpcErr)
+		}
+		if rpcErr.Message != "" {
+			return fmt.Errorf("rpc error: %s", rpcErr.Message)
+		}
+		return fmt.Errorf("rpc error: status %d", resp.StatusCode)
+	}
+	if out == nil || len(raw) == 0 {
+		return nil
+	}
+	if err := json.Unmarshal(raw, out); err != nil {
+		return fmt.Errorf("decode response: %w", err)
+	}
+	return nil
+}

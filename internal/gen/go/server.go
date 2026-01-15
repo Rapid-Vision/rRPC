@@ -90,6 +90,10 @@ func rpcRoute(name string) string {
 	return "POST /" + utils.NewIdentifierName(name).SnakeCase()
 }
 
+func rpcPath(name string) string {
+	return "/" + utils.NewIdentifierName(name).SnakeCase()
+}
+
 func resultField(t parser.TypeRef) string {
 	if t.Kind == parser.TypeIdent {
 		return utils.NewIdentifierName(t.Name).PascalCase()

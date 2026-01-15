@@ -1,0 +1,101 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "rRPC",
+	"scopeName": "source.rrpc",
+	"fileTypes": [
+		"rrpc"
+	],
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#builtins"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#identifiers"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#punctuation"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line.number-sign.rrpc",
+					"match": "#[^\\n]*"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.declaration.rrpc",
+					"match": "\\b(model|rpc)\\b"
+				},
+				{
+					"name": "keyword.operator.rrpc",
+					"match": "\\b(list|map)\\b"
+				}
+			]
+		},
+		"builtins": {
+			"patterns": [
+				{
+					"name": "storage.type.rrpc",
+					"match": "\\b(string|int|bool)\\b"
+				}
+			]
+		},
+		"types": {
+			"patterns": [
+				{
+					"name": "entity.name.type.rrpc",
+					"match": "\\b[A-Z][A-Za-z0-9_]*\\b"
+				}
+			]
+		},
+		"identifiers": {
+			"patterns": [
+				{
+					"name": "variable.other.rrpc",
+					"match": "\\b[a-z_][A-Za-z0-9_]*\\b"
+				}
+			]
+		},
+		"operators": {
+			"patterns": [
+				{
+					"name": "keyword.operator.rrpc",
+					"match": "\\?"
+				}
+			]
+		},
+		"punctuation": {
+			"patterns": [
+				{
+					"name": "punctuation.separator.rrpc",
+					"match": "[:,]"
+				},
+				{
+					"name": "punctuation.section.group.begin.rrpc",
+					"match": "[\\(\\[\\{]"
+				},
+				{
+					"name": "punctuation.section.group.end.rrpc",
+					"match": "[\\)\\]\\}]"
+				}
+			]
+		}
+	}
+}

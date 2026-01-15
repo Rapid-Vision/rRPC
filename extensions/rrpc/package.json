@@ -1,0 +1,34 @@
+{
+  "name": "rrpc",
+  "displayName": "rRPC",
+  "description": "rRPC schema language support",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.108.1"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "rrpc",
+        "aliases": [
+          "rRPC",
+          "rrpc"
+        ],
+        "extensions": [
+          "rrpc"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "rrpc",
+        "scopeName": "source.rrpc",
+        "path": "./syntaxes/rrpc.tmLanguage.json"
+      }
+    ]
+  }
+}

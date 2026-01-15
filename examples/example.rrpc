@@ -5,7 +5,12 @@ model User {
 }
 
 rpc GetUser(
-    userId: int
+    userId: int,
 ) User
 
 rpc ListUsers() []User
+
+rpc CreateUser(
+    name: string,
+    surname: string?,
+) User

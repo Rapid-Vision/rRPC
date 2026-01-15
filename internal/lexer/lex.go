@@ -14,6 +14,7 @@ const (
 	TokenIdentifier
 	TokenOptional
 	TokenColon
+	TokenComma
 	TokenLParen
 	TokenRParen
 	TokenLBrack
@@ -67,6 +68,11 @@ var rules = [...]rule{
 		Name:  "colon",
 		Regex: `(?P<colon>:)`,
 		Type:  TokenColon,
+	},
+	{
+		Name:  "comma",
+		Regex: `(?P<comma>,)`,
+		Type:  TokenComma,
 	},
 	{
 		Name:  "lparen",
@@ -154,4 +160,35 @@ func (l *Lexer) Tokenize() (tokens []Token) {
 		i += loc[1]
 	}
 	return tokens
+}
+
+func TokenTypeName(tt TokenType) string {
+	switch tt {
+	case TokenModel:
+		return "model"
+	case TokenRpc:
+		return "rpc"
+	case TokenIdentifier:
+		return "identifier"
+	case TokenOptional:
+		return "?"
+	case TokenColon:
+		return ":"
+	case TokenComma:
+		return ","
+	case TokenLParen:
+		return "("
+	case TokenRParen:
+		return ")"
+	case TokenLBrack:
+		return "["
+	case TokenRBrack:
+		return "]"
+	case TokenLBrace:
+		return "{"
+	case TokenRBrace:
+		return "}"
+	default:
+		return "unknown"
+	}
 }

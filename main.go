@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Rapid-Vision/rRPC/internal/lexer"
+	"github.com/Rapid-Vision/rRPC/internal/parser"
 )
 
 func main() {
@@ -16,10 +16,11 @@ func main() {
 		return
 	}
 
-	lex := lexer.NewLexer(string(data))
-	tokens := lex.Tokenize()
-
-	for i, tok := range tokens {
-		fmt.Println(i, tok)
+	res, err := parser.Parse(string(data))
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+
+	fmt.Println(res.Dump())
 }

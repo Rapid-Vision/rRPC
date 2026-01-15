@@ -5,6 +5,11 @@ model User {
     surname: string?
 }
 
+model Group {
+    name: string
+    users: list[User]
+}
+
 rpc GetUser(
     userId: int,
 ) User
@@ -17,3 +22,7 @@ rpc CreateUser(
 ) User
 
 rpc GetUsernameMap() map[string, User]
+
+rpc FindGroupByName(
+    name: string,
+) Group

@@ -14,41 +14,43 @@ type Schema struct {
 
 func (s *Schema) Dump() string {
 	var b strings.Builder
-	for i, model := range s.Models {
-		if i > 0 {
-			b.WriteString("\n")
-		}
-		b.WriteString("model ")
-		b.WriteString(model.Name)
-		b.WriteString(" {\n")
+	totalChildren := len(s.Models) + len(s.RPCs)
+	modelsLeft := len(s.Models)
+	for _, model := range s.Models {
+		modelsLeft--
+		writeTreeLine(&b, 0, "Model: "+model.Name)
+		fieldsLeft := len(model.Fields)
 		for _, field := range model.Fields {
-			b.WriteString("  ")
-			b.WriteString(field.Name)
-			b.WriteString(": ")
-			b.WriteString(formatType(field.Type))
-			b.WriteString("\n")
+			fieldsLeft--
+			writeTreeLine(&b, 1, "Field: "+field.Name)
+			writeTreeLine(&b, 2, "Type: "+formatType(field.Type))
 		}
-		b.WriteString("}\n")
+		if len(model.Fields) == 0 {
+			writeTreeLine(&b, 1, "Field: (none)")
+		}
+		totalChildren--
+		if totalChildren == 0 {
+			break
+		}
 	}
 
-	for i, rpc := range s.RPCs {
-		if len(s.Models) > 0 || i > 0 {
-			b.WriteString("\n")
-		}
-		b.WriteString("rpc ")
-		b.WriteString(rpc.Name)
-		b.WriteString("(")
-		for idx, param := range rpc.Parameters {
-			if idx > 0 {
-				b.WriteString(", ")
+	rpcsLeft := len(s.RPCs)
+	for _, rpc := range s.RPCs {
+		rpcsLeft--
+		writeTreeLine(&b, 0, "RPC: "+rpc.Name)
+		writeTreeLine(&b, 1, "Params")
+		if len(rpc.Parameters) == 0 {
+			writeTreeLine(&b, 2, "Field: (none)")
+		} else {
+			paramsLeft := len(rpc.Parameters)
+			for _, param := range rpc.Parameters {
+				paramsLeft--
+				writeTreeLine(&b, 2, "Field: "+param.Name)
+				writeTreeLine(&b, 3, "Type: "+formatType(param.Type))
 			}
-			b.WriteString(param.Name)
-			b.WriteString(": ")
-			b.WriteString(formatType(param.Type))
 		}
-		b.WriteString(") ")
-		b.WriteString(formatType(rpc.Returns))
-		b.WriteString("\n")
+		writeTreeLine(&b, 1, "Returns")
+		writeTreeLine(&b, 2, "Type: "+formatType(rpc.Returns))
 	}
 	return b.String()
 }
@@ -343,6 +345,14 @@ func formatType(t TypeRef) string {
 		b.WriteString("?")
 	}
 	return b.String()
+}
+
+func writeTreeLine(b *strings.Builder, depth int, text string) {
+	for i := 0; i < depth; i++ {
+		b.WriteString("  ")
+	}
+	b.WriteString(text)
+	b.WriteString("\n")
 }
 
 func ValidateType(t TypeRef) error {

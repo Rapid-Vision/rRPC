@@ -1,7 +1,7 @@
 from .client import RPCClient
 from .client import GreetingMessageModel
 
-__ALL__ = [
+__all__ = [
     "RPCClient",
     "GreetingMessageModel",
 ]

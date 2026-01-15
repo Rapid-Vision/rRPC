@@ -98,7 +98,7 @@ func buildPythonInit(schema *parser.Schema) string {
 		b.WriteString(className)
 		b.WriteString("\n")
 	}
-	b.WriteString("\n__ALL__ = [\n")
+	b.WriteString("\n__all__ = [\n")
 	b.WriteString("    \"RPCClient\",\n")
 	for _, model := range schema.Models {
 		className := utils.NewIdentifierName(model.Name).PascalCase() + "Model"

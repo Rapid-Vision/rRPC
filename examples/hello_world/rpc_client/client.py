@@ -19,15 +19,17 @@ class GreetingMessageModel:
 
 
 class RPCClient:
-    def __init__(self, base_url: str) -> None:
+    def __init__(self, base_url: str, headers: Optional[Dict[str, str]] = None) -> None:
         self.base_url = base_url.rstrip("/")
+        self.headers = headers or {}
 
     def _request(self, path: str, payload: Optional[Dict[str, Any]]) -> Any:
         url = f"{self.base_url}/{path}"
         data = None
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(url, data=data, method="POST", headers={"Content-Type": "application/json"})
+        headers = {**self.headers, "Content-Type": "application/json"}
+        req = urllib.request.Request(url, data=data, method="POST", headers=headers)
         try:
             with urllib.request.urlopen(req) as resp:
                 body = resp.read()

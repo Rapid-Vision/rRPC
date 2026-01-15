@@ -193,6 +193,26 @@ func (g *Generator) writeRPCHandler(rpc parser.RPC) {
 
 }
 
+func (g *Generator) identType(name string) string {
+	switch name {
+	case "string":
+		return "string"
+	case "int":
+		return "int"
+	case "bool":
+		return "bool"
+	default:
+		return utils.NewIdentifierName(name).PascalCase() + "Model"
+	}
+}
+
+func (g *Generator) resultFieldName(t parser.TypeRef) string {
+	if t.Kind == parser.TypeIdent {
+		return utils.NewIdentifierName(t.Name).PascalCase()
+	}
+	return "Result"
+}
+
 func (g *Generator) goType(t parser.TypeRef) string {
 	var base string
 	switch t.Kind {
@@ -220,24 +240,4 @@ func (g *Generator) goType(t parser.TypeRef) string {
 		return "*" + base
 	}
 	return base
-}
-
-func (g *Generator) identType(name string) string {
-	switch name {
-	case "string":
-		return "string"
-	case "int":
-		return "int"
-	case "bool":
-		return "bool"
-	default:
-		return utils.NewIdentifierName(name).PascalCase() + "Model"
-	}
-}
-
-func (g *Generator) resultFieldName(t parser.TypeRef) string {
-	if t.Kind == parser.TypeIdent {
-		return utils.NewIdentifierName(t.Name).PascalCase()
-	}
-	return "Result"
 }

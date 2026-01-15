@@ -245,6 +245,9 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if err != nil {
 			return TypeRef{}, err
 		}
+		if !isComparableMapKey(key) {
+			return TypeRef{}, fmt.Errorf("map key type must be comparable identifier (string, int, bool)")
+		}
 		if _, err := p.expect(lexer.TokenComma); err != nil {
 			return TypeRef{}, err
 		}
@@ -330,4 +333,16 @@ func formatType(t TypeRef) string {
 		b.WriteString("?")
 	}
 	return b.String()
+}
+
+func isComparableMapKey(t TypeRef) bool {
+	if t.Kind != TypeIdent {
+		return false
+	}
+	switch t.Name {
+	case "string", "int", "bool":
+		return true
+	default:
+		return false
+	}
 }

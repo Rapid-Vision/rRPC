@@ -98,7 +98,14 @@ func Parse(text string) (*Schema, error) {
 		return nil, err
 	}
 	p := NewParser(tokens)
-	return p.parseSchema()
+	schema, err := p.parseSchema()
+	if err != nil {
+		return nil, err
+	}
+	if err := ValidateSchema(schema); err != nil {
+		return nil, err
+	}
+	return schema, nil
 }
 
 func NewParser(tokens []lexer.Token) *Parser {
@@ -361,4 +368,99 @@ func ValidateType(t TypeRef) error {
 		}
 	}
 	return nil
+}
+
+func ValidateSchema(schema *Schema) error {
+	if schema == nil {
+		return fmt.Errorf("schema is nil")
+	}
+	models := make(map[string]struct{}, len(schema.Models))
+	for _, model := range schema.Models {
+		if model.Name == "" {
+			return fmt.Errorf("model name is empty")
+		}
+		if _, exists := models[model.Name]; exists {
+			return fmt.Errorf("duplicate model %q", model.Name)
+		}
+		models[model.Name] = struct{}{}
+	}
+	rpcs := make(map[string]struct{}, len(schema.RPCs))
+	for _, rpc := range schema.RPCs {
+		if rpc.Name == "" {
+			return fmt.Errorf("rpc name is empty")
+		}
+		if _, exists := rpcs[rpc.Name]; exists {
+			return fmt.Errorf("duplicate rpc %q", rpc.Name)
+		}
+		rpcs[rpc.Name] = struct{}{}
+	}
+	for _, model := range schema.Models {
+		fields := make(map[string]struct{}, len(model.Fields))
+		for _, field := range model.Fields {
+			if field.Name == "" {
+				return fmt.Errorf("model %q has empty field name", model.Name)
+			}
+			if _, exists := fields[field.Name]; exists {
+				return fmt.Errorf("model %q has duplicate field %q", model.Name, field.Name)
+			}
+			fields[field.Name] = struct{}{}
+			if err := validateTypeRef(field.Type, models); err != nil {
+				return fmt.Errorf("model %q field %q: %w", model.Name, field.Name, err)
+			}
+		}
+	}
+	for _, rpc := range schema.RPCs {
+		params := make(map[string]struct{}, len(rpc.Parameters))
+		for _, param := range rpc.Parameters {
+			if param.Name == "" {
+				return fmt.Errorf("rpc %q has empty parameter name", rpc.Name)
+			}
+			if _, exists := params[param.Name]; exists {
+				return fmt.Errorf("rpc %q has duplicate parameter %q", rpc.Name, param.Name)
+			}
+			params[param.Name] = struct{}{}
+			if err := validateTypeRef(param.Type, models); err != nil {
+				return fmt.Errorf("rpc %q parameter %q: %w", rpc.Name, param.Name, err)
+			}
+		}
+		if err := validateTypeRef(rpc.Returns, models); err != nil {
+			return fmt.Errorf("rpc %q returns: %w", rpc.Name, err)
+		}
+	}
+	return nil
+}
+
+func validateTypeRef(t TypeRef, models map[string]struct{}) error {
+	if err := ValidateType(t); err != nil {
+		return err
+	}
+	switch t.Kind {
+	case TypeList:
+		if t.Elem == nil {
+			return fmt.Errorf("list type missing element")
+		}
+		return validateTypeRef(*t.Elem, models)
+	case TypeMap:
+		if t.Value == nil {
+			return fmt.Errorf("map type missing value")
+		}
+		return validateTypeRef(*t.Value, models)
+	case TypeIdent:
+		if isBuiltinType(t.Name) {
+			return nil
+		}
+		if _, ok := models[t.Name]; !ok {
+			return fmt.Errorf("unknown type %q", t.Name)
+		}
+	}
+	return nil
+}
+
+func isBuiltinType(name string) bool {
+	switch name {
+	case "string", "int", "bool":
+		return true
+	default:
+		return false
+	}
 }

@@ -70,10 +70,21 @@ type Field struct {
 }
 
 type TypeRef struct {
-	Base     string
-	IsArray  bool
+	Kind     TypeKind
+	Name     string
+	Elem     *TypeRef
+	Key      *TypeRef
+	Value    *TypeRef
 	Optional bool
 }
+
+type TypeKind int
+
+const (
+	TypeIdent TypeKind = iota
+	TypeList
+	TypeMap
+)
 
 type Parser struct {
 	tokens []lexer.Token
@@ -205,24 +216,57 @@ func (p *Parser) parseField() (Field, error) {
 }
 
 func (p *Parser) parseType() (TypeRef, error) {
-	var typeRef TypeRef
-	if p.match(lexer.TokenLBrack) {
-		if _, err := p.expect(lexer.TokenRBrack); err != nil {
-			return TypeRef{}, err
-		}
-		typeRef.IsArray = true
-	}
-
-	base, err := p.expect(lexer.TokenIdentifier)
+	name, err := p.expect(lexer.TokenIdentifier)
 	if err != nil {
 		return TypeRef{}, err
 	}
-	typeRef.Base = base.Value
-
-	if p.match(lexer.TokenOptional) {
-		typeRef.Optional = true
+	switch name.Value {
+	case "list":
+		if _, err := p.expect(lexer.TokenLBrack); err != nil {
+			return TypeRef{}, err
+		}
+		elem, err := p.parseType()
+		if err != nil {
+			return TypeRef{}, err
+		}
+		if _, err := p.expect(lexer.TokenRBrack); err != nil {
+			return TypeRef{}, err
+		}
+		typeRef := TypeRef{Kind: TypeList, Elem: &elem}
+		if p.match(lexer.TokenOptional) {
+			typeRef.Optional = true
+		}
+		return typeRef, nil
+	case "map":
+		if _, err := p.expect(lexer.TokenLBrack); err != nil {
+			return TypeRef{}, err
+		}
+		key, err := p.parseType()
+		if err != nil {
+			return TypeRef{}, err
+		}
+		if _, err := p.expect(lexer.TokenComma); err != nil {
+			return TypeRef{}, err
+		}
+		value, err := p.parseType()
+		if err != nil {
+			return TypeRef{}, err
+		}
+		if _, err := p.expect(lexer.TokenRBrack); err != nil {
+			return TypeRef{}, err
+		}
+		typeRef := TypeRef{Kind: TypeMap, Key: &key, Value: &value}
+		if p.match(lexer.TokenOptional) {
+			typeRef.Optional = true
+		}
+		return typeRef, nil
+	default:
+		typeRef := TypeRef{Kind: TypeIdent, Name: name.Value}
+		if p.match(lexer.TokenOptional) {
+			typeRef.Optional = true
+		}
+		return typeRef, nil
 	}
-	return typeRef, nil
 }
 
 func (p *Parser) match(tt lexer.TokenType) bool {
@@ -262,10 +306,26 @@ func (p *Parser) unexpected(expected string) error {
 
 func formatType(t TypeRef) string {
 	var b strings.Builder
-	if t.IsArray {
-		b.WriteString("[]")
+	switch t.Kind {
+	case TypeList:
+		b.WriteString("list[")
+		if t.Elem != nil {
+			b.WriteString(formatType(*t.Elem))
+		}
+		b.WriteString("]")
+	case TypeMap:
+		b.WriteString("map[")
+		if t.Key != nil {
+			b.WriteString(formatType(*t.Key))
+		}
+		b.WriteString(", ")
+		if t.Value != nil {
+			b.WriteString(formatType(*t.Value))
+		}
+		b.WriteString("]")
+	default:
+		b.WriteString(t.Name)
 	}
-	b.WriteString(t.Base)
 	if t.Optional {
 		b.WriteString("?")
 	}

@@ -1,5 +1,6 @@
 model User {
     id: int
+    username: string
     name: string
     surname: string?
 }
@@ -8,9 +9,11 @@ rpc GetUser(
     userId: int,
 ) User
 
-rpc ListUsers() []User
+rpc ListUsers() list[User]
 
 rpc CreateUser(
     name: string,
     surname: string?,
 ) User
+
+rpc GetUsernameMap() map[string, User]

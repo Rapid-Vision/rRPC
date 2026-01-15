@@ -18,3 +18,16 @@ This project aims to provide a simple toolkit with following properties:
 - Capacity to generate an [OpenAPI](https://www.openapis.org/) schema
 
 At this moment this project aims to generate only a golang server and a python client.
+
+## Usage
+Define your schema in a `.rrpc` file (see `examples/example.rrpc`), then generate code from it.
+
+Generate Go server code:
+```bash
+rrpc server examples/example.rrpc
+```
+
+Generate Python client code:
+```bash
+rrpc client examples/example.rrpc
+```

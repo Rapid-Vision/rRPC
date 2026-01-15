@@ -1,0 +1,8 @@
+model GreetingMessage {
+    message: string
+}
+
+rpc HelloWorld(
+    name: string,
+    surname: string?,
+) GreetingMessage

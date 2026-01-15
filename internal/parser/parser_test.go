@@ -122,13 +122,9 @@ rpc GetUser() User
 			if err == nil {
 				t.Fatalf("expected error, got nil")
 			}
-			if tc.wantErr != "" && !contains(err.Error(), tc.wantErr) {
+			if tc.wantErr != "" && !strings.Contains(err.Error(), tc.wantErr) {
 				t.Fatalf("expected error %q, got %q", tc.wantErr, err.Error())
 			}
 		})
 	}
-}
-
-func contains(haystack, needle string) bool {
-	return len(needle) == 0 || (len(haystack) >= len(needle) && strings.Contains(haystack, needle))
 }

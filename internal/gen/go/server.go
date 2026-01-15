@@ -120,7 +120,7 @@ func (g *Generator) writeHTTPHandlers(rpcs []parser.RPC) {
 	g.b.WriteString("func CreateHTTPHandler(rpc RPCHandler) http.Handler {\n")
 	g.b.WriteString("\tmux := http.NewServeMux()\n")
 	for _, rpc := range rpcs {
-		route := "/" + utils.NewIdentifierName(rpc.Name).SnakeCase()
+		route := "POST /" + utils.NewIdentifierName(rpc.Name).SnakeCase()
 		handler := "Create" + utils.NewIdentifierName(rpc.Name).PascalCase() + "Handler"
 		g.b.WriteString("\tmux.Handle(\"")
 		g.b.WriteString(route)

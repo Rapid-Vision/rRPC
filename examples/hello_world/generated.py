@@ -6,6 +6,7 @@ import json
 import urllib.error
 import urllib.request
 
+
 @dataclass
 class GreetingMessageModel:
     message: str
@@ -16,6 +17,7 @@ class GreetingMessageModel:
             message=data.get("message"),
         )
 
+
 class RPCClient:
     def __init__(self, base_url: str) -> None:
         self.base_url = base_url.rstrip("/")
@@ -25,7 +27,9 @@ class RPCClient:
         data = None
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        req = urllib.request.Request(
+            url, data=data, method="POST", headers={"Content-Type": "application/json"}
+        )
         try:
             with urllib.request.urlopen(req) as resp:
                 body = resp.read()
@@ -36,7 +40,9 @@ class RPCClient:
             return None
         return json.loads(body.decode("utf-8"))
 
-    def hello_world(self, name: str, surname: Optional[str] = None) -> GreetingMessageModel:
+    def hello_world(
+        self, name: str, surname: Optional[str] = None
+    ) -> GreetingMessageModel:
         payload = {
             "name": name,
             "surname": surname,
@@ -44,4 +50,3 @@ class RPCClient:
         data = self._request("hello_world", payload)
         value = data.get("greeting_message") if isinstance(data, dict) else data
         return GreetingMessageModel.from_dict(value)
-

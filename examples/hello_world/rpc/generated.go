@@ -25,7 +25,7 @@ type RPCHandler interface {
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle("/hello_world", CreateHelloWorldHandler(rpc))
+	mux.Handle("POST /hello_world", CreateHelloWorldHandler(rpc))
 	return mux
 }
 

@@ -82,7 +82,7 @@ func (g *Generator) writeClient(rpcs []parser.RPC) {
 	g.b.WriteString("        data = None\n")
 	g.b.WriteString("        if payload is not None:\n")
 	g.b.WriteString("            data = json.dumps(payload).encode(\"utf-8\")\n")
-	g.b.WriteString("        req = urllib.request.Request(url, data=data, headers={\"Content-Type\": \"application/json\"})\n")
+	g.b.WriteString("        req = urllib.request.Request(url, data=data, method='POST', headers={\"Content-Type\": \"application/json\"})\n")
 	g.b.WriteString("        try:\n")
 	g.b.WriteString("            with urllib.request.urlopen(req) as resp:\n")
 	g.b.WriteString("                body = resp.read()\n")

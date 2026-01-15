@@ -92,7 +92,10 @@ type Parser struct {
 }
 
 func Parse(text string) (*Schema, error) {
-	tokens := lexer.NewLexer(text).Tokenize()
+	tokens, err := lexer.NewLexer(text).Tokenize()
+	if err != nil {
+		return nil, err
+	}
 	p := NewParser(tokens)
 	return p.parseSchema()
 }
@@ -310,7 +313,8 @@ func (p *Parser) unexpected(expected string) error {
 	if p.atEnd() {
 		return fmt.Errorf("unexpected end of input, expected %s", expected)
 	}
-	return fmt.Errorf("unexpected token %q, expected %s", p.peek().Value, expected)
+	token := p.peek()
+	return fmt.Errorf("unexpected token %q at line %d, column %d, expected %s", token.Value, token.Line, token.Col, expected)
 }
 
 func formatType(t TypeRef) string {

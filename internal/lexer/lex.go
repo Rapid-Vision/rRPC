@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -26,10 +27,25 @@ const (
 type Token struct {
 	Type  TokenType
 	Value string
+	Line  int
+	Col   int
 }
 
 type Lexer struct {
 	text string
+}
+
+type LexerError struct {
+	Line int
+	Col  int
+	Ch   string
+}
+
+func (e LexerError) Error() string {
+	if e.Ch == "" {
+		return fmt.Sprintf("lexer error at line %d, column %d", e.Line, e.Col)
+	}
+	return fmt.Sprintf("lexer error at line %d, column %d: unexpected %q", e.Line, e.Col, e.Ch)
 }
 
 type rule struct {
@@ -117,7 +133,7 @@ func NewLexer(text string) *Lexer {
 	}
 }
 
-func (l *Lexer) Tokenize() (tokens []Token) {
+func (l *Lexer) Tokenize() (tokens []Token, err error) {
 	patterns := make([]string, 0, len(rules))
 	nameToType := make(map[string]TokenType, len(rules))
 	for _, rule := range rules {
@@ -128,15 +144,18 @@ func (l *Lexer) Tokenize() (tokens []Token) {
 	names := re.SubexpNames()
 
 	text := l.text
+	line := 1
+	col := 1
 	for i := 0; i < len(text); {
 		loc := re.FindStringSubmatchIndex(text[i:])
 		if loc == nil || loc[0] != 0 {
-			i++
-			continue
+			return nil, LexerError{Line: line, Col: col, Ch: string(text[i])}
 		}
 
 		var tokenType TokenType
 		var value string
+		tokenLine := line
+		tokenCol := col
 		for group := 1; group < len(loc)/2; group++ {
 			start := loc[group*2]
 			end := loc[group*2+1]
@@ -155,11 +174,19 @@ func (l *Lexer) Tokenize() (tokens []Token) {
 		}
 
 		if value != "" && tokenType != TokenIgn {
-			tokens = append(tokens, Token{Type: tokenType, Value: value})
+			tokens = append(tokens, Token{Type: tokenType, Value: value, Line: tokenLine, Col: tokenCol})
+		}
+		for _, r := range text[i : i+loc[1]] {
+			if r == '\n' {
+				line++
+				col = 1
+			} else {
+				col++
+			}
 		}
 		i += loc[1]
 	}
-	return tokens
+	return tokens, nil
 }
 
 func TokenTypeName(tt TokenType) string {

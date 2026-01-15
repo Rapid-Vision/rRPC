@@ -16,36 +16,27 @@ var serverCmd = &cobra.Command{
 	RunE:  RunServerCmd,
 }
 
+var (
+	serverLang  string
+	serverPkg   string
+	serverOut   string
+	serverForce bool
+)
+
 func init() {
 	rootCmd.AddCommand(serverCmd)
-	serverCmd.Flags().String("lang", "go", "Output language")
-	serverCmd.Flags().StringP("pkg", "p", "rpcserver", "Package name for generated code")
-	serverCmd.Flags().StringP("output", "o", "", "Output base directory (default: .)")
-	serverCmd.Flags().BoolP("force", "f", false, "Overwrite output file if it exists")
+	serverCmd.Flags().StringVar(&serverLang, "lang", "go", "Output language")
+	serverCmd.Flags().StringVarP(&serverPkg, "pkg", "p", "rpcserver", "Package name for generated code")
+	serverCmd.Flags().StringVarP(&serverOut, "output", "o", "", "Output base directory (default: .)")
+	serverCmd.Flags().BoolVarP(&serverForce, "force", "f", false, "Overwrite output file if it exists")
 }
 
 func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected schema path argument")
 	}
-	lang, err := cmd.Flags().GetString("lang")
-	if err != nil {
-		return fmt.Errorf("read lang flag: %w", err)
-	}
-	if lang != "go" {
-		return fmt.Errorf("unsupported language %q for server", lang)
-	}
-	pkg, err := cmd.Flags().GetString("pkg")
-	if err != nil {
-		return fmt.Errorf("read pkg flag: %w", err)
-	}
-	output, err := cmd.Flags().GetString("output")
-	if err != nil {
-		return fmt.Errorf("read output flag: %w", err)
-	}
-	force, err := cmd.Flags().GetBool("force")
-	if err != nil {
-		return fmt.Errorf("read force flag: %w", err)
+	if serverLang != "go" {
+		return fmt.Errorf("unsupported language %q for server", serverLang)
 	}
 	schemaPath := args[0]
 	data, err := os.ReadFile(schemaPath)
@@ -56,16 +47,16 @@ func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("parse schema: %w", err)
 	}
-	code, err := gogen.Generate(schema, pkg)
+	code, err := gogen.Generate(schema, serverPkg)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}
-	outputDir := output
+	outputDir := serverOut
 	if outputDir == "" {
 		outputDir = "."
 	}
-	outputPath := filepath.Join(outputDir, pkg, "server.go")
-	if !force {
+	outputPath := filepath.Join(outputDir, "generated", serverPkg, "server.go")
+	if !serverForce {
 		if _, statErr := os.Stat(outputPath); statErr == nil {
 			return fmt.Errorf("output file exists: %s (use --force to overwrite)", outputPath)
 		}

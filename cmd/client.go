@@ -18,36 +18,27 @@ var clientCmd = &cobra.Command{
 	RunE:  RunClientCmd,
 }
 
+var (
+	clientLang  string
+	clientPkg   string
+	clientOut   string
+	clientForce bool
+)
+
 func init() {
 	rootCmd.AddCommand(clientCmd)
-	clientCmd.Flags().String("lang", "python", "Output language")
-	clientCmd.Flags().StringP("pkg", "p", "rpc_client", "Python package name for generated code")
-	clientCmd.Flags().StringP("output", "o", "", "Output base directory (default: .)")
-	clientCmd.Flags().BoolP("force", "f", false, "Overwrite output file if it exists")
+	clientCmd.Flags().StringVar(&clientLang, "lang", "python", "Output language")
+	clientCmd.Flags().StringVarP(&clientPkg, "pkg", "p", "rpc_client", "Python package name for generated code")
+	clientCmd.Flags().StringVarP(&clientOut, "output", "o", "", "Output base directory (default: .)")
+	clientCmd.Flags().BoolVarP(&clientForce, "force", "f", false, "Overwrite output file if it exists")
 }
 
 func RunClientCmd(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected schema path argument")
 	}
-	lang, err := cmd.Flags().GetString("lang")
-	if err != nil {
-		return fmt.Errorf("read lang flag: %w", err)
-	}
-	if lang != "python" && lang != "py" {
-		return fmt.Errorf("unsupported language %q for client", lang)
-	}
-	pkg, err := cmd.Flags().GetString("pkg")
-	if err != nil {
-		return fmt.Errorf("read pkg flag: %w", err)
-	}
-	output, err := cmd.Flags().GetString("output")
-	if err != nil {
-		return fmt.Errorf("read output flag: %w", err)
-	}
-	force, err := cmd.Flags().GetBool("force")
-	if err != nil {
-		return fmt.Errorf("read force flag: %w", err)
+	if clientLang != "python" && clientLang != "py" {
+		return fmt.Errorf("unsupported language %q for client", clientLang)
 	}
 	schemaPath := args[0]
 	data, err := os.ReadFile(schemaPath)
@@ -62,14 +53,14 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}
-	outputDir := output
+	outputDir := clientOut
 	if outputDir == "" {
 		outputDir = "."
 	}
-	baseDir := filepath.Join(outputDir, pkg)
+	baseDir := filepath.Join(outputDir, "generated", clientPkg)
 	clientPath := filepath.Join(baseDir, "client.py")
 	initPath := filepath.Join(baseDir, "__init__.py")
-	if !force {
+	if !clientForce {
 		if _, statErr := os.Stat(clientPath); statErr == nil {
 			return fmt.Errorf("output file exists: %s (use --force to overwrite)", clientPath)
 		}

@@ -16,18 +16,16 @@ var debugCmd = &cobra.Command{
 	RunE:  RunDebugCmd,
 }
 
+var debugStage string
+
 func init() {
 	rootCmd.AddCommand(debugCmd)
-	debugCmd.Flags().String("stage", "tokens", "Debug stage: tokens or ast")
+	debugCmd.Flags().StringVar(&debugStage, "stage", "tokens", "Debug stage: tokens or ast")
 }
 
 func RunDebugCmd(cmd *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("expected schema path argument")
-	}
-	stage, err := cmd.Flags().GetString("stage")
-	if err != nil {
-		return fmt.Errorf("read stage flag: %w", err)
 	}
 	schemaPath := args[0]
 	data, err := os.ReadFile(schemaPath)
@@ -35,7 +33,7 @@ func RunDebugCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("read schema: %w", err)
 	}
 
-	switch stage {
+	switch debugStage {
 	case "tokens", "tok", "lex", "lexer":
 		tokens, err := lexer.NewLexer(string(data)).Tokenize()
 		if err != nil {
@@ -59,7 +57,7 @@ func RunDebugCmd(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("write output: %w", err)
 		}
 	default:
-		return fmt.Errorf("unsupported stage %q (use tokens or ast)", stage)
+		return fmt.Errorf("unsupported stage %q (use tokens or ast)", debugStage)
 	}
 	return nil
 }

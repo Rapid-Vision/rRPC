@@ -30,7 +30,6 @@ func GenerateClient(schema *parser.Schema) (string, error) {
 		"rpcMethodName":  rpcMethodName,
 		"resultField":    resultField,
 		"decodeExpr":     decodeExpr,
-		"decodeKeyExpr":  decodeKeyExpr,
 		"hasParameters":  hasParameters,
 		"hasModelFields": hasModelFields,
 	}).Parse(clientTemplate)
@@ -81,15 +80,11 @@ func pythonBaseType(t parser.TypeRef) string {
 		}
 		return "List[" + pythonType(*t.Elem) + "]"
 	case parser.TypeMap:
-		keyType := "str"
 		valueType := "Any"
-		if t.Key != nil {
-			keyType = pythonType(*t.Key)
-		}
 		if t.Value != nil {
 			valueType = pythonType(*t.Value)
 		}
-		return "Dict[" + keyType + ", " + valueType + "]"
+		return "Dict[str, " + valueType + "]"
 	default:
 		switch t.Name {
 		case "string":
@@ -116,12 +111,11 @@ func decodeExpr(t parser.TypeRef, value string) string {
 		itemExpr := decodeExpr(*t.Elem, "item")
 		return fmt.Sprintf("[%s for item in %s]", itemExpr, value)
 	case parser.TypeMap:
-		if t.Key == nil || t.Value == nil {
+		if t.Value == nil {
 			return value
 		}
-		keyExpr := decodeKeyExpr(*t.Key, "k")
 		valExpr := decodeExpr(*t.Value, "v")
-		return fmt.Sprintf("{%s: %s for k, v in %s.items()}", keyExpr, valExpr, value)
+		return fmt.Sprintf("{k: %s for k, v in %s.items()}", valExpr, value)
 	default:
 		switch t.Name {
 		case "string", "int", "bool":
@@ -129,15 +123,6 @@ func decodeExpr(t parser.TypeRef, value string) string {
 		default:
 			return utils.NewIdentifierName(t.Name).PascalCase() + "Model.from_dict(" + value + ")"
 		}
-	}
-}
-
-func decodeKeyExpr(t parser.TypeRef, value string) string {
-	switch t.Name {
-	case "int":
-		return "int(" + value + ")"
-	default:
-		return value
 	}
 }
 

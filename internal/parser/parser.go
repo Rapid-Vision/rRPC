@@ -75,7 +75,6 @@ type TypeRef struct {
 	Kind     TypeKind
 	Name     string
 	Elem     *TypeRef
-	Key      *TypeRef
 	Value    *TypeRef
 	Optional bool
 }
@@ -249,13 +248,6 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if _, err := p.expect(lexer.TokenLBrack); err != nil {
 			return TypeRef{}, err
 		}
-		key, err := p.parseType()
-		if err != nil {
-			return TypeRef{}, err
-		}
-		if _, err := p.expect(lexer.TokenComma); err != nil {
-			return TypeRef{}, err
-		}
 		value, err := p.parseType()
 		if err != nil {
 			return TypeRef{}, err
@@ -263,7 +255,7 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if _, err := p.expect(lexer.TokenRBrack); err != nil {
 			return TypeRef{}, err
 		}
-		typeRef := TypeRef{Kind: TypeMap, Key: &key, Value: &value}
+		typeRef := TypeRef{Kind: TypeMap, Value: &value}
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
 		}
@@ -330,10 +322,6 @@ func formatType(t TypeRef) string {
 		b.WriteString("]")
 	case TypeMap:
 		b.WriteString("map[")
-		if t.Key != nil {
-			b.WriteString(formatType(*t.Key))
-		}
-		b.WriteString(", ")
 		if t.Value != nil {
 			b.WriteString(formatType(*t.Value))
 		}
@@ -363,34 +351,14 @@ func ValidateType(t TypeRef) error {
 		}
 		return ValidateType(*t.Elem)
 	case TypeMap:
-		if t.Key == nil || t.Value == nil {
-			return fmt.Errorf("map type missing key or value")
+		if t.Value == nil {
+			return fmt.Errorf("map type missing value")
 		}
-		if !isValidMapKey(*t.Key) {
-			return fmt.Errorf("map key type must be a non-optional string or int")
-		}
-		if err := ValidateType(*t.Value); err != nil {
-			return err
-		}
+		return ValidateType(*t.Value)
 	case TypeIdent:
 		if t.Name == "" {
 			return fmt.Errorf("identifier type is empty")
 		}
 	}
 	return nil
-}
-
-func isValidMapKey(t TypeRef) bool {
-	if t.Kind != TypeIdent {
-		return false
-	}
-	if t.Optional {
-		return false
-	}
-	switch t.Name {
-	case "string", "int":
-		return true
-	default:
-		return false
-	}
 }

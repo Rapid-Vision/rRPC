@@ -15,7 +15,7 @@ rpc GetUser(
 
 rpc ListUsers() list[User]
 
-rpc GetUsernameMap() map[string, User]
+rpc GetUsernameMap() map[User]
 `
 
 	tokens, err := NewLexer(input).Tokenize()

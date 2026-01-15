@@ -21,7 +21,7 @@ rpc CreateUser(
     surname: string?,
 ) User
 
-rpc GetUsernameMap() map[string, User]
+rpc GetUsernameMap() map[User]
 
 rpc FindGroupByName(
     name: string,

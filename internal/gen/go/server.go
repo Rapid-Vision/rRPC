@@ -107,15 +107,11 @@ func goType(t parser.TypeRef) string {
 			base = "[]" + goType(*t.Elem)
 		}
 	case parser.TypeMap:
-		keyType := "string"
 		valueType := "any"
-		if t.Key != nil {
-			keyType = goType(*t.Key)
-		}
 		if t.Value != nil {
 			valueType = goType(*t.Value)
 		}
-		base = "map[" + keyType + "]" + valueType
+		base = "map[string]" + valueType
 	default:
 		base = identType(t.Name)
 	}

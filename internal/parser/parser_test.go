@@ -31,17 +31,9 @@ rpc HelloWorld(
 	}
 }
 
-func TestParseMapKeyValidation(t *testing.T) {
-	input := `rpc GetMap() map[bool, string]`
-	_, err := Parse(input)
-	if err == nil {
-		t.Fatalf("expected error, got nil")
-	}
-}
-
 func TestParseListAndMapTypes(t *testing.T) {
 	input := `rpc GetUsers() list[User]
-rpc GetUsersByName() map[string, list[User]]
+rpc GetUsersByName() map[list[User]]
 `
 	schema, err := Parse(input)
 	if err != nil {

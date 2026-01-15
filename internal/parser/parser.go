@@ -236,6 +236,9 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
 		}
+		if err := ValidateType(typeRef); err != nil {
+			return TypeRef{}, err
+		}
 		return typeRef, nil
 	case "map":
 		if _, err := p.expect(lexer.TokenLBrack); err != nil {
@@ -244,9 +247,6 @@ func (p *Parser) parseType() (TypeRef, error) {
 		key, err := p.parseType()
 		if err != nil {
 			return TypeRef{}, err
-		}
-		if !isComparableMapKey(key) {
-			return TypeRef{}, fmt.Errorf("map key type must be comparable identifier (string, int, bool)")
 		}
 		if _, err := p.expect(lexer.TokenComma); err != nil {
 			return TypeRef{}, err
@@ -262,11 +262,17 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
 		}
+		if err := ValidateType(typeRef); err != nil {
+			return TypeRef{}, err
+		}
 		return typeRef, nil
 	default:
 		typeRef := TypeRef{Kind: TypeIdent, Name: name.Value}
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
+		}
+		if err := ValidateType(typeRef); err != nil {
+			return TypeRef{}, err
 		}
 		return typeRef, nil
 	}
@@ -335,12 +341,40 @@ func formatType(t TypeRef) string {
 	return b.String()
 }
 
-func isComparableMapKey(t TypeRef) bool {
+func ValidateType(t TypeRef) error {
+	switch t.Kind {
+	case TypeList:
+		if t.Elem == nil {
+			return fmt.Errorf("list type missing element")
+		}
+		return ValidateType(*t.Elem)
+	case TypeMap:
+		if t.Key == nil || t.Value == nil {
+			return fmt.Errorf("map type missing key or value")
+		}
+		if !isValidMapKey(*t.Key) {
+			return fmt.Errorf("map key type must be a non-optional string or int")
+		}
+		if err := ValidateType(*t.Value); err != nil {
+			return err
+		}
+	case TypeIdent:
+		if t.Name == "" {
+			return fmt.Errorf("identifier type is empty")
+		}
+	}
+	return nil
+}
+
+func isValidMapKey(t TypeRef) bool {
 	if t.Kind != TypeIdent {
 		return false
 	}
+	if t.Optional {
+		return false
+	}
 	switch t.Name {
-	case "string", "int", "bool":
+	case "string", "int":
 		return true
 	default:
 		return false

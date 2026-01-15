@@ -80,3 +80,22 @@ greeting = rpc.hello_world(name="Ada", surname="Lovelace")
 print("greeting:", greeting)
 ```
 
+## Comparison & Fit
+This project focuses on a small, typed, JSON-over-HTTP RPC flow with codegen for a Go server and a Python client.
+
+### Compared to other tools
+- **[gRPC](https://grpc.io/)**: gRPC is a full-featured RPC system with strong tooling, streaming, and HTTP/2. rRPC is lighter and simpler but lacks streaming, interceptors, and a mature ecosystem.
+- **[OpenAPI](https://www.openapis.org/)**: OpenAPI is an API description format with broad tooling for REST-style endpoints. rRPC is RPC-oriented and does not target REST semantics or multiple transports.
+- **[GraphQL](https://graphql.org/)**: GraphQL offers flexible client queries and a rich type system. rRPC is schema-first but request/response shapes are fixed per method and not queryable.
+- **[CUE](https://cuelang.org/)**: CUE is a general configuration and validation language. rRPC is narrowly scoped to RPC schema + codegen rather than validation or policy.
+- **[TypeSpec](https://typespec.io/)**: TypeSpec is a rich API modeling language with multiple emitters. rRPC is smaller, has a simpler DSL, and targets a limited set of generators.
+
+### When this may be useful
+- You want a small schema language and minimal runtime.
+- You want strict typing with simple JSON over HTTP.
+- You only need a Go server and Python client today.
+
+### When this is not a good fit
+- You need streaming, bidirectional RPC, or advanced middleware.
+- You need multi-language support beyond Go/Python.
+- You want REST or GraphQL semantics and tooling.

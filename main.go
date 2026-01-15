@@ -1,11 +1,25 @@
-/*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-
-*/
 package main
 
-import "github.com/Rapid-Vision/rRPC/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/Rapid-Vision/rRPC/internal/lexer"
+)
 
 func main() {
-	cmd.Execute()
+	// cmd.Execute()
+
+	data, err := os.ReadFile("examples/example.rrpc")
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
+
+	lex := lexer.NewLexer(string(data))
+	tokens := lex.Tokenize()
+
+	for i, tok := range tokens {
+		fmt.Println(i, tok)
+	}
 }

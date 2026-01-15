@@ -14,12 +14,12 @@ const (
 	TokenIdentifier
 	TokenOptional
 	TokenColon
-	TokenRoundBracketL
-	TokenRoundBracketR
-	TokenSquareBracketL
-	TokenSquareBracketR
-	TokenCurlyBracketL
-	TokenCurlyBracketR
+	TokenLParen
+	TokenRParen
+	TokenLBrack
+	TokenRBrack
+	TokenLBrace
+	TokenRBrace
 )
 
 type Token struct {
@@ -71,32 +71,32 @@ var rules = [...]rule{
 	{
 		Name:  "lparen",
 		Regex: `(?P<lparen>\()`,
-		Type:  TokenRoundBracketL,
+		Type:  TokenLParen,
 	},
 	{
 		Name:  "rparen",
 		Regex: `(?P<rparen>\))`,
-		Type:  TokenRoundBracketR,
+		Type:  TokenRParen,
 	},
 	{
 		Name:  "lbrack",
 		Regex: `(?P<lbrack>\[)`,
-		Type:  TokenSquareBracketL,
+		Type:  TokenLBrack,
 	},
 	{
 		Name:  "rbrack",
 		Regex: `(?P<rbrack>\])`,
-		Type:  TokenSquareBracketR,
+		Type:  TokenRBrack,
 	},
 	{
 		Name:  "lbrace",
 		Regex: `(?P<lbrace>\{)`,
-		Type:  TokenCurlyBracketL,
+		Type:  TokenLBrace,
 	},
 	{
 		Name:  "rbrace",
 		Regex: `(?P<rbrace>\})`,
-		Type:  TokenCurlyBracketR,
+		Type:  TokenRBrace,
 	},
 	{
 		Name:  "optional",

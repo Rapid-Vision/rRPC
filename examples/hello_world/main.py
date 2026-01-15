@@ -1,4 +1,4 @@
-from generated import RPCClient
+from rpc_client import RPCClient
 
 
 def main() -> None:

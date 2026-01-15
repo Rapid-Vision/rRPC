@@ -84,6 +84,13 @@ greeting = rpc.hello_world(name="Ada", surname="Lovelace")
 print("greeting:", greeting)
 ```
 
+## OpenAPI
+You can generate an OpenAPI 3.0 schema for a given rRPC schema:
+```bash
+rRPC openapi -o . hello.rrpc
+```
+This writes `generated/openapi.json` under the output directory. Use it with tools like Swagger UI or client generators.
+
 ## Comparison & Fit
 This project focuses on a small, typed, JSON-over-HTTP RPC flow with codegen for a Go server and a Python client.
 

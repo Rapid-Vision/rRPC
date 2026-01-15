@@ -2,14 +2,14 @@
 
 ## Project Structure & Module Organization
 - `main.go` is the CLI entry point; it wires into Cobra commands in `cmd/`.
-- `cmd/` holds the CLI command tree (currently `root.go`).
-- `internal/` contains implementation packages such as the lexer (`internal/lexer/`).
-- `examples/` stores sample schemas like `examples/example.rrpc`.
+- `cmd/` holds CLI commands like `server` and `client`.
+- `internal/` contains the lexer, parser, utils, and codegen (`internal/gen/go/`, `internal/gen/python/`).
+- `examples/` stores sample schemas and runnable demos (see `examples/hello_world/`).
 
 ## Build, Test, and Development Commands
 - `go build ./...` builds the CLI and all packages.
 - `go run ./...` runs the CLI from source (handy during development).
-- `go test ./...` runs all tests (there are currently no tests, but keep this green).
+- `go test ./...` runs unit tests.
 - `gofmt -w .` formats all Go code in the repo.
 
 ## Coding Style & Naming Conventions

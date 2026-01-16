@@ -1,50 +1,50 @@
-model EmptyModel {
+model Empty {
 }
 
-model TextModel {
+model Text {
     title: string?
     body: string
 }
 
-model FlagsModel {
+model Flags {
     enabled: bool
     retries: int
     labels: list[string]
     meta: map[string]
 }
 
-model NestedModel {
-    text: TextModel
-    flags: FlagsModel?
-    items: list[TextModel]
-    lookup: map[TextModel]
+model Nested {
+    text: Text
+    flags: Flags?
+    items: list[Text]
+    lookup: map[Text]
 }
 
-rpc TestEmpty() EmptyModel
+rpc TestEmpty() Empty
 
 rpc TestBasic(
-    text: TextModel,
+    text: Text,
     flag: bool,
     count: int,
     note: string?,
-) TextModel
+) Text
 
 rpc TestListMap(
-    texts: list[TextModel],
+    texts: list[Text],
     flags: map[string],
-) NestedModel
+) Nested
 
 rpc TestOptional(
-    text: TextModel?,
+    text: Text?,
     flag: bool?,
-) FlagsModel
+) Flags
 
 rpc TestValidationError(
-    text: TextModel,
-) TextModel
+    text: Text,
+) Text
 
-rpc TestUnauthorizedError() EmptyModel
+rpc TestUnauthorizedError() Empty
 
-rpc TestForbiddenError() EmptyModel
+rpc TestForbiddenError() Empty
 
-rpc TestNotImplementedError() EmptyModel
+rpc TestNotImplementedError() Empty

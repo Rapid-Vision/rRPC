@@ -7,88 +7,88 @@ import (
 	"net/http"
 )
 
-type EmptyModelModel struct {
+type EmptyModel struct {
 }
-type TextModelModel struct {
+type TextModel struct {
 	Title *string `json:"title"`
 	Body  string  `json:"body"`
 }
-type FlagsModelModel struct {
+type FlagsModel struct {
 	Enabled bool              `json:"enabled"`
 	Retries int               `json:"retries"`
 	Labels  []string          `json:"labels"`
 	Meta    map[string]string `json:"meta"`
 }
-type NestedModelModel struct {
-	Text   TextModelModel            `json:"text"`
-	Flags  *FlagsModelModel          `json:"flags"`
-	Items  []TextModelModel          `json:"items"`
-	Lookup map[string]TextModelModel `json:"lookup"`
+type NestedModel struct {
+	Text   TextModel            `json:"text"`
+	Flags  *FlagsModel          `json:"flags"`
+	Items  []TextModel          `json:"items"`
+	Lookup map[string]TextModel `json:"lookup"`
 }
 
 type TestEmptyParams struct {
 }
 
 type TestEmptyResult struct {
-	EmptyModel EmptyModelModel `json:"empty_model"`
+	Empty EmptyModel `json:"empty"`
 }
 
 type TestBasicParams struct {
-	Text  TextModelModel `json:"text"`
-	Flag  bool           `json:"flag"`
-	Count int            `json:"count"`
-	Note  *string        `json:"note"`
+	Text  TextModel `json:"text"`
+	Flag  bool      `json:"flag"`
+	Count int       `json:"count"`
+	Note  *string   `json:"note"`
 }
 
 type TestBasicResult struct {
-	TextModel TextModelModel `json:"text_model"`
+	Text TextModel `json:"text"`
 }
 
 type TestListMapParams struct {
-	Texts []TextModelModel  `json:"texts"`
+	Texts []TextModel       `json:"texts"`
 	Flags map[string]string `json:"flags"`
 }
 
 type TestListMapResult struct {
-	NestedModel NestedModelModel `json:"nested_model"`
+	Nested NestedModel `json:"nested"`
 }
 
 type TestOptionalParams struct {
-	Text *TextModelModel `json:"text"`
-	Flag *bool           `json:"flag"`
+	Text *TextModel `json:"text"`
+	Flag *bool      `json:"flag"`
 }
 
 type TestOptionalResult struct {
-	FlagsModel FlagsModelModel `json:"flags_model"`
+	Flags FlagsModel `json:"flags"`
 }
 
 type TestValidationErrorParams struct {
-	Text TextModelModel `json:"text"`
+	Text TextModel `json:"text"`
 }
 
 type TestValidationErrorResult struct {
-	TextModel TextModelModel `json:"text_model"`
+	Text TextModel `json:"text"`
 }
 
 type TestUnauthorizedErrorParams struct {
 }
 
 type TestUnauthorizedErrorResult struct {
-	EmptyModel EmptyModelModel `json:"empty_model"`
+	Empty EmptyModel `json:"empty"`
 }
 
 type TestForbiddenErrorParams struct {
 }
 
 type TestForbiddenErrorResult struct {
-	EmptyModel EmptyModelModel `json:"empty_model"`
+	Empty EmptyModel `json:"empty"`
 }
 
 type TestNotImplementedErrorParams struct {
 }
 
 type TestNotImplementedErrorResult struct {
-	EmptyModel EmptyModelModel `json:"empty_model"`
+	Empty EmptyModel `json:"empty"`
 }
 
 type RPCHandler interface {

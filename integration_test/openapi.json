@@ -584,12 +584,12 @@
   },
   "components": {
     "schemas": {
-      "EmptyModelModel": {
+      "EmptyModel": {
         "type": "object",
         "properties": {
         }
       },
-      "TextModelModel": {
+      "TextModel": {
         "type": "object",
         "properties": {
           "title": {"nullable":true,"type":"string"},
@@ -597,7 +597,7 @@
         },
         "required": ["body"]
       },
-      "FlagsModelModel": {
+      "FlagsModel": {
         "type": "object",
         "properties": {
           "enabled": {"type":"boolean"},
@@ -607,13 +607,13 @@
         },
         "required": ["enabled","retries","labels","meta"]
       },
-      "NestedModelModel": {
+      "NestedModel": {
         "type": "object",
         "properties": {
-          "text": {"$ref":"#/components/schemas/TextModelModel"},
-          "flags": {"allOf":[{"$ref":"#/components/schemas/FlagsModelModel"}],"nullable":true},
-          "items": {"items":{"$ref":"#/components/schemas/TextModelModel"},"type":"array"},
-          "lookup": {"additionalProperties":{"$ref":"#/components/schemas/TextModelModel"},"type":"object"}
+          "text": {"$ref":"#/components/schemas/TextModel"},
+          "flags": {"allOf":[{"$ref":"#/components/schemas/FlagsModel"}],"nullable":true},
+          "items": {"items":{"$ref":"#/components/schemas/TextModel"},"type":"array"},
+          "lookup": {"additionalProperties":{"$ref":"#/components/schemas/TextModel"},"type":"object"}
         },
         "required": ["text","items","lookup"]
       },
@@ -625,13 +625,13 @@
       "TestEmptyResult": {
         "type": "object",
         "properties": {
-          "empty_model": {"$ref":"#/components/schemas/EmptyModelModel"}
+          "empty": {"$ref":"#/components/schemas/EmptyModel"}
         }
       },
       "TestBasicParams": {
         "type": "object",
         "properties": {
-          "text": {"$ref":"#/components/schemas/TextModelModel"},
+          "text": {"$ref":"#/components/schemas/TextModel"},
           "flag": {"type":"boolean"},
           "count": {"format":"int32","type":"integer"},
           "note": {"nullable":true,"type":"string"}
@@ -641,13 +641,13 @@
       "TestBasicResult": {
         "type": "object",
         "properties": {
-          "text_model": {"$ref":"#/components/schemas/TextModelModel"}
+          "text": {"$ref":"#/components/schemas/TextModel"}
         }
       },
       "TestListMapParams": {
         "type": "object",
         "properties": {
-          "texts": {"items":{"$ref":"#/components/schemas/TextModelModel"},"type":"array"},
+          "texts": {"items":{"$ref":"#/components/schemas/TextModel"},"type":"array"},
           "flags": {"additionalProperties":{"type":"string"},"type":"object"}
         },
         "required": ["texts","flags"]
@@ -655,33 +655,33 @@
       "TestListMapResult": {
         "type": "object",
         "properties": {
-          "nested_model": {"$ref":"#/components/schemas/NestedModelModel"}
+          "nested": {"$ref":"#/components/schemas/NestedModel"}
         }
       },
       "TestOptionalParams": {
         "type": "object",
         "properties": {
-          "text": {"allOf":[{"$ref":"#/components/schemas/TextModelModel"}],"nullable":true},
+          "text": {"allOf":[{"$ref":"#/components/schemas/TextModel"}],"nullable":true},
           "flag": {"nullable":true,"type":"boolean"}
         }
       },
       "TestOptionalResult": {
         "type": "object",
         "properties": {
-          "flags_model": {"$ref":"#/components/schemas/FlagsModelModel"}
+          "flags": {"$ref":"#/components/schemas/FlagsModel"}
         }
       },
       "TestValidationErrorParams": {
         "type": "object",
         "properties": {
-          "text": {"$ref":"#/components/schemas/TextModelModel"}
+          "text": {"$ref":"#/components/schemas/TextModel"}
         },
         "required": ["text"]
       },
       "TestValidationErrorResult": {
         "type": "object",
         "properties": {
-          "text_model": {"$ref":"#/components/schemas/TextModelModel"}
+          "text": {"$ref":"#/components/schemas/TextModel"}
         }
       },
       "TestUnauthorizedErrorParams": {
@@ -692,7 +692,7 @@
       "TestUnauthorizedErrorResult": {
         "type": "object",
         "properties": {
-          "empty_model": {"$ref":"#/components/schemas/EmptyModelModel"}
+          "empty": {"$ref":"#/components/schemas/EmptyModel"}
         }
       },
       "TestForbiddenErrorParams": {
@@ -703,7 +703,7 @@
       "TestForbiddenErrorResult": {
         "type": "object",
         "properties": {
-          "empty_model": {"$ref":"#/components/schemas/EmptyModelModel"}
+          "empty": {"$ref":"#/components/schemas/EmptyModel"}
         }
       },
       "TestNotImplementedErrorParams": {
@@ -714,7 +714,7 @@
       "TestNotImplementedErrorResult": {
         "type": "object",
         "properties": {
-          "empty_model": {"$ref":"#/components/schemas/EmptyModelModel"}
+          "empty": {"$ref":"#/components/schemas/EmptyModel"}
         }
       }
       ,

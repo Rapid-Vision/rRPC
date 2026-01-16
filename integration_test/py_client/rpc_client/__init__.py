@@ -7,10 +7,10 @@ from .client import InputRPCError
 from .client import UnauthorizedRPCError
 from .client import ForbiddenRPCError
 from .client import NotImplementedRPCError
-from .client import EmptyModelModel
-from .client import TextModelModel
-from .client import FlagsModelModel
-from .client import NestedModelModel
+from .client import EmptyModel
+from .client import TextModel
+from .client import FlagsModel
+from .client import NestedModel
 
 __all__ = [
     "RPCClient",
@@ -22,8 +22,8 @@ __all__ = [
     "UnauthorizedRPCError",
     "ForbiddenRPCError",
     "NotImplementedRPCError",
-    "EmptyModelModel",
-    "TextModelModel",
-    "FlagsModelModel",
-    "NestedModelModel",
+    "EmptyModel",
+    "TextModel",
+    "FlagsModel",
+    "NestedModel",
 ]

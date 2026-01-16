@@ -5,7 +5,7 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/get_user": {
+    "/rpc/get_user": {
       "post": {
         "operationId": "GetUser",
         "requestBody": {
@@ -32,7 +32,7 @@
         }
       }
     },
-    "/list_users": {
+    "/rpc/list_users": {
       "post": {
         "operationId": "ListUsers",
         "responses": {
@@ -49,7 +49,7 @@
         }
       }
     },
-    "/create_user": {
+    "/rpc/create_user": {
       "post": {
         "operationId": "CreateUser",
         "requestBody": {
@@ -76,7 +76,7 @@
         }
       }
     },
-    "/get_username_map": {
+    "/rpc/get_username_map": {
       "post": {
         "operationId": "GetUsernameMap",
         "responses": {
@@ -93,7 +93,7 @@
         }
       }
     },
-    "/find_group_by_name": {
+    "/rpc/find_group_by_name": {
       "post": {
         "operationId": "FindGroupByName",
         "requestBody": {

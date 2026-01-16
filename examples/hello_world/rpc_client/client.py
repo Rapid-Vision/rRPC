@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict, is_dataclass
 from typing import Any, Dict, List, Optional, Literal
 import json
 import urllib.error
@@ -83,7 +83,7 @@ class RPCClient:
         url = f"{self.base_url}/rpc/{path}"
         data = None
         if payload is not None:
-            data = json.dumps(payload).encode("utf-8")
+            data = json.dumps(self._encode_payload(payload)).encode("utf-8")
         headers = {**self.headers, "Content-Type": "application/json"}
         req = urllib.request.Request(url, data=data, method="POST", headers=headers)
         try:
@@ -114,6 +114,17 @@ class RPCClient:
         if exc_type is None:
             return
         raise exc_type(RPCError(type=err_type, message=message))
+
+    def _encode_payload(self, value: Any) -> Any:
+        if is_dataclass(value):
+            return asdict(value)
+        if isinstance(value, dict):
+            return {k: self._encode_payload(v) for k, v in value.items()}
+        if isinstance(value, list):
+            return [self._encode_payload(item) for item in value]
+        if isinstance(value, tuple):
+            return tuple(self._encode_payload(item) for item in value)
+        return value
 
     def hello_world(self, name: str, surname: Optional[str] = None) -> GreetingMessageModel:
         payload = {

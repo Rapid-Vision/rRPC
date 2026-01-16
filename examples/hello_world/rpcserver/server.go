@@ -2,6 +2,7 @@ package rpcserver
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 )
@@ -35,12 +36,12 @@ func CreateHelloWorldHandler(rpc RPCHandler) http.Handler {
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&params); err != nil && err != io.EOF {
-			writeError(w, http.StatusBadRequest, err)
+			writeError(w, InputError{Message: err.Error()})
 			return
 		}
 		res, err := rpc.HelloWorld(params)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err)
+			writeError(w, err)
 			return
 		}
 		writeJSON(w, http.StatusOK, res)
@@ -48,8 +49,58 @@ func CreateHelloWorldHandler(rpc RPCHandler) http.Handler {
 }
 
 type rpcError struct {
+	Type    string `json:"type"`
 	Message string `json:"message"`
 }
+
+type ValidationError struct {
+	Message string
+}
+
+func (e ValidationError) Error() string {
+	return e.Message
+}
+
+type InputError struct {
+	Message string
+}
+
+func (e InputError) Error() string {
+	return e.Message
+}
+
+type UnauthorizedError struct {
+	Message string
+}
+
+func (e UnauthorizedError) Error() string {
+	return e.Message
+}
+
+type ForbiddenError struct {
+	Message string
+}
+
+func (e ForbiddenError) Error() string {
+	return e.Message
+}
+
+type NotImplementedError struct {
+	Message string
+}
+
+func (e NotImplementedError) Error() string {
+	return e.Message
+}
+
+const (
+	errorTypeCustom     = "custom"
+	errorTypeValidation = "validation"
+	errorTypeInput      = "input"
+	errorTypeAuth       = "unauthorized"
+	errorTypeForbidden  = "forbidden"
+	errorTypeNotImpl    = "not_implemented"
+)
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
@@ -57,10 +108,44 @@ func writeJSON(w http.ResponseWriter, status int, payload any) {
 	_ = json.NewEncoder(w).Encode(payload)
 }
 
-func writeError(w http.ResponseWriter, status int, err error) {
+func writeError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	errType := errorTypeCustom
 	msg := "error"
 	if err != nil {
 		msg = err.Error()
 	}
-	writeJSON(w, status, rpcError{Message: msg})
+
+	var validationErr ValidationError
+	if errors.As(err, &validationErr) {
+		status = http.StatusBadRequest
+		errType = errorTypeValidation
+		msg = validationErr.Error()
+	}
+	var inputErr InputError
+	if errors.As(err, &inputErr) {
+		status = http.StatusBadRequest
+		errType = errorTypeInput
+		msg = inputErr.Error()
+	}
+	var unauthorizedErr UnauthorizedError
+	if errors.As(err, &unauthorizedErr) {
+		status = http.StatusUnauthorized
+		errType = errorTypeAuth
+		msg = unauthorizedErr.Error()
+	}
+	var forbiddenErr ForbiddenError
+	if errors.As(err, &forbiddenErr) {
+		status = http.StatusForbidden
+		errType = errorTypeForbidden
+		msg = forbiddenErr.Error()
+	}
+	var notImplErr NotImplementedError
+	if errors.As(err, &notImplErr) {
+		status = http.StatusNotImplemented
+		errType = errorTypeNotImpl
+		msg = notImplErr.Error()
+	}
+
+	writeJSON(w, status, rpcError{Type: errType, Message: msg})
 }

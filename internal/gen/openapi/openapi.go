@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
@@ -19,9 +20,17 @@ type templateData struct {
 	Version string
 	Models  []parser.Model
 	RPCs    []parser.RPC
+	Prefix  string
 }
 
 func Generate(schema *parser.Schema, title, version string) (string, error) {
+	if schema == nil {
+		return "", fmt.Errorf("schema is nil")
+	}
+	return GenerateWithPrefix(schema, title, version, "rpc")
+}
+
+func GenerateWithPrefix(schema *parser.Schema, title, version, prefix string) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
@@ -35,7 +44,9 @@ func Generate(schema *parser.Schema, title, version string) (string, error) {
 		"modelSchemaName":  modelSchemaName,
 		"paramsSchemaName": paramsSchemaName,
 		"resultSchemaName": resultSchemaName,
-		"rpcRoute":         rpcRoute,
+		"rpcRoute": func(name string) string {
+			return rpcRoute(prefix, name)
+		},
 		"rpcMethodName":    rpcMethodName,
 		"jsonName":         jsonName,
 		"schemaJSON":       schemaJSON,
@@ -54,6 +65,7 @@ func Generate(schema *parser.Schema, title, version string) (string, error) {
 		Version: version,
 		Models:  schema.Models,
 		RPCs:    schema.RPCs,
+		Prefix:  prefix,
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
@@ -74,8 +86,13 @@ func resultSchemaName(name string) string {
 	return utils.NewIdentifierName(name).PascalCase() + "Result"
 }
 
-func rpcRoute(name string) string {
-	return utils.NewIdentifierName(name).SnakeCase()
+func rpcRoute(prefix, name string) string {
+	p := strings.Trim(prefix, "/")
+	route := utils.NewIdentifierName(name).SnakeCase()
+	if p == "" {
+		return "/" + route
+	}
+	return "/" + p + "/" + route
 }
 
 func rpcMethodName(name string) string {

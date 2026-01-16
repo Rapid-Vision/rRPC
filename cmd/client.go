@@ -24,6 +24,7 @@ var (
 	clientPkg   string
 	clientOut   string
 	clientForce bool
+	clientPrefix string
 )
 
 func init() {
@@ -32,6 +33,7 @@ func init() {
 	clientCmd.Flags().StringVarP(&clientPkg, "pkg", "p", "rpc_client", "Python package name for generated code")
 	clientCmd.Flags().StringVarP(&clientOut, "output", "o", "", "Output base directory (default: .)")
 	clientCmd.Flags().BoolVarP(&clientForce, "force", "f", false, "Overwrite output file if it exists")
+	clientCmd.Flags().StringVar(&clientPrefix, "prefix", "rpc", "URL path prefix (empty for none)")
 }
 
 func RunClientCmd(cmd *cobra.Command, args []string) error {
@@ -56,7 +58,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 	}
 	baseDir := filepath.Join(outputDir, clientPkg)
 	if clientLang == "go" {
-		code, err := gogen.GenerateClient(schema, clientPkg)
+		code, err := gogen.GenerateClientWithPrefix(schema, clientPkg, clientPrefix)
 		if err != nil {
 			return fmt.Errorf("generate code: %w", err)
 		}
@@ -75,7 +77,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	code, err := pygen.GenerateClient(schema)
+	code, err := pygen.GenerateClientWithPrefix(schema, clientPrefix)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}

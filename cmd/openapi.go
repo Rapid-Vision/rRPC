@@ -21,6 +21,7 @@ var (
 	openapiVersion string
 	openapiOut     string
 	openapiForce   bool
+	openapiPrefix  string
 )
 
 func init() {
@@ -29,6 +30,7 @@ func init() {
 	openapiCmd.Flags().StringVar(&openapiVersion, "version", "0.1.0", "OpenAPI version")
 	openapiCmd.Flags().StringVarP(&openapiOut, "output", "o", "", "Output base directory (default: .)")
 	openapiCmd.Flags().BoolVarP(&openapiForce, "force", "f", false, "Overwrite output file if it exists")
+	openapiCmd.Flags().StringVar(&openapiPrefix, "prefix", "rpc", "URL path prefix (empty for none)")
 }
 
 func RunOpenAPICmd(cmd *cobra.Command, args []string) error {
@@ -44,7 +46,7 @@ func RunOpenAPICmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("parse schema: %w", err)
 	}
-	spec, err := openapi.Generate(schema, openapiTitle, openapiVersion)
+	spec, err := openapi.GenerateWithPrefix(schema, openapiTitle, openapiVersion, openapiPrefix)
 	if err != nil {
 		return fmt.Errorf("generate openapi: %w", err)
 	}

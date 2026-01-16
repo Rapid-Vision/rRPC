@@ -5,7 +5,7 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/hello_world": {
+    "/rpc/hello_world": {
       "post": {
         "operationId": "HelloWorld",
         "requestBody": {

@@ -16,11 +16,15 @@ var debugCmd = &cobra.Command{
 	RunE:  RunDebugCmd,
 }
 
-var debugStage string
+var (
+	debugStage  string
+	debugPrefix string
+)
 
 func init() {
 	rootCmd.AddCommand(debugCmd)
 	debugCmd.Flags().StringVar(&debugStage, "stage", "tokens", "Debug stage: tokens or ast")
+	debugCmd.Flags().StringVar(&debugPrefix, "prefix", "rpc", "URL path prefix (unused by debug)")
 }
 
 func RunDebugCmd(cmd *cobra.Command, args []string) error {

@@ -36,7 +36,7 @@ class RPCClient:
         self.headers = headers or {}
 
     def _request(self, path: str, payload: Optional[Dict[str, Any]]) -> Any:
-        url = f"{self.base_url}/{path}"
+        url = f"{self.base_url}{{.Prefix}}/{path}"
         data = None
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")

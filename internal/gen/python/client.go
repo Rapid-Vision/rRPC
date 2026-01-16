@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
@@ -16,9 +17,17 @@ var clientTemplate string
 type templateData struct {
 	Models []parser.Model
 	RPCs   []parser.RPC
+	Prefix string
 }
 
 func GenerateClient(schema *parser.Schema) (string, error) {
+	if schema == nil {
+		return "", fmt.Errorf("schema is nil")
+	}
+	return GenerateClientWithPrefix(schema, "rpc")
+}
+
+func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
@@ -40,6 +49,7 @@ func GenerateClient(schema *parser.Schema) (string, error) {
 	data := templateData{
 		Models: schema.Models,
 		RPCs:   schema.RPCs,
+		Prefix: prefixPath(prefix),
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
@@ -144,4 +154,12 @@ func hasModelFields(model parser.Model) bool {
 func stripOptional(t parser.TypeRef) parser.TypeRef {
 	t.Optional = false
 	return t
+}
+
+func prefixPath(prefix string) string {
+	p := strings.Trim(prefix, "/")
+	if p == "" {
+		return ""
+	}
+	return "/" + p
 }

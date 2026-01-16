@@ -6,7 +6,7 @@
   },
   "paths": {
 {{- range $i, $rpc := .RPCs}}
-    "/{{rpcRoute $rpc.Name}}": {
+    "{{rpcRoute $rpc.Name}}": {
       "post": {
         "operationId": "{{rpcMethodName $rpc.Name}}",
 {{- if hasParameters $rpc}}

@@ -1,10 +1,66 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 import json
 import urllib.error
 import urllib.request
+
+
+RPCErrorType = Literal[
+    "custom",
+    "validation",
+    "input",
+    "unauthorized",
+    "forbidden",
+    "not_implemented",
+]
+
+
+@dataclass
+class RPCError:
+    type: RPCErrorType
+    message: str
+
+
+class RPCErrorException(Exception):
+    def __init__(self, error: RPCError) -> None:
+        super().__init__(error.message)
+        self.error = error
+
+
+class CustomRPCError(RPCErrorException):
+    pass
+
+
+class ValidationRPCError(RPCErrorException):
+    pass
+
+
+class InputRPCError(RPCErrorException):
+    pass
+
+
+class UnauthorizedRPCError(RPCErrorException):
+    pass
+
+
+class ForbiddenRPCError(RPCErrorException):
+    pass
+
+
+class NotImplementedRPCError(RPCErrorException):
+    pass
+
+
+_ERROR_EXCEPTIONS = {
+    "custom": CustomRPCError,
+    "validation": ValidationRPCError,
+    "input": InputRPCError,
+    "unauthorized": UnauthorizedRPCError,
+    "forbidden": ForbiddenRPCError,
+    "not_implemented": NotImplementedRPCError,
+}
 
 
 @dataclass
@@ -66,11 +122,30 @@ class RPCClient:
             with urllib.request.urlopen(req) as resp:
                 body = resp.read()
         except urllib.error.HTTPError as err:
-            detail = err.read().decode("utf-8")
-            raise RuntimeError(f"rpc error: {detail}") from err
+            detail = err.read()
+            try:
+                parsed = json.loads(detail.decode("utf-8")) if detail else None
+            except json.JSONDecodeError:
+                parsed = None
+            if parsed is not None:
+                self._raise_if_error(parsed)
+            text = detail.decode("utf-8", errors="replace")
+            raise RuntimeError(f"rpc error: {text}") from err
         if not body:
             return None
         return json.loads(body.decode("utf-8"))
+
+    def _raise_if_error(self, payload: Any) -> None:
+        if not isinstance(payload, dict):
+            return
+        err_type = payload.get("type")
+        message = payload.get("message")
+        if not isinstance(err_type, str) or not isinstance(message, str):
+            return
+        exc_type = _ERROR_EXCEPTIONS.get(err_type)
+        if exc_type is None:
+            return
+        raise exc_type(RPCError(type=err_type, message=message))
 
     def submit_text(self, text: TextModel) -> int:
         payload = {

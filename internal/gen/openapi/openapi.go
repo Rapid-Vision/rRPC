@@ -44,6 +44,7 @@ func GenerateWithPrefix(schema *parser.Schema, title, version, prefix string) (s
 		"modelSchemaName":  modelSchemaName,
 		"paramsSchemaName": paramsSchemaName,
 		"resultSchemaName": resultSchemaName,
+		"errorSchemaName":  errorSchemaName,
 		"rpcRoute": func(name string) string {
 			return rpcRoute(prefix, name)
 		},
@@ -84,6 +85,10 @@ func paramsSchemaName(name string) string {
 
 func resultSchemaName(name string) string {
 	return utils.NewIdentifierName(name).PascalCase() + "Result"
+}
+
+func errorSchemaName() string {
+	return "RPCError"
 }
 
 func rpcRoute(prefix, name string) string {

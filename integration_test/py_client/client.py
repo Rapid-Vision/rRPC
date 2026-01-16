@@ -29,7 +29,7 @@ def run_test(name: str, fn) -> bool:
 
 
 def main() -> None:
-    rpc = RPCClient("http://localhost:8080")
+    rpc = RPCClient("http://localhost:8080", headers={"Authorization": "Bearer test_token"})
     passed = 0
     total = 0
 

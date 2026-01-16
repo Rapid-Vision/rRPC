@@ -2,12 +2,15 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	"integration_test/rpcserver"
 )
+
+const bearerToken = "test_token"
 
 type service struct{}
 
@@ -93,5 +96,21 @@ func (s *service) TestMapReturn(params rpcserver.TestMapReturnParams) (rpcserver
 
 func main() {
 	handler := rpcserver.CreateHTTPHandler(&service{})
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	log.Fatal(http.ListenAndServe(":8080", authMiddleware(handler)))
+}
+
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer "+bearerToken {
+			writeAuthError(w, "missing or invalid token")
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func writeAuthError(w http.ResponseWriter, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	_, _ = fmt.Fprintf(w, `{"type":"unauthorized","message":%q}`, message)
 }

@@ -80,7 +80,10 @@ class {{className $model.Name}}:
 {{- end}}
         )
 {{- else}}
-    pass
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
+        _ = data
+        return {{className $model.Name}}()
 {{- end}}
 
 {{- end}}

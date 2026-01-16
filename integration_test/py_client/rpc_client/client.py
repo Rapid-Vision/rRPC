@@ -65,7 +65,10 @@ _ERROR_EXCEPTIONS = {
 
 @dataclass
 class EmptyModel:
-    pass
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "EmptyModel":
+        _ = data
+        return EmptyModel()
 
 
 @dataclass

@@ -7,84 +7,59 @@ import (
 	"net/http"
 )
 
-type UserModel struct {
-	Id       int     `json:"id"`
-	Username string  `json:"username"`
-	Name     string  `json:"name"`
-	Surname  *string `json:"surname"`
+type TextModel struct {
+	Title *string `json:"title"`
+	Data  string  `json:"data"`
 }
-type GroupModel struct {
-	Name  string      `json:"name"`
-	Users []UserModel `json:"users"`
+type SliceModel struct {
+	Begin int `json:"begin"`
+	End   int `json:"end"`
 }
-
-type GetUserParams struct {
-	UserId int `json:"user_id"`
-}
-
-type GetUserResult struct {
-	User UserModel `json:"user"`
+type StatsModel struct {
+	Ascii      bool           `json:"ascii"`
+	WordCount  map[string]int `json:"word_count"`
+	TotalWords int            `json:"total_words"`
+	Sentences  []SliceModel   `json:"sentences"`
 }
 
-type ListUsersParams struct {
+type SubmitTextParams struct {
+	Text TextModel `json:"text"`
 }
 
-type ListUsersResult struct {
-	Result []UserModel `json:"result"`
+type SubmitTextResult struct {
+	Int int `json:"int"`
 }
 
-type CreateUserParams struct {
-	Name    string  `json:"name"`
-	Surname *string `json:"surname"`
+type ComputeStatsParams struct {
+	TextId int `json:"text_id"`
 }
 
-type CreateUserResult struct {
-	User UserModel `json:"user"`
-}
-
-type GetUsernameMapParams struct {
-}
-
-type GetUsernameMapResult struct {
-	Result map[string]UserModel `json:"result"`
-}
-
-type FindGroupByNameParams struct {
-	Name string `json:"name"`
-}
-
-type FindGroupByNameResult struct {
-	Group GroupModel `json:"group"`
+type ComputeStatsResult struct {
+	Stats StatsModel `json:"stats"`
 }
 
 type RPCHandler interface {
-	GetUser(GetUserParams) (GetUserResult, error)
-	ListUsers(ListUsersParams) (ListUsersResult, error)
-	CreateUser(CreateUserParams) (CreateUserResult, error)
-	GetUsernameMap(GetUsernameMapParams) (GetUsernameMapResult, error)
-	FindGroupByName(FindGroupByNameParams) (FindGroupByNameResult, error)
+	SubmitText(SubmitTextParams) (SubmitTextResult, error)
+	ComputeStats(ComputeStatsParams) (ComputeStatsResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle("POST /rpc/get_user", CreateGetUserHandler(rpc))
-	mux.Handle("POST /rpc/list_users", CreateListUsersHandler(rpc))
-	mux.Handle("POST /rpc/create_user", CreateCreateUserHandler(rpc))
-	mux.Handle("POST /rpc/get_username_map", CreateGetUsernameMapHandler(rpc))
-	mux.Handle("POST /rpc/find_group_by_name", CreateFindGroupByNameHandler(rpc))
+	mux.Handle("POST /rpc/submit_text", CreateSubmitTextHandler(rpc))
+	mux.Handle("POST /rpc/compute_stats", CreateComputeStatsHandler(rpc))
 	return mux
 }
 
-func CreateGetUserHandler(rpc RPCHandler) http.Handler {
+func CreateSubmitTextHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params GetUserParams
+		var params SubmitTextParams
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&params); err != nil && err != io.EOF {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.GetUser(params)
+		res, err := rpc.SubmitText(params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -93,58 +68,16 @@ func CreateGetUserHandler(rpc RPCHandler) http.Handler {
 	})
 }
 
-func CreateListUsersHandler(rpc RPCHandler) http.Handler {
+func CreateComputeStatsHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params ListUsersParams
-		res, err := rpc.ListUsers(params)
-		if err != nil {
-			writeError(w, err)
-			return
-		}
-		writeJSON(w, http.StatusOK, res)
-	})
-}
-
-func CreateCreateUserHandler(rpc RPCHandler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params CreateUserParams
+		var params ComputeStatsParams
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&params); err != nil && err != io.EOF {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.CreateUser(params)
-		if err != nil {
-			writeError(w, err)
-			return
-		}
-		writeJSON(w, http.StatusOK, res)
-	})
-}
-
-func CreateGetUsernameMapHandler(rpc RPCHandler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params GetUsernameMapParams
-		res, err := rpc.GetUsernameMap(params)
-		if err != nil {
-			writeError(w, err)
-			return
-		}
-		writeJSON(w, http.StatusOK, res)
-	})
-}
-
-func CreateFindGroupByNameHandler(rpc RPCHandler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params FindGroupByNameParams
-		decoder := json.NewDecoder(r.Body)
-		decoder.DisallowUnknownFields()
-		if err := decoder.Decode(&params); err != nil && err != io.EOF {
-			writeError(w, InputError{Message: err.Error()})
-			return
-		}
-		res, err := rpc.FindGroupByName(params)
+		res, err := rpc.ComputeStats(params)
 		if err != nil {
 			writeError(w, err)
 			return

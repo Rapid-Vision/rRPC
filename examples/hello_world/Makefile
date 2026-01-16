@@ -20,10 +20,10 @@ openapi: go-build
 endif
 
 server: $(SCHEMA)
-	$(RRPC) server -o . -f $(SCHEMA)
+	$(RRPC) server -o ./go_server -f $(SCHEMA)
 
 client: $(SCHEMA)
-	$(RRPC) client -o . -f $(SCHEMA)
+	$(RRPC) client -o ./py_client -f $(SCHEMA)
 
 openapi: $(SCHEMA)
 	$(RRPC) openapi -o . -f $(SCHEMA)

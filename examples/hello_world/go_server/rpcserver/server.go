@@ -180,3 +180,11 @@ func writeError(w http.ResponseWriter, err error) {
 
 	writeJSON(w, status, rpcError{Type: errType, Message: msg})
 }
+
+func WriteAuthError(w http.ResponseWriter, message string) {
+	writeJSON(w, http.StatusUnauthorized, rpcError{Type: errorTypeAuth, Message: message})
+}
+
+func WriteUnauthorizedError(w http.ResponseWriter, message string) {
+	WriteAuthError(w, message)
+}

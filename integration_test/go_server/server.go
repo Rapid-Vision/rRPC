@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -103,15 +102,9 @@ func main() {
 func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer "+bearerToken {
-			writeAuthError(w, "missing or invalid token")
+			rpcserver.WriteAuthError(w, "missing or invalid token")
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
-}
-
-func writeAuthError(w http.ResponseWriter, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusUnauthorized)
-	_, _ = fmt.Fprintf(w, `{"type":"unauthorized","message":%q}`, message)
 }

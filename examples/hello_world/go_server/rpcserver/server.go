@@ -1,6 +1,7 @@
 package rpcserver
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -21,7 +22,7 @@ type HelloWorldResult struct {
 }
 
 type RPCHandler interface {
-	HelloWorld(HelloWorldParams) (HelloWorldResult, error)
+	HelloWorld(context.Context, HelloWorldParams) (HelloWorldResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
@@ -39,7 +40,7 @@ func CreateHelloWorldHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.HelloWorld(params)
+		res, err := rpc.HelloWorld(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return

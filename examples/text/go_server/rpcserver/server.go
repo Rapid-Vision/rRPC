@@ -1,6 +1,7 @@
 package rpcserver
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -39,8 +40,8 @@ type ComputeStatsResult struct {
 }
 
 type RPCHandler interface {
-	SubmitText(SubmitTextParams) (SubmitTextResult, error)
-	ComputeStats(ComputeStatsParams) (ComputeStatsResult, error)
+	SubmitText(context.Context, SubmitTextParams) (SubmitTextResult, error)
+	ComputeStats(context.Context, ComputeStatsParams) (ComputeStatsResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
@@ -59,7 +60,7 @@ func CreateSubmitTextHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.SubmitText(params)
+		res, err := rpc.SubmitText(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -77,7 +78,7 @@ func CreateComputeStatsHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.ComputeStats(params)
+		res, err := rpc.ComputeStats(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return

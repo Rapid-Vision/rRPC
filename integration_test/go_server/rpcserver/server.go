@@ -1,6 +1,7 @@
 package rpcserver
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -106,16 +107,16 @@ type TestMapReturnResult struct {
 }
 
 type RPCHandler interface {
-	TestEmpty(TestEmptyParams) (TestEmptyResult, error)
-	TestBasic(TestBasicParams) (TestBasicResult, error)
-	TestListMap(TestListMapParams) (TestListMapResult, error)
-	TestOptional(TestOptionalParams) (TestOptionalResult, error)
-	TestValidationError(TestValidationErrorParams) (TestValidationErrorResult, error)
-	TestUnauthorizedError(TestUnauthorizedErrorParams) (TestUnauthorizedErrorResult, error)
-	TestForbiddenError(TestForbiddenErrorParams) (TestForbiddenErrorResult, error)
-	TestNotImplementedError(TestNotImplementedErrorParams) (TestNotImplementedErrorResult, error)
-	TestCustomError(TestCustomErrorParams) (TestCustomErrorResult, error)
-	TestMapReturn(TestMapReturnParams) (TestMapReturnResult, error)
+	TestEmpty(context.Context, TestEmptyParams) (TestEmptyResult, error)
+	TestBasic(context.Context, TestBasicParams) (TestBasicResult, error)
+	TestListMap(context.Context, TestListMapParams) (TestListMapResult, error)
+	TestOptional(context.Context, TestOptionalParams) (TestOptionalResult, error)
+	TestValidationError(context.Context, TestValidationErrorParams) (TestValidationErrorResult, error)
+	TestUnauthorizedError(context.Context, TestUnauthorizedErrorParams) (TestUnauthorizedErrorResult, error)
+	TestForbiddenError(context.Context, TestForbiddenErrorParams) (TestForbiddenErrorResult, error)
+	TestNotImplementedError(context.Context, TestNotImplementedErrorParams) (TestNotImplementedErrorResult, error)
+	TestCustomError(context.Context, TestCustomErrorParams) (TestCustomErrorResult, error)
+	TestMapReturn(context.Context, TestMapReturnParams) (TestMapReturnResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
@@ -136,7 +137,7 @@ func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 func CreateTestEmptyHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestEmptyParams
-		res, err := rpc.TestEmpty(params)
+		res, err := rpc.TestEmpty(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -154,7 +155,7 @@ func CreateTestBasicHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.TestBasic(params)
+		res, err := rpc.TestBasic(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -172,7 +173,7 @@ func CreateTestListMapHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.TestListMap(params)
+		res, err := rpc.TestListMap(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -190,7 +191,7 @@ func CreateTestOptionalHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.TestOptional(params)
+		res, err := rpc.TestOptional(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -208,7 +209,7 @@ func CreateTestValidationErrorHandler(rpc RPCHandler) http.Handler {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		res, err := rpc.TestValidationError(params)
+		res, err := rpc.TestValidationError(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -220,7 +221,7 @@ func CreateTestValidationErrorHandler(rpc RPCHandler) http.Handler {
 func CreateTestUnauthorizedErrorHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestUnauthorizedErrorParams
-		res, err := rpc.TestUnauthorizedError(params)
+		res, err := rpc.TestUnauthorizedError(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -232,7 +233,7 @@ func CreateTestUnauthorizedErrorHandler(rpc RPCHandler) http.Handler {
 func CreateTestForbiddenErrorHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestForbiddenErrorParams
-		res, err := rpc.TestForbiddenError(params)
+		res, err := rpc.TestForbiddenError(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -244,7 +245,7 @@ func CreateTestForbiddenErrorHandler(rpc RPCHandler) http.Handler {
 func CreateTestNotImplementedErrorHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestNotImplementedErrorParams
-		res, err := rpc.TestNotImplementedError(params)
+		res, err := rpc.TestNotImplementedError(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -256,7 +257,7 @@ func CreateTestNotImplementedErrorHandler(rpc RPCHandler) http.Handler {
 func CreateTestCustomErrorHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestCustomErrorParams
-		res, err := rpc.TestCustomError(params)
+		res, err := rpc.TestCustomError(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -268,7 +269,7 @@ func CreateTestCustomErrorHandler(rpc RPCHandler) http.Handler {
 func CreateTestMapReturnHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestMapReturnParams
-		res, err := rpc.TestMapReturn(params)
+		res, err := rpc.TestMapReturn(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"strings"
@@ -27,7 +28,7 @@ func newService() *service {
 	}
 }
 
-func (s *service) SubmitText(params rpcserver.SubmitTextParams) (rpcserver.SubmitTextResult, error) {
+func (s *service) SubmitText(_ context.Context, params rpcserver.SubmitTextParams) (rpcserver.SubmitTextResult, error) {
 	s.mu.Lock()
 	id := s.nextID
 	s.nextID++
@@ -36,7 +37,7 @@ func (s *service) SubmitText(params rpcserver.SubmitTextParams) (rpcserver.Submi
 	return rpcserver.SubmitTextResult{Int: id}, nil
 }
 
-func (s *service) ComputeStats(params rpcserver.ComputeStatsParams) (rpcserver.ComputeStatsResult, error) {
+func (s *service) ComputeStats(_ context.Context, params rpcserver.ComputeStatsParams) (rpcserver.ComputeStatsResult, error) {
 	s.mu.Lock()
 	text, ok := s.store[params.TextId]
 	s.mu.Unlock()

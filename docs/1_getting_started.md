@@ -31,7 +31,7 @@ Generated code is written to `./<pkg>/` (default packages: `rpcserver` and `rpc_
 ```go
 type service struct{}
 
-func (s *service) HelloWorld(params rpcserver.HelloWorldParams) (rpcserver.HelloWorldResult, error) {
+func (s *service) HelloWorld(_ context.Context, params rpcserver.HelloWorldParams) (rpcserver.HelloWorldResult, error) {
 	msg := rpcserver.GreetingMessageModel{
 		Message: "Hello, " + params.Name + "!",
 	}

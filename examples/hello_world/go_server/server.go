@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 type service struct{}
 
-func (s *service) HelloWorld(params rpcserver.HelloWorldParams) (rpcserver.HelloWorldResult, error) {
+func (s *service) HelloWorld(_ context.Context, params rpcserver.HelloWorldParams) (rpcserver.HelloWorldResult, error) {
 	surname := "-"
 	if params.Surname != nil {
 		surname = *params.Surname

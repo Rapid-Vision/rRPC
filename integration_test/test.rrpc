@@ -48,3 +48,7 @@ rpc TestUnauthorizedError() Empty
 rpc TestForbiddenError() Empty
 
 rpc TestNotImplementedError() Empty
+
+rpc TestCustomError() Empty
+
+rpc TestMapReturn() map[Text]

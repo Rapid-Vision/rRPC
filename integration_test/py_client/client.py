@@ -4,7 +4,10 @@ import sys
 
 from rpc_client import (
     RPCClient,
+    EmptyModel,
     TextModel,
+    CustomRPCError,
+    InputRPCError,
     ValidationRPCError,
     UnauthorizedRPCError,
     ForbiddenRPCError,
@@ -32,7 +35,7 @@ def main() -> None:
 
     def test_empty() -> None:
         empty = rpc.test_empty()
-        assert empty is not None
+        assert isinstance(empty, EmptyModel)
 
     def test_basic() -> None:
         text = TextModel(title=None, body="  hello  ")
@@ -48,6 +51,7 @@ def main() -> None:
         assert nested.flags is not None
         assert nested.flags.retries == 2
         assert nested.flags.meta.get("mode") == "fast"
+        assert isinstance(nested.lookup.get("first"), TextModel)
 
     def test_optional() -> None:
         optional = rpc.test_optional(text=None, flag=None)
@@ -59,6 +63,13 @@ def main() -> None:
         except ValidationRPCError:
             return
         raise AssertionError("expected ValidationRPCError")
+
+    def test_input_error() -> None:
+        try:
+            rpc.test_basic(text="bad", flag=True, count=1, note=None)
+        except InputRPCError:
+            return
+        raise AssertionError("expected InputRPCError")
 
     def test_unauthorized_error() -> None:
         try:
@@ -81,15 +92,31 @@ def main() -> None:
             return
         raise AssertionError("expected NotImplementedRPCError")
 
+    def test_custom_error() -> None:
+        try:
+            rpc.test_custom_error()
+        except CustomRPCError:
+            return
+        raise AssertionError("expected CustomRPCError")
+
+    def test_map_return() -> None:
+        mapped = rpc.test_map_return()
+        assert isinstance(mapped, dict)
+        assert isinstance(mapped.get("a"), TextModel)
+        assert mapped["a"].body == "mapped"
+
     tests = [
         ("empty", test_empty),
         ("basic", test_basic),
         ("list_map", test_list_map),
         ("optional", test_optional),
         ("validation_error", test_validation_error),
+        ("input_error", test_input_error),
         ("unauthorized_error", test_unauthorized_error),
         ("forbidden_error", test_forbidden_error),
         ("not_implemented_error", test_not_implemented_error),
+        ("custom_error", test_custom_error),
+        ("map_return", test_map_return),
     ]
 
     for name, fn in tests:

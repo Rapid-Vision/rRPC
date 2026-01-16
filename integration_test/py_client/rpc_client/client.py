@@ -230,3 +230,15 @@ class RPCClient:
         data = self._request("test_not_implemented_error", payload)
         value = data.get("empty") if isinstance(data, dict) else data
         return EmptyModel.from_dict(value)
+
+    def test_custom_error(self) -> EmptyModel:
+        payload = None
+        data = self._request("test_custom_error", payload)
+        value = data.get("empty") if isinstance(data, dict) else data
+        return EmptyModel.from_dict(value)
+
+    def test_map_return(self) -> Dict[str, TextModel]:
+        payload = None
+        data = self._request("test_map_return", payload)
+        value = data.get("result") if isinstance(data, dict) else data
+        return {k: TextModel.from_dict(v) for k, v in value.items()}

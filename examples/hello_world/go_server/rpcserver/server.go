@@ -116,11 +116,23 @@ func writeError(w http.ResponseWriter, err error) {
 		msg = err.Error()
 	}
 
+	var validationErrPtr *ValidationError
+	if errors.As(err, &validationErrPtr) {
+		status = http.StatusBadRequest
+		errType = errorTypeValidation
+		msg = validationErrPtr.Error()
+	}
 	var validationErr ValidationError
 	if errors.As(err, &validationErr) {
 		status = http.StatusBadRequest
 		errType = errorTypeValidation
 		msg = validationErr.Error()
+	}
+	var inputErrPtr *InputError
+	if errors.As(err, &inputErrPtr) {
+		status = http.StatusBadRequest
+		errType = errorTypeInput
+		msg = inputErrPtr.Error()
 	}
 	var inputErr InputError
 	if errors.As(err, &inputErr) {
@@ -128,17 +140,35 @@ func writeError(w http.ResponseWriter, err error) {
 		errType = errorTypeInput
 		msg = inputErr.Error()
 	}
+	var unauthorizedErrPtr *UnauthorizedError
+	if errors.As(err, &unauthorizedErrPtr) {
+		status = http.StatusUnauthorized
+		errType = errorTypeAuth
+		msg = unauthorizedErrPtr.Error()
+	}
 	var unauthorizedErr UnauthorizedError
 	if errors.As(err, &unauthorizedErr) {
 		status = http.StatusUnauthorized
 		errType = errorTypeAuth
 		msg = unauthorizedErr.Error()
 	}
+	var forbiddenErrPtr *ForbiddenError
+	if errors.As(err, &forbiddenErrPtr) {
+		status = http.StatusForbidden
+		errType = errorTypeForbidden
+		msg = forbiddenErrPtr.Error()
+	}
 	var forbiddenErr ForbiddenError
 	if errors.As(err, &forbiddenErr) {
 		status = http.StatusForbidden
 		errType = errorTypeForbidden
 		msg = forbiddenErr.Error()
+	}
+	var notImplErrPtr *NotImplementedError
+	if errors.As(err, &notImplErrPtr) {
+		status = http.StatusNotImplemented
+		errType = errorTypeNotImpl
+		msg = notImplErrPtr.Error()
 	}
 	var notImplErr NotImplementedError
 	if errors.As(err, &notImplErr) {

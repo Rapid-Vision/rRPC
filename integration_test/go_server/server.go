@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"strings"
@@ -56,7 +57,7 @@ func (s *service) TestOptional(params rpcserver.TestOptionalParams) (rpcserver.T
 
 func (s *service) TestValidationError(params rpcserver.TestValidationErrorParams) (rpcserver.TestValidationErrorResult, error) {
 	if strings.TrimSpace(params.Text.Body) == "" {
-		return rpcserver.TestValidationErrorResult{}, rpcserver.ValidationError{Message: "body is required"}
+		return rpcserver.TestValidationErrorResult{}, &rpcserver.ValidationError{Message: "body is required"}
 	}
 	return rpcserver.TestValidationErrorResult{Text: params.Text}, nil
 }
@@ -74,6 +75,20 @@ func (s *service) TestForbiddenError(params rpcserver.TestForbiddenErrorParams) 
 func (s *service) TestNotImplementedError(params rpcserver.TestNotImplementedErrorParams) (rpcserver.TestNotImplementedErrorResult, error) {
 	_ = params
 	return rpcserver.TestNotImplementedErrorResult{}, rpcserver.NotImplementedError{Message: "not implemented"}
+}
+
+func (s *service) TestCustomError(params rpcserver.TestCustomErrorParams) (rpcserver.TestCustomErrorResult, error) {
+	_ = params
+	return rpcserver.TestCustomErrorResult{}, errors.New("custom failure")
+}
+
+func (s *service) TestMapReturn(params rpcserver.TestMapReturnParams) (rpcserver.TestMapReturnResult, error) {
+	_ = params
+	text := rpcserver.TextModel{
+		Title: nil,
+		Body:  "mapped",
+	}
+	return rpcserver.TestMapReturnResult{Result: map[string]rpcserver.TextModel{"a": text}}, nil
 }
 
 func main() {

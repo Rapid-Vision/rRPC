@@ -91,6 +91,20 @@ type TestNotImplementedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
+type TestCustomErrorParams struct {
+}
+
+type TestCustomErrorResult struct {
+	Empty EmptyModel `json:"empty"`
+}
+
+type TestMapReturnParams struct {
+}
+
+type TestMapReturnResult struct {
+	Result map[string]TextModel `json:"result"`
+}
+
 type RPCHandler interface {
 	TestEmpty(TestEmptyParams) (TestEmptyResult, error)
 	TestBasic(TestBasicParams) (TestBasicResult, error)
@@ -100,6 +114,8 @@ type RPCHandler interface {
 	TestUnauthorizedError(TestUnauthorizedErrorParams) (TestUnauthorizedErrorResult, error)
 	TestForbiddenError(TestForbiddenErrorParams) (TestForbiddenErrorResult, error)
 	TestNotImplementedError(TestNotImplementedErrorParams) (TestNotImplementedErrorResult, error)
+	TestCustomError(TestCustomErrorParams) (TestCustomErrorResult, error)
+	TestMapReturn(TestMapReturnParams) (TestMapReturnResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
@@ -112,6 +128,8 @@ func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux.Handle("POST /rpc/test_unauthorized_error", CreateTestUnauthorizedErrorHandler(rpc))
 	mux.Handle("POST /rpc/test_forbidden_error", CreateTestForbiddenErrorHandler(rpc))
 	mux.Handle("POST /rpc/test_not_implemented_error", CreateTestNotImplementedErrorHandler(rpc))
+	mux.Handle("POST /rpc/test_custom_error", CreateTestCustomErrorHandler(rpc))
+	mux.Handle("POST /rpc/test_map_return", CreateTestMapReturnHandler(rpc))
 	return mux
 }
 
@@ -235,6 +253,30 @@ func CreateTestNotImplementedErrorHandler(rpc RPCHandler) http.Handler {
 	})
 }
 
+func CreateTestCustomErrorHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestCustomErrorParams
+		res, err := rpc.TestCustomError(params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	})
+}
+
+func CreateTestMapReturnHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestMapReturnParams
+		res, err := rpc.TestMapReturn(params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	})
+}
+
 type rpcError struct {
 	Type    string `json:"type"`
 	Message string `json:"message"`
@@ -303,11 +345,23 @@ func writeError(w http.ResponseWriter, err error) {
 		msg = err.Error()
 	}
 
+	var validationErrPtr *ValidationError
+	if errors.As(err, &validationErrPtr) {
+		status = http.StatusBadRequest
+		errType = errorTypeValidation
+		msg = validationErrPtr.Error()
+	}
 	var validationErr ValidationError
 	if errors.As(err, &validationErr) {
 		status = http.StatusBadRequest
 		errType = errorTypeValidation
 		msg = validationErr.Error()
+	}
+	var inputErrPtr *InputError
+	if errors.As(err, &inputErrPtr) {
+		status = http.StatusBadRequest
+		errType = errorTypeInput
+		msg = inputErrPtr.Error()
 	}
 	var inputErr InputError
 	if errors.As(err, &inputErr) {
@@ -315,17 +369,35 @@ func writeError(w http.ResponseWriter, err error) {
 		errType = errorTypeInput
 		msg = inputErr.Error()
 	}
+	var unauthorizedErrPtr *UnauthorizedError
+	if errors.As(err, &unauthorizedErrPtr) {
+		status = http.StatusUnauthorized
+		errType = errorTypeAuth
+		msg = unauthorizedErrPtr.Error()
+	}
 	var unauthorizedErr UnauthorizedError
 	if errors.As(err, &unauthorizedErr) {
 		status = http.StatusUnauthorized
 		errType = errorTypeAuth
 		msg = unauthorizedErr.Error()
 	}
+	var forbiddenErrPtr *ForbiddenError
+	if errors.As(err, &forbiddenErrPtr) {
+		status = http.StatusForbidden
+		errType = errorTypeForbidden
+		msg = forbiddenErrPtr.Error()
+	}
 	var forbiddenErr ForbiddenError
 	if errors.As(err, &forbiddenErr) {
 		status = http.StatusForbidden
 		errType = errorTypeForbidden
 		msg = forbiddenErr.Error()
+	}
+	var notImplErrPtr *NotImplementedError
+	if errors.As(err, &notImplErrPtr) {
+		status = http.StatusNotImplemented
+		errType = errorTypeNotImpl
+		msg = notImplErrPtr.Error()
 	}
 	var notImplErr NotImplementedError
 	if errors.As(err, &notImplErr) {

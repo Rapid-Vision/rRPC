@@ -23,6 +23,8 @@ This project aims to provide a simple toolkit with following properties:
 | Go | ✅ | ✅ |
 | Python | ❌ | ✅ |
 
+Other languages can be supported via OpenAPI toolkits.
+
 ## Installation
 ```bash
 go install github.com/Rapid-Vision/rRPC
@@ -89,10 +91,10 @@ You can generate an OpenAPI 3.0 schema for a given rRPC schema:
 ```bash
 rRPC openapi -o . hello.rrpc
 ```
-This writes `generated/openapi.json` under the output directory. Use it with tools like Swagger UI or client generators.
+This writes `openapi.json` under the output directory. Use it with tools like Swagger UI or client generators.
 
 ## Comparison & Fit
-This project focuses on a small, typed, JSON-over-HTTP RPC flow with codegen for a Go server and a Python client.
+This project focuses on a small, typed, JSON-over-HTTP RPC flow.
 
 ### Compared to other tools
 - **[gRPC](https://grpc.io/)**: gRPC is a full-featured RPC system with strong tooling, streaming, and HTTP/2. rRPC is lighter and simpler but lacks streaming, interceptors, and a mature ecosystem.
@@ -104,7 +106,6 @@ This project focuses on a small, typed, JSON-over-HTTP RPC flow with codegen for
 ### When this may be useful
 - You want a small schema language and minimal runtime.
 - You want strict typing with simple JSON over HTTP.
-- You only need a Go server and Python client today.
 
 ### When this is not a good fit
 - You need streaming, bidirectional RPC, or advanced middleware.

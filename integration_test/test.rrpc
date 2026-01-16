@@ -1,0 +1,50 @@
+model EmptyModel {
+}
+
+model TextModel {
+    title: string?
+    body: string
+}
+
+model FlagsModel {
+    enabled: bool
+    retries: int
+    labels: list[string]
+    meta: map[string]
+}
+
+model NestedModel {
+    text: TextModel
+    flags: FlagsModel?
+    items: list[TextModel]
+    lookup: map[TextModel]
+}
+
+rpc TestEmpty() EmptyModel
+
+rpc TestBasic(
+    text: TextModel,
+    flag: bool,
+    count: int,
+    note: string?,
+) TextModel
+
+rpc TestListMap(
+    texts: list[TextModel],
+    flags: map[string],
+) NestedModel
+
+rpc TestOptional(
+    text: TextModel?,
+    flag: bool?,
+) FlagsModel
+
+rpc TestValidationError(
+    text: TextModel,
+) TextModel
+
+rpc TestUnauthorizedError() EmptyModel
+
+rpc TestForbiddenError() EmptyModel
+
+rpc TestNotImplementedError() EmptyModel

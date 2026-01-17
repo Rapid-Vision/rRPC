@@ -22,7 +22,7 @@ rpc GetUser(
 Parameters are named fields. The return type is a single type.
 
 ## Types
-- Builtins: `string`, `int`, `bool`
+- Builtins: `string`, `int`, `bool`, `json`, `raw`
 - Optional: `string?`, `User?`
 - Lists: `list[Type]`
 - Maps: `map[Type]` (JSON keys are strings)

@@ -149,6 +149,10 @@ func identType(name string) string {
 		return "int"
 	case "bool":
 		return "bool"
+	case "json":
+		return "any"
+	case "raw":
+		return "json.RawMessage"
 	default:
 		return utils.NewIdentifierName(name).PascalCase() + "Model"
 	}

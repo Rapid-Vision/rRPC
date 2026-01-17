@@ -1,35 +1,25 @@
 SCHEMA := test.rrpc
 ROOT   := ..
-
-ifneq ("$(wildcard $(ROOT)/go.mod)","")
 RRPC := $(ROOT)/rRPC
-NEED_GO_BUILD := 1
-else
-RRPC := rRPC
-NEED_GO_BUILD :=
-endif
 
-.PHONY: all server client openapi clean go-build
+.PHONY: all go-server py-client openapi clean
 
-all: server client openapi
+all: go-server go-client py-client openapi
 
-ifeq ($(NEED_GO_BUILD),1)
-server: go-build
-client: go-build
-openapi: go-build
-endif
-
-server: $(SCHEMA)
+go-server: $(SCHEMA) $(RRPC)
 	$(RRPC) server -o ./go_server -f $(SCHEMA)
 
-client: $(SCHEMA)
+py-client: $(SCHEMA) $(RRPC)
 	$(RRPC) client -o ./py_client -f $(SCHEMA)
 
-openapi: $(SCHEMA)
+go-client: $(SCHEMA) $(RRPC)
+	$(RRPC) client --lang go -o ./go_client -f $(SCHEMA)
+
+openapi: $(SCHEMA) $(RRPC)
 	$(RRPC) openapi -o . -f $(SCHEMA)
 
-go-build:
+$(RRPC):
 	cd $(ROOT) && go build
 
 clean:
-	rm -rf rpcserver rpc_client openapi.json
+	rm -rf go_server/rpcserver go_client/rpc_client py_client/rpc_client openapi.json

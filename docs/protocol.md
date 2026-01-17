@@ -12,7 +12,7 @@ POST /rpc/get_user
 Override the prefix with `--prefix` during code generation.
 
 ## Requests
-The request body is a JSON object with parameter names as keys. For example:
+The request body is a JSON object with parameter names in snake_case as keys. For example:
 ```json
 { "user_id": 42 }
 ```
@@ -23,7 +23,7 @@ On success, the server returns `200` with a JSON object that wraps the result:
 ```json
 { "user": { "id": 1, "name": "Ada" } }
 ```
-The wrapper key is derived from the return type (model name or `result` for collections).
+The wrapper key is derived from the return type (model name in snake_case or `result` for collections).
 
 ## Errors
 Non-2xx responses return:

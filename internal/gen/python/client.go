@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
@@ -16,9 +17,17 @@ var clientTemplate string
 type templateData struct {
 	Models []parser.Model
 	RPCs   []parser.RPC
+	Prefix string
 }
 
 func GenerateClient(schema *parser.Schema) (string, error) {
+	if schema == nil {
+		return "", fmt.Errorf("schema is nil")
+	}
+	return GenerateClientWithPrefix(schema, "rpc")
+}
+
+func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
@@ -40,12 +49,50 @@ func GenerateClient(schema *parser.Schema) (string, error) {
 	data := templateData{
 		Models: schema.Models,
 		RPCs:   schema.RPCs,
+		Prefix: prefixPath(prefix),
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
 		return "", fmt.Errorf("execute template: %w", err)
 	}
 	return buf.String(), nil
+}
+
+func GeneratePythonInit(schema *parser.Schema) string {
+	var b strings.Builder
+	b.WriteString("from .client import RPCClient\n")
+	b.WriteString("from .client import RPCError\n")
+	b.WriteString("from .client import RPCErrorException\n")
+	b.WriteString("from .client import CustomRPCError\n")
+	b.WriteString("from .client import ValidationRPCError\n")
+	b.WriteString("from .client import InputRPCError\n")
+	b.WriteString("from .client import UnauthorizedRPCError\n")
+	b.WriteString("from .client import ForbiddenRPCError\n")
+	b.WriteString("from .client import NotImplementedRPCError\n")
+	for _, model := range schema.Models {
+		className := utils.NewIdentifierName(model.Name).PascalCase() + "Model"
+		b.WriteString("from .client import ")
+		b.WriteString(className)
+		b.WriteString("\n")
+	}
+	b.WriteString("\n__all__ = [\n")
+	b.WriteString("    \"RPCClient\",\n")
+	b.WriteString("    \"RPCError\",\n")
+	b.WriteString("    \"RPCErrorException\",\n")
+	b.WriteString("    \"CustomRPCError\",\n")
+	b.WriteString("    \"ValidationRPCError\",\n")
+	b.WriteString("    \"InputRPCError\",\n")
+	b.WriteString("    \"UnauthorizedRPCError\",\n")
+	b.WriteString("    \"ForbiddenRPCError\",\n")
+	b.WriteString("    \"NotImplementedRPCError\",\n")
+	for _, model := range schema.Models {
+		className := utils.NewIdentifierName(model.Name).PascalCase() + "Model"
+		b.WriteString("    \"")
+		b.WriteString(className)
+		b.WriteString("\",\n")
+	}
+	b.WriteString("]\n")
+	return b.String()
 }
 
 func className(name string) string {
@@ -144,4 +191,12 @@ func hasModelFields(model parser.Model) bool {
 func stripOptional(t parser.TypeRef) parser.TypeRef {
 	t.Optional = false
 	return t
+}
+
+func prefixPath(prefix string) string {
+	p := strings.Trim(prefix, "/")
+	if p == "" {
+		return ""
+	}
+	return "/" + p
 }

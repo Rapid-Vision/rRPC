@@ -1,0 +1,25 @@
+model Text {
+    title: string?
+    data: string
+}
+
+model Slice {
+    begin: int
+    end: int
+}
+
+model Stats {
+    ascii: bool
+    word_count: map[int]
+    total_words: int
+    sentences: list[Slice] 
+}
+
+rpc SubmitText(
+    text: Text,
+) int
+
+rpc ComputeStats(
+    text_id: int,
+) Stats
+

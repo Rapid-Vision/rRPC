@@ -62,31 +62,16 @@ _ERROR_EXCEPTIONS = {
     "not_implemented": NotImplementedRPCError,
 }
 
-{{- range $model := .Models}}
-
 
 @dataclass
-class {{className $model.Name}}:
-{{- if hasModelFields $model}}
-{{- range $field := $model.Fields}}
-    {{fieldName $field.Name}}: {{pythonType $field.Type}}
-{{- end}}
+class GreetingMessageModel:
+    message: str
 
     @staticmethod
-    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
-        return {{className $model.Name}}(
-{{- range $field := $model.Fields}}
-            {{fieldName $field.Name}}={{decodeExpr $field.Type (print "data.get(\"" (jsonName $field.Name) "\")")}},
-{{- end}}
+    def from_dict(data: Dict[str, Any]) -> "GreetingMessageModel":
+        return GreetingMessageModel(
+            message=data.get("message"),
         )
-{{- else}}
-    @staticmethod
-    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
-        _ = data
-        return {{className $model.Name}}()
-{{- end}}
-
-{{- end}}
 
 
 class RPCClient:
@@ -95,7 +80,7 @@ class RPCClient:
         self.headers = headers or {}
 
     def _request(self, path: str, payload: Optional[Dict[str, Any]]) -> Any:
-        url = f"{self.base_url}{{.Prefix}}/{path}"
+        url = f"{self.base_url}/rpc/{path}"
         data = None
         if payload is not None:
             data = json.dumps(self._encode_payload(payload)).encode("utf-8")
@@ -142,20 +127,11 @@ class RPCClient:
             return tuple(self._encode_payload(item) for item in value)
         return value
 
-{{- range $rpc := .RPCs}}
-
-    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{pythonType $rpc.Returns}}:
-{{- if hasParameters $rpc}}
+    def hello_world(self, name: str, surname: Optional[str] = None) -> GreetingMessageModel:
         payload = {
-{{- range $param := $rpc.Parameters}}
-            "{{jsonName $param.Name}}": {{fieldName $param.Name}},
-{{- end}}
+            "name": name,
+            "surname": surname,
         }
-{{- else}}
-        payload = None
-{{- end}}
-        data = self._request("{{rpcMethodName $rpc.Name}}", payload)
-        value = data.get("{{resultField $rpc.Returns}}") if isinstance(data, dict) else data
-        return {{decodeExpr $rpc.Returns "value"}}
-
-{{- end}}
+        data = self._request("hello_world", payload)
+        value = data.get("greeting_message") if isinstance(data, dict) else data
+        return GreetingMessageModel.from_dict(value)

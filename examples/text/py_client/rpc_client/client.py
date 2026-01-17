@@ -62,31 +62,48 @@ _ERROR_EXCEPTIONS = {
     "not_implemented": NotImplementedRPCError,
 }
 
-{{- range $model := .Models}}
+
+@dataclass
+class TextModel:
+    title: Optional[str]
+    data: str
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "TextModel":
+        return TextModel(
+            title=None if data.get("title") is None else data.get("title"),
+            data=data.get("data"),
+        )
 
 
 @dataclass
-class {{className $model.Name}}:
-{{- if hasModelFields $model}}
-{{- range $field := $model.Fields}}
-    {{fieldName $field.Name}}: {{pythonType $field.Type}}
-{{- end}}
+class SliceModel:
+    begin: int
+    end: int
 
     @staticmethod
-    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
-        return {{className $model.Name}}(
-{{- range $field := $model.Fields}}
-            {{fieldName $field.Name}}={{decodeExpr $field.Type (print "data.get(\"" (jsonName $field.Name) "\")")}},
-{{- end}}
+    def from_dict(data: Dict[str, Any]) -> "SliceModel":
+        return SliceModel(
+            begin=data.get("begin"),
+            end=data.get("end"),
         )
-{{- else}}
-    @staticmethod
-    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
-        _ = data
-        return {{className $model.Name}}()
-{{- end}}
 
-{{- end}}
+
+@dataclass
+class StatsModel:
+    ascii: bool
+    word_count: Dict[str, int]
+    total_words: int
+    sentences: List[SliceModel]
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "StatsModel":
+        return StatsModel(
+            ascii=data.get("ascii"),
+            word_count={k: v for k, v in data.get("word_count").items()},
+            total_words=data.get("total_words"),
+            sentences=[SliceModel.from_dict(item) for item in data.get("sentences")],
+        )
 
 
 class RPCClient:
@@ -95,7 +112,7 @@ class RPCClient:
         self.headers = headers or {}
 
     def _request(self, path: str, payload: Optional[Dict[str, Any]]) -> Any:
-        url = f"{self.base_url}{{.Prefix}}/{path}"
+        url = f"{self.base_url}/rpc/{path}"
         data = None
         if payload is not None:
             data = json.dumps(self._encode_payload(payload)).encode("utf-8")
@@ -142,20 +159,18 @@ class RPCClient:
             return tuple(self._encode_payload(item) for item in value)
         return value
 
-{{- range $rpc := .RPCs}}
-
-    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{pythonType $rpc.Returns}}:
-{{- if hasParameters $rpc}}
+    def submit_text(self, text: TextModel) -> int:
         payload = {
-{{- range $param := $rpc.Parameters}}
-            "{{jsonName $param.Name}}": {{fieldName $param.Name}},
-{{- end}}
+            "text": text,
         }
-{{- else}}
-        payload = None
-{{- end}}
-        data = self._request("{{rpcMethodName $rpc.Name}}", payload)
-        value = data.get("{{resultField $rpc.Returns}}") if isinstance(data, dict) else data
-        return {{decodeExpr $rpc.Returns "value"}}
+        data = self._request("submit_text", payload)
+        value = data.get("int") if isinstance(data, dict) else data
+        return value
 
-{{- end}}
+    def compute_stats(self, text_id: int) -> StatsModel:
+        payload = {
+            "text_id": text_id,
+        }
+        data = self._request("compute_stats", payload)
+        value = data.get("stats") if isinstance(data, dict) else data
+        return StatsModel.from_dict(value)

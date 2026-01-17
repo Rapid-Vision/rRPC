@@ -1,4 +1,4 @@
-package {{.Package}}
+package rpcserver
 
 import (
 	"context"
@@ -8,58 +8,39 @@ import (
 	"net/http"
 )
 
-{{- range $index, $model := .Models}}
-{{- if gt $index 0}}
-
-{{- end}}
-type {{modelTypeName $model.Name}} struct {
-{{- range $field := $model.Fields}}
-	{{fieldName $field.Name}} {{goType $field.Type}} `json:"{{jsonName $field.Name}}"`
-{{- end}}
-}
-{{- end}}
-
-{{- range $rpc := .RPCs}}
-
-type {{rpcParamsName $rpc.Name}} struct {
-{{- range $param := $rpc.Parameters}}
-	{{fieldName $param.Name}} {{goType $param.Type}} `json:"{{jsonName $param.Name}}"`
-{{- end}}
+type GreetingMessageModel struct {
+	Message string `json:"message"`
 }
 
-type {{rpcResultName $rpc.Name}} struct {
-	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
+type HelloWorldParams struct {
+	Name    string  `json:"name"`
+	Surname *string `json:"surname"`
 }
-{{- end}}
+
+type HelloWorldResult struct {
+	GreetingMessage GreetingMessageModel `json:"greeting_message"`
+}
 
 type RPCHandler interface {
-{{- range $rpc := .RPCs}}
-	{{rpcMethodName $rpc.Name}}(context.Context, {{rpcParamsName $rpc.Name}}) ({{rpcResultName $rpc.Name}}, error)
-{{- end}}
+	HelloWorld(context.Context, HelloWorldParams) (HelloWorldResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux := http.NewServeMux()
-{{- range $rpc := .RPCs}}
-	mux.Handle("{{rpcRoute $rpc.Name}}", {{rpcHandlerName $rpc.Name}}(rpc))
-{{- end}}
+	mux.Handle("POST /rpc/hello_world", CreateHelloWorldHandler(rpc))
 	return mux
 }
 
-{{- range $rpc := .RPCs}}
-
-func {{rpcHandlerName $rpc.Name}}(rpc RPCHandler) http.Handler {
+func CreateHelloWorldHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params {{rpcParamsName $rpc.Name}}
-		{{- if gt (len $rpc.Parameters) 0}}
+		var params HelloWorldParams
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&params); err != nil && err != io.EOF {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		{{- end}}
-		res, err := rpc.{{rpcMethodName $rpc.Name}}(r.Context(), params)
+		res, err := rpc.HelloWorld(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -67,7 +48,6 @@ func {{rpcHandlerName $rpc.Name}}(rpc RPCHandler) http.Handler {
 		writeJSON(w, http.StatusOK, res)
 	})
 }
-{{- end}}
 
 type rpcError struct {
 	Type    string `json:"type"`

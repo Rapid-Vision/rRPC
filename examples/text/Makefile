@@ -1,4 +1,4 @@
-SCHEMA := hello.rrpc
+SCHEMA := text.rrpc
 ROOT   := ../..
 
 ifneq ("$(wildcard $(ROOT)/go.mod)","")

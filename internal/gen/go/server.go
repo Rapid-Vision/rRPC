@@ -3,6 +3,7 @@ package gogen
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
@@ -25,6 +26,13 @@ func Generate(schema *parser.Schema, pkg string) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
+	return GenerateWithPrefix(schema, pkg, "rpc")
+}
+
+func GenerateWithPrefix(schema *parser.Schema, pkg, prefix string) (string, error) {
+	if schema == nil {
+		return "", fmt.Errorf("schema is nil")
+	}
 	tmpl, err := template.New("server.go.tmpl").Funcs(template.FuncMap{
 		"modelTypeName":  modelTypeName,
 		"fieldName":      fieldName,
@@ -34,7 +42,9 @@ func Generate(schema *parser.Schema, pkg string) (string, error) {
 		"rpcResultName":  rpcResultName,
 		"rpcHandlerName": rpcHandlerName,
 		"rpcMethodName":  rpcMethodName,
-		"rpcRoute":       rpcRoute,
+		"rpcRoute": func(name string) string {
+			return rpcRoute(prefix, name)
+		},
 		"resultField":    resultField,
 	}).Parse(serverTemplate)
 	if err != nil {
@@ -86,12 +96,17 @@ func rpcMethodName(name string) string {
 	return utils.NewIdentifierName(name).PascalCase()
 }
 
-func rpcRoute(name string) string {
-	return "POST /" + utils.NewIdentifierName(name).SnakeCase()
+func rpcRoute(prefix, name string) string {
+	return "POST " + rpcPath(prefix, name)
 }
 
-func rpcPath(name string) string {
-	return "/" + utils.NewIdentifierName(name).SnakeCase()
+func rpcPath(prefix, name string) string {
+	p := strings.Trim(prefix, "/")
+	route := utils.NewIdentifierName(name).SnakeCase()
+	if p == "" {
+		return "/" + route
+	}
+	return "/" + p + "/" + route
 }
 
 func resultField(t parser.TypeRef) string {

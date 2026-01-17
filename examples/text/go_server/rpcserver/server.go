@@ -1,4 +1,4 @@
-package {{.Package}}
+package rpcserver
 
 import (
 	"context"
@@ -8,58 +8,59 @@ import (
 	"net/http"
 )
 
-{{- range $index, $model := .Models}}
-{{- if gt $index 0}}
-
-{{- end}}
-type {{modelTypeName $model.Name}} struct {
-{{- range $field := $model.Fields}}
-	{{fieldName $field.Name}} {{goType $field.Type}} `json:"{{jsonName $field.Name}}"`
-{{- end}}
+type TextModel struct {
+	Title *string `json:"title"`
+	Data  string  `json:"data"`
 }
-{{- end}}
-
-{{- range $rpc := .RPCs}}
-
-type {{rpcParamsName $rpc.Name}} struct {
-{{- range $param := $rpc.Parameters}}
-	{{fieldName $param.Name}} {{goType $param.Type}} `json:"{{jsonName $param.Name}}"`
-{{- end}}
+type SliceModel struct {
+	Begin int `json:"begin"`
+	End   int `json:"end"`
+}
+type StatsModel struct {
+	Ascii      bool           `json:"ascii"`
+	WordCount  map[string]int `json:"word_count"`
+	TotalWords int            `json:"total_words"`
+	Sentences  []SliceModel   `json:"sentences"`
 }
 
-type {{rpcResultName $rpc.Name}} struct {
-	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
+type SubmitTextParams struct {
+	Text TextModel `json:"text"`
 }
-{{- end}}
+
+type SubmitTextResult struct {
+	Int int `json:"int"`
+}
+
+type ComputeStatsParams struct {
+	TextId int `json:"text_id"`
+}
+
+type ComputeStatsResult struct {
+	Stats StatsModel `json:"stats"`
+}
 
 type RPCHandler interface {
-{{- range $rpc := .RPCs}}
-	{{rpcMethodName $rpc.Name}}(context.Context, {{rpcParamsName $rpc.Name}}) ({{rpcResultName $rpc.Name}}, error)
-{{- end}}
+	SubmitText(context.Context, SubmitTextParams) (SubmitTextResult, error)
+	ComputeStats(context.Context, ComputeStatsParams) (ComputeStatsResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux := http.NewServeMux()
-{{- range $rpc := .RPCs}}
-	mux.Handle("{{rpcRoute $rpc.Name}}", {{rpcHandlerName $rpc.Name}}(rpc))
-{{- end}}
+	mux.Handle("POST /rpc/submit_text", CreateSubmitTextHandler(rpc))
+	mux.Handle("POST /rpc/compute_stats", CreateComputeStatsHandler(rpc))
 	return mux
 }
 
-{{- range $rpc := .RPCs}}
-
-func {{rpcHandlerName $rpc.Name}}(rpc RPCHandler) http.Handler {
+func CreateSubmitTextHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var params {{rpcParamsName $rpc.Name}}
-		{{- if gt (len $rpc.Parameters) 0}}
+		var params SubmitTextParams
 		decoder := json.NewDecoder(r.Body)
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&params); err != nil && err != io.EOF {
 			writeError(w, InputError{Message: err.Error()})
 			return
 		}
-		{{- end}}
-		res, err := rpc.{{rpcMethodName $rpc.Name}}(r.Context(), params)
+		res, err := rpc.SubmitText(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -67,7 +68,24 @@ func {{rpcHandlerName $rpc.Name}}(rpc RPCHandler) http.Handler {
 		writeJSON(w, http.StatusOK, res)
 	})
 }
-{{- end}}
+
+func CreateComputeStatsHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params ComputeStatsParams
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&params); err != nil && err != io.EOF {
+			writeError(w, InputError{Message: err.Error()})
+			return
+		}
+		res, err := rpc.ComputeStats(r.Context(), params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	})
+}
 
 type rpcError struct {
 	Type    string `json:"type"`

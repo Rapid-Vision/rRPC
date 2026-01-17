@@ -18,6 +18,13 @@ func GenerateClient(schema *parser.Schema, pkg string) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
+	return GenerateClientWithPrefix(schema, pkg, "rpc")
+}
+
+func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (string, error) {
+	if schema == nil {
+		return "", fmt.Errorf("schema is nil")
+	}
 	tmpl, err := template.New("client.go.tmpl").Funcs(template.FuncMap{
 		"modelTypeName": modelTypeName,
 		"fieldName":     fieldName,
@@ -26,7 +33,9 @@ func GenerateClient(schema *parser.Schema, pkg string) (string, error) {
 		"rpcParamsName": rpcParamsName,
 		"rpcResultName": rpcResultName,
 		"rpcMethodName": rpcMethodName,
-		"rpcPath":       rpcPath,
+		"rpcPath": func(name string) string {
+			return rpcPath(prefix, name)
+		},
 		"resultField":   resultField,
 	}).Parse(clientTemplate)
 	if err != nil {

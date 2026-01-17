@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	gogen "github.com/Rapid-Vision/rRPC/internal/gen/go"
 	pygen "github.com/Rapid-Vision/rRPC/internal/gen/python"
 	"github.com/Rapid-Vision/rRPC/internal/parser"
-	"github.com/Rapid-Vision/rRPC/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -20,18 +18,20 @@ var clientCmd = &cobra.Command{
 }
 
 var (
-	clientLang  string
-	clientPkg   string
-	clientOut   string
-	clientForce bool
+	clientLang   string
+	clientPkg    string
+	clientOut    string
+	clientForce  bool
+	clientPrefix string
 )
 
 func init() {
 	rootCmd.AddCommand(clientCmd)
 	clientCmd.Flags().StringVar(&clientLang, "lang", "python", "Output language")
 	clientCmd.Flags().StringVarP(&clientPkg, "pkg", "p", "rpc_client", "Python package name for generated code")
-	clientCmd.Flags().StringVarP(&clientOut, "output", "o", "", "Output base directory (default: .)")
+	clientCmd.Flags().StringVarP(&clientOut, "output", "o", ".", "Output base directory")
 	clientCmd.Flags().BoolVarP(&clientForce, "force", "f", false, "Overwrite output file if it exists")
+	clientCmd.Flags().StringVar(&clientPrefix, "prefix", "rpc", "URL path prefix (empty for none)")
 }
 
 func RunClientCmd(cmd *cobra.Command, args []string) error {
@@ -56,7 +56,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 	}
 	baseDir := filepath.Join(outputDir, clientPkg)
 	if clientLang == "go" {
-		code, err := gogen.GenerateClient(schema, clientPkg)
+		code, err := gogen.GenerateClientWithPrefix(schema, clientPkg, clientPrefix)
 		if err != nil {
 			return fmt.Errorf("generate code: %w", err)
 		}
@@ -75,7 +75,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	code, err := pygen.GenerateClient(schema)
+	code, err := pygen.GenerateClientWithPrefix(schema, clientPrefix)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}
@@ -95,29 +95,8 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 	if err := os.WriteFile(clientPath, []byte(code), 0o644); err != nil {
 		return fmt.Errorf("write output: %w", err)
 	}
-	if err := os.WriteFile(initPath, []byte(buildPythonInit(schema)), 0o644); err != nil {
+	if err := os.WriteFile(initPath, []byte(pygen.GeneratePythonInit(schema)), 0o644); err != nil {
 		return fmt.Errorf("write output: %w", err)
 	}
 	return nil
-}
-
-func buildPythonInit(schema *parser.Schema) string {
-	var b strings.Builder
-	b.WriteString("from .client import RPCClient\n")
-	for _, model := range schema.Models {
-		className := utils.NewIdentifierName(model.Name).PascalCase() + "Model"
-		b.WriteString("from .client import ")
-		b.WriteString(className)
-		b.WriteString("\n")
-	}
-	b.WriteString("\n__all__ = [\n")
-	b.WriteString("    \"RPCClient\",\n")
-	for _, model := range schema.Models {
-		className := utils.NewIdentifierName(model.Name).PascalCase() + "Model"
-		b.WriteString("    \"")
-		b.WriteString(className)
-		b.WriteString("\",\n")
-	}
-	b.WriteString("]\n")
-	return b.String()
 }

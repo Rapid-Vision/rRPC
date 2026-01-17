@@ -17,18 +17,20 @@ var serverCmd = &cobra.Command{
 }
 
 var (
-	serverLang  string
-	serverPkg   string
-	serverOut   string
-	serverForce bool
+	serverLang   string
+	serverPkg    string
+	serverOut    string
+	serverForce  bool
+	serverPrefix string
 )
 
 func init() {
 	rootCmd.AddCommand(serverCmd)
 	serverCmd.Flags().StringVar(&serverLang, "lang", "go", "Output language")
 	serverCmd.Flags().StringVarP(&serverPkg, "pkg", "p", "rpcserver", "Package name for generated code")
-	serverCmd.Flags().StringVarP(&serverOut, "output", "o", "", "Output base directory (default: .)")
+	serverCmd.Flags().StringVarP(&serverOut, "output", "o", ".", "Output base directory")
 	serverCmd.Flags().BoolVarP(&serverForce, "force", "f", false, "Overwrite output file if it exists")
+	serverCmd.Flags().StringVar(&serverPrefix, "prefix", "rpc", "URL path prefix (empty for none)")
 }
 
 func RunServerCmd(cmd *cobra.Command, args []string) error {
@@ -47,7 +49,7 @@ func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("parse schema: %w", err)
 	}
-	code, err := gogen.Generate(schema, serverPkg)
+	code, err := gogen.GenerateWithPrefix(schema, serverPkg, serverPrefix)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}

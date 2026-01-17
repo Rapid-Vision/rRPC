@@ -16,7 +16,9 @@ var debugCmd = &cobra.Command{
 	RunE:  RunDebugCmd,
 }
 
-var debugStage string
+var (
+	debugStage string
+)
 
 func init() {
 	rootCmd.AddCommand(debugCmd)

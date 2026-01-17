@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import signal
 import socket
 import subprocess
 import sys
@@ -54,6 +55,7 @@ def main() -> int:
     server = subprocess.Popen(
         ["go", "run", "."],
         cwd=workdir / "go_server",
+        start_new_session=True,
     )
     try:
         wait_for_port("127.0.0.1", 8080, timeout=5.0)
@@ -63,11 +65,17 @@ def main() -> int:
             cwd=workdir / "py_client",
         )
     finally:
-        server.terminate()
+        try:
+            os.killpg(server.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            sys.exit(1)
         try:
             server.wait(timeout=3.0)
         except subprocess.TimeoutExpired:
-            server.kill()
+            try:
+                os.killpg(server.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                sys.exit(1)
             server.wait(timeout=3.0)
     return 0
 

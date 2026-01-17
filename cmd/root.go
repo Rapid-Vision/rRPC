@@ -1,14 +1,22 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
+const version = "0.0.1"
+
+var (
+	rootVersionFlag bool
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "rrpc",
 	Short: "rRPC is a code generation tool for creating an RPC API from a schema",
+	RunE:  RunRootCmd,
 }
 
 func Execute() {
@@ -19,5 +27,15 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().BoolVarP(&rootVersionFlag, "version", "v", false, "Print version")
+}
 
+func RunRootCmd(cmd *cobra.Command, args []string) error {
+	if rootVersionFlag {
+		fmt.Println(version)
+	} else {
+		return cmd.Help()
+	}
+
+	return nil
 }

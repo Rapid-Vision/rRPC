@@ -31,3 +31,6 @@
 
 ## Configuration & Examples
 - Sample schema files live in `examples/`; update or add examples when changing parsing or codegen behavior.
+
+## Additional notes
+- go version in the go.mod file is correct and real

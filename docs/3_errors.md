@@ -42,3 +42,17 @@ func (s *service) GetUser(params rpcserver.GetUserParams) (rpcserver.GetUserResu
 ```
 
 Input errors are produced automatically when JSON decoding fails in generated handlers.
+
+## Writing errors from middleware (Go)
+Generated servers also expose helper functions you can call directly from middleware:
+```go
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") == "" {
+			rpcserver.WriteUnauthorizedError(w, "missing token")
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+```

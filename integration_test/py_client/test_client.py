@@ -54,6 +54,19 @@ class RPCClientTest(unittest.TestCase):
         with self.assertRaises(UnauthorizedRPCError):
             self.rpc.test_unauthorized_error()
 
+    def test_auth_middleware_missing_token(self) -> None:
+        rpc = RPCClient("http://localhost:8080")
+        with self.assertRaises(UnauthorizedRPCError):
+            rpc.test_empty()
+
+    def test_auth_middleware_invalid_token(self) -> None:
+        rpc = RPCClient(
+            "http://localhost:8080",
+            headers={"Authorization": "Bearer bad_token"},
+        )
+        with self.assertRaises(UnauthorizedRPCError):
+            rpc.test_empty()
+
     def test_forbidden_error(self) -> None:
         with self.assertRaises(ForbiddenRPCError):
             self.rpc.test_forbidden_error()

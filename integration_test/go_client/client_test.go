@@ -114,6 +114,26 @@ func TestUnauthorizedError(t *testing.T) {
 	}
 }
 
+func TestAuthMiddlewareMissingToken(t *testing.T) {
+	rpc := client.NewRPCClient(baseURL)
+	_, err := rpc.TestEmpty()
+	var uErr client.UnauthorizedRPCError
+	if err == nil || !errors.As(err, &uErr) {
+		t.Fatalf("expected UnauthorizedRPCError from middleware, got %v", err)
+	}
+}
+
+func TestAuthMiddlewareInvalidToken(t *testing.T) {
+	rpc := client.NewRPCClientWithHeaders(baseURL, map[string]string{
+		"Authorization": "Bearer bad_token",
+	})
+	_, err := rpc.TestEmpty()
+	var uErr client.UnauthorizedRPCError
+	if err == nil || !errors.As(err, &uErr) {
+		t.Fatalf("expected UnauthorizedRPCError from middleware, got %v", err)
+	}
+}
+
 func TestForbiddenError(t *testing.T) {
 	rpc := newClient()
 	_, err := rpc.TestForbiddenError()

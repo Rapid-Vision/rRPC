@@ -458,7 +458,7 @@ func validateTypeRef(t TypeRef, models map[string]struct{}) error {
 
 func isBuiltinType(name string) bool {
 	switch name {
-	case "string", "int", "bool":
+	case "string", "int", "bool", "json", "raw":
 		return true
 	default:
 		return false

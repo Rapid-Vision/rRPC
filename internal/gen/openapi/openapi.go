@@ -140,12 +140,16 @@ func schemaForType(t parser.TypeRef) map[string]any {
 			schema = map[string]any{"type": "string"}
 		case "int":
 			schema = map[string]any{"type": "integer", "format": "int32"}
-		case "bool":
-			schema = map[string]any{"type": "boolean"}
-		default:
-			schema = map[string]any{
-				"$ref": "#/components/schemas/" + modelSchemaName(t.Name),
-			}
+	case "bool":
+		schema = map[string]any{"type": "boolean"}
+	case "json":
+		schema = map[string]any{}
+	case "raw":
+		schema = map[string]any{}
+	default:
+		schema = map[string]any{
+			"$ref": "#/components/schemas/" + modelSchemaName(t.Name),
+		}
 		}
 	}
 

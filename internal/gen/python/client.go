@@ -140,6 +140,10 @@ func pythonBaseType(t parser.TypeRef) string {
 			return "int"
 		case "bool":
 			return "bool"
+		case "json":
+			return "Any"
+		case "raw":
+			return "Any"
 		default:
 			return utils.NewIdentifierName(t.Name).PascalCase() + "Model"
 		}
@@ -165,7 +169,7 @@ func decodeExpr(t parser.TypeRef, value string) string {
 		return fmt.Sprintf("{k: %s for k, v in %s.items()}", valExpr, value)
 	default:
 		switch t.Name {
-		case "string", "int", "bool":
+		case "string", "int", "bool", "json", "raw":
 			return value
 		default:
 			return utils.NewIdentifierName(t.Name).PascalCase() + "Model.from_dict(" + value + ")"

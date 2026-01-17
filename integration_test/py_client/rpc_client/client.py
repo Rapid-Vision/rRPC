@@ -118,6 +118,19 @@ class NestedModel:
         )
 
 
+@dataclass
+class PayloadModel:
+    data: Any
+    raw_data: Any
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "PayloadModel":
+        return PayloadModel(
+            data=data.get("data"),
+            raw_data=data.get("raw_data"),
+        )
+
+
 class RPCClient:
     def __init__(self, base_url: str, headers: Optional[Dict[str, str]] = None) -> None:
         self.base_url = base_url.rstrip("/")
@@ -243,3 +256,27 @@ class RPCClient:
         data = self._request("test_map_return", payload)
         value = data.get("result") if isinstance(data, dict) else data
         return {k: TextModel.from_dict(v) for k, v in value.items()}
+
+    def test_json(self, data: Any) -> Any:
+        payload = {
+            "data": data,
+        }
+        data = self._request("test_json", payload)
+        value = data.get("json") if isinstance(data, dict) else data
+        return value
+
+    def test_raw(self, payload: Any) -> Any:
+        payload = {
+            "payload": payload,
+        }
+        data = self._request("test_raw", payload)
+        value = data.get("raw") if isinstance(data, dict) else data
+        return value
+
+    def test_mixed_payload(self, payload: PayloadModel) -> PayloadModel:
+        payload = {
+            "payload": payload,
+        }
+        data = self._request("test_mixed_payload", payload)
+        value = data.get("payload") if isinstance(data, dict) else data
+        return PayloadModel.from_dict(value)

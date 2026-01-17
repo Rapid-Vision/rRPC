@@ -26,6 +26,10 @@ type NestedModel struct {
 	Items  []TextModel          `json:"items"`
 	Lookup map[string]TextModel `json:"lookup"`
 }
+type PayloadModel struct {
+	Data    any             `json:"data"`
+	RawData json.RawMessage `json:"raw_data"`
+}
 
 type TestEmptyParams struct {
 }
@@ -106,6 +110,30 @@ type TestMapReturnResult struct {
 	Result map[string]TextModel `json:"result"`
 }
 
+type TestJsonParams struct {
+	Data any `json:"data"`
+}
+
+type TestJsonResult struct {
+	Json any `json:"json"`
+}
+
+type TestRawParams struct {
+	Payload json.RawMessage `json:"payload"`
+}
+
+type TestRawResult struct {
+	Raw json.RawMessage `json:"raw"`
+}
+
+type TestMixedPayloadParams struct {
+	Payload PayloadModel `json:"payload"`
+}
+
+type TestMixedPayloadResult struct {
+	Payload PayloadModel `json:"payload"`
+}
+
 type RPCHandler interface {
 	TestEmpty(context.Context, TestEmptyParams) (TestEmptyResult, error)
 	TestBasic(context.Context, TestBasicParams) (TestBasicResult, error)
@@ -117,6 +145,9 @@ type RPCHandler interface {
 	TestNotImplementedError(context.Context, TestNotImplementedErrorParams) (TestNotImplementedErrorResult, error)
 	TestCustomError(context.Context, TestCustomErrorParams) (TestCustomErrorResult, error)
 	TestMapReturn(context.Context, TestMapReturnParams) (TestMapReturnResult, error)
+	TestJson(context.Context, TestJsonParams) (TestJsonResult, error)
+	TestRaw(context.Context, TestRawParams) (TestRawResult, error)
+	TestMixedPayload(context.Context, TestMixedPayloadParams) (TestMixedPayloadResult, error)
 }
 
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
@@ -131,6 +162,9 @@ func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux.Handle("POST /rpc/test_not_implemented_error", CreateTestNotImplementedErrorHandler(rpc))
 	mux.Handle("POST /rpc/test_custom_error", CreateTestCustomErrorHandler(rpc))
 	mux.Handle("POST /rpc/test_map_return", CreateTestMapReturnHandler(rpc))
+	mux.Handle("POST /rpc/test_json", CreateTestJsonHandler(rpc))
+	mux.Handle("POST /rpc/test_raw", CreateTestRawHandler(rpc))
+	mux.Handle("POST /rpc/test_mixed_payload", CreateTestMixedPayloadHandler(rpc))
 	return mux
 }
 
@@ -270,6 +304,60 @@ func CreateTestMapReturnHandler(rpc RPCHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var params TestMapReturnParams
 		res, err := rpc.TestMapReturn(r.Context(), params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	})
+}
+
+func CreateTestJsonHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestJsonParams
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&params); err != nil && err != io.EOF {
+			writeError(w, InputError{Message: err.Error()})
+			return
+		}
+		res, err := rpc.TestJson(r.Context(), params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	})
+}
+
+func CreateTestRawHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestRawParams
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&params); err != nil && err != io.EOF {
+			writeError(w, InputError{Message: err.Error()})
+			return
+		}
+		res, err := rpc.TestRaw(r.Context(), params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+	})
+}
+
+func CreateTestMixedPayloadHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestMixedPayloadParams
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&params); err != nil && err != io.EOF {
+			writeError(w, InputError{Message: err.Error()})
+			return
+		}
+		res, err := rpc.TestMixedPayload(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return

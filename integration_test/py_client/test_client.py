@@ -3,6 +3,7 @@ import unittest
 from rpc_client import (
     RPCClient,
     EmptyModel,
+    PayloadModel,
     TextModel,
     CustomRPCError,
     InputRPCError,
@@ -84,6 +85,25 @@ class RPCClientTest(unittest.TestCase):
         self.assertIsInstance(mapped, dict)
         self.assertIsInstance(mapped.get("a"), TextModel)
         self.assertEqual(mapped["a"].body, "mapped")
+
+    def test_json(self) -> None:
+        payload = {"count": 2, "tags": ["a", "b"]}
+        result = self.rpc.test_json(data=payload)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get("count"), 2)
+
+    def test_raw(self) -> None:
+        payload = {"ok": True}
+        result = self.rpc.test_raw(payload=payload)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get("ok"), True)
+
+    def test_mixed_payload(self) -> None:
+        payload = {"data": {"value": "x"}, "raw_data": {"id": 1}}
+        result = self.rpc.test_mixed_payload(payload=payload)
+        self.assertIsInstance(result, PayloadModel)
+        self.assertEqual(result.data.get("value"), "x")
+        self.assertEqual(result.raw_data.get("id"), 1)
 
 
 if __name__ == "__main__":

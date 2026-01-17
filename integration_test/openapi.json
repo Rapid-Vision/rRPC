@@ -714,6 +714,237 @@
           }
         }
       }
+    },
+    "/rpc/test_json": {
+      "post": {
+        "operationId": "TestJson",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestJsonParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestJsonResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rpc/test_raw": {
+      "post": {
+        "operationId": "TestRaw",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestRawParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestRawResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rpc/test_mixed_payload": {
+      "post": {
+        "operationId": "TestMixedPayload",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestMixedPayloadParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestMixedPayloadResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -750,6 +981,14 @@
           "lookup": {"additionalProperties":{"$ref":"#/components/schemas/TextModel"},"type":"object"}
         },
         "required": ["text","items","lookup"]
+      },
+      "PayloadModel": {
+        "type": "object",
+        "properties": {
+          "data": {},
+          "raw_data": {}
+        },
+        "required": ["data","raw_data"]
       },
       "TestEmptyParams": {
         "type": "object",
@@ -871,6 +1110,45 @@
         "type": "object",
         "properties": {
           "result": {"additionalProperties":{"$ref":"#/components/schemas/TextModel"},"type":"object"}
+        }
+      },
+      "TestJsonParams": {
+        "type": "object",
+        "properties": {
+          "data": {}
+        },
+        "required": ["data"]
+      },
+      "TestJsonResult": {
+        "type": "object",
+        "properties": {
+          "json": {}
+        }
+      },
+      "TestRawParams": {
+        "type": "object",
+        "properties": {
+          "payload": {}
+        },
+        "required": ["payload"]
+      },
+      "TestRawResult": {
+        "type": "object",
+        "properties": {
+          "raw": {}
+        }
+      },
+      "TestMixedPayloadParams": {
+        "type": "object",
+        "properties": {
+          "payload": {"$ref":"#/components/schemas/PayloadModel"}
+        },
+        "required": ["payload"]
+      },
+      "TestMixedPayloadResult": {
+        "type": "object",
+        "properties": {
+          "payload": {"$ref":"#/components/schemas/PayloadModel"}
         }
       }
       ,

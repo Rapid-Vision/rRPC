@@ -22,10 +22,14 @@ rpc GetUser(
 Parameters are named fields. The return type is a single type.
 
 ## Types
-- Builtins: `string`, `int`, `bool`
+- Builtins: `string`, `int`, `bool`, `json`, `raw`
 - Optional: `string?`, `User?`
 - Lists: `list[Type]`
 - Maps: `map[Type]` (JSON keys are strings)
+
+## json and raw
+- `json` is arbitrary JSON data decoded into language-native structures (maps/lists in Go/Python).
+- `raw` preserves the raw JSON payload (Go uses `json.RawMessage`; Python exposes it as an untyped value).
 
 ## Nesting
 Types can be nested:

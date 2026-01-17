@@ -36,127 +36,17 @@ func main() {
 	})
 
 	tests := []testCase{
-		{name: "empty", fn: func() error {
-			_, err := rpc.TestEmpty()
-			return err
-		}},
-		{name: "basic", fn: func() error {
-			note := "note"
-			text := client.TextModel{Title: nil, Body: "  hello  "}
-			res, err := rpc.TestBasic(client.TestBasicParams{
-				Text:  text,
-				Flag:  true,
-				Count: 3,
-				Note:  &note,
-			})
-			if err != nil {
-				return err
-			}
-			if res.Body != "hello" {
-				return fmt.Errorf("expected body 'hello', got %q", res.Body)
-			}
-			if res.Title == nil || *res.Title != "note" {
-				return fmt.Errorf("expected title 'note', got %v", res.Title)
-			}
-			return nil
-		}},
-		{name: "list_map", fn: func() error {
-			res, err := rpc.TestListMap(client.TestListMapParams{
-				Texts: []client.TextModel{
-					{Title: stringPtr("t1"), Body: "b1"},
-					{Title: stringPtr("t2"), Body: "b2"},
-				},
-				Flags: map[string]string{"mode": "fast"},
-			})
-			if err != nil {
-				return err
-			}
-			if res.Flags == nil {
-				return fmt.Errorf("expected flags")
-			}
-			if res.Flags.Retries != 2 {
-				return fmt.Errorf("expected retries 2, got %d", res.Flags.Retries)
-			}
-			if res.Flags.Meta["mode"] != "fast" {
-				return fmt.Errorf("expected mode fast, got %q", res.Flags.Meta["mode"])
-			}
-			if _, ok := res.Lookup["first"]; !ok {
-				return fmt.Errorf("expected lookup to include 'first'")
-			}
-			return nil
-		}},
-		{name: "optional", fn: func() error {
-			res, err := rpc.TestOptional(client.TestOptionalParams{
-				Text: nil,
-				Flag: nil,
-			})
-			if err != nil {
-				return err
-			}
-			if res.Enabled {
-				return fmt.Errorf("expected enabled false")
-			}
-			return nil
-		}},
-		{name: "validation_error", fn: func() error {
-			_, err := rpc.TestValidationError(client.TestValidationErrorParams{
-				Text: client.TextModel{Title: nil, Body: ""},
-			})
-			var vErr client.ValidationRPCError
-			if err == nil || !errors.As(err, &vErr) {
-				return fmt.Errorf("expected ValidationRPCError, got %v", err)
-			}
-			return nil
-		}},
-		{name: "input_error", fn: func() error {
-			return sendInvalidPayload()
-		}},
-		{name: "unauthorized_error", fn: func() error {
-			_, err := rpc.TestUnauthorizedError()
-			var uErr client.UnauthorizedRPCError
-			if err == nil || !errors.As(err, &uErr) {
-				return fmt.Errorf("expected UnauthorizedRPCError, got %v", err)
-			}
-			return nil
-		}},
-		{name: "forbidden_error", fn: func() error {
-			_, err := rpc.TestForbiddenError()
-			var fErr client.ForbiddenRPCError
-			if err == nil || !errors.As(err, &fErr) {
-				return fmt.Errorf("expected ForbiddenRPCError, got %v", err)
-			}
-			return nil
-		}},
-		{name: "not_implemented_error", fn: func() error {
-			_, err := rpc.TestNotImplementedError()
-			var nErr client.NotImplementedRPCError
-			if err == nil || !errors.As(err, &nErr) {
-				return fmt.Errorf("expected NotImplementedRPCError, got %v", err)
-			}
-			return nil
-		}},
-		{name: "custom_error", fn: func() error {
-			_, err := rpc.TestCustomError()
-			var cErr client.CustomRPCError
-			if err == nil || !errors.As(err, &cErr) {
-				return fmt.Errorf("expected CustomRPCError, got %v", err)
-			}
-			return nil
-		}},
-		{name: "map_return", fn: func() error {
-			res, err := rpc.TestMapReturn()
-			if err != nil {
-				return err
-			}
-			text, ok := res["a"]
-			if !ok {
-				return fmt.Errorf("expected key 'a'")
-			}
-			if text.Body != "mapped" {
-				return fmt.Errorf("expected body 'mapped', got %q", text.Body)
-			}
-			return nil
-		}},
+		{name: "empty", fn: func() error { return testEmpty(rpc) }},
+		{name: "basic", fn: func() error { return testBasic(rpc) }},
+		{name: "list_map", fn: func() error { return testListMap(rpc) }},
+		{name: "optional", fn: func() error { return testOptional(rpc) }},
+		{name: "validation_error", fn: func() error { return testValidationError(rpc) }},
+		{name: "input_error", fn: func() error { return testInputError() }},
+		{name: "unauthorized_error", fn: func() error { return testUnauthorizedError(rpc) }},
+		{name: "forbidden_error", fn: func() error { return testForbiddenError(rpc) }},
+		{name: "not_implemented_error", fn: func() error { return testNotImplementedError(rpc) }},
+		{name: "custom_error", fn: func() error { return testCustomError(rpc) }},
+		{name: "map_return", fn: func() error { return testMapReturn(rpc) }},
 	}
 
 	passed := 0
@@ -173,6 +63,138 @@ func main() {
 
 func stringPtr(value string) *string {
 	return &value
+}
+
+func testEmpty(rpc *client.RPCClient) error {
+	_, err := rpc.TestEmpty()
+	return err
+}
+
+func testBasic(rpc *client.RPCClient) error {
+	note := "note"
+	text := client.TextModel{Title: nil, Body: "  hello  "}
+	res, err := rpc.TestBasic(client.TestBasicParams{
+		Text:  text,
+		Flag:  true,
+		Count: 3,
+		Note:  &note,
+	})
+	if err != nil {
+		return err
+	}
+	if res.Body != "hello" {
+		return fmt.Errorf("expected body 'hello', got %q", res.Body)
+	}
+	if res.Title == nil || *res.Title != "note" {
+		return fmt.Errorf("expected title 'note', got %v", res.Title)
+	}
+	return nil
+}
+
+func testListMap(rpc *client.RPCClient) error {
+	res, err := rpc.TestListMap(client.TestListMapParams{
+		Texts: []client.TextModel{
+			{Title: stringPtr("t1"), Body: "b1"},
+			{Title: stringPtr("t2"), Body: "b2"},
+		},
+		Flags: map[string]string{"mode": "fast"},
+	})
+	if err != nil {
+		return err
+	}
+	if res.Flags == nil {
+		return fmt.Errorf("expected flags")
+	}
+	if res.Flags.Retries != 2 {
+		return fmt.Errorf("expected retries 2, got %d", res.Flags.Retries)
+	}
+	if res.Flags.Meta["mode"] != "fast" {
+		return fmt.Errorf("expected mode fast, got %q", res.Flags.Meta["mode"])
+	}
+	if _, ok := res.Lookup["first"]; !ok {
+		return fmt.Errorf("expected lookup to include 'first'")
+	}
+	return nil
+}
+
+func testOptional(rpc *client.RPCClient) error {
+	res, err := rpc.TestOptional(client.TestOptionalParams{
+		Text: nil,
+		Flag: nil,
+	})
+	if err != nil {
+		return err
+	}
+	if res.Enabled {
+		return fmt.Errorf("expected enabled false")
+	}
+	return nil
+}
+
+func testValidationError(rpc *client.RPCClient) error {
+	_, err := rpc.TestValidationError(client.TestValidationErrorParams{
+		Text: client.TextModel{Title: nil, Body: ""},
+	})
+	var vErr client.ValidationRPCError
+	if err == nil || !errors.As(err, &vErr) {
+		return fmt.Errorf("expected ValidationRPCError, got %v", err)
+	}
+	return nil
+}
+
+func testInputError() error {
+	return sendInvalidPayload()
+}
+
+func testUnauthorizedError(rpc *client.RPCClient) error {
+	_, err := rpc.TestUnauthorizedError()
+	var uErr client.UnauthorizedRPCError
+	if err == nil || !errors.As(err, &uErr) {
+		return fmt.Errorf("expected UnauthorizedRPCError, got %v", err)
+	}
+	return nil
+}
+
+func testForbiddenError(rpc *client.RPCClient) error {
+	_, err := rpc.TestForbiddenError()
+	var fErr client.ForbiddenRPCError
+	if err == nil || !errors.As(err, &fErr) {
+		return fmt.Errorf("expected ForbiddenRPCError, got %v", err)
+	}
+	return nil
+}
+
+func testNotImplementedError(rpc *client.RPCClient) error {
+	_, err := rpc.TestNotImplementedError()
+	var nErr client.NotImplementedRPCError
+	if err == nil || !errors.As(err, &nErr) {
+		return fmt.Errorf("expected NotImplementedRPCError, got %v", err)
+	}
+	return nil
+}
+
+func testCustomError(rpc *client.RPCClient) error {
+	_, err := rpc.TestCustomError()
+	var cErr client.CustomRPCError
+	if err == nil || !errors.As(err, &cErr) {
+		return fmt.Errorf("expected CustomRPCError, got %v", err)
+	}
+	return nil
+}
+
+func testMapReturn(rpc *client.RPCClient) error {
+	res, err := rpc.TestMapReturn()
+	if err != nil {
+		return err
+	}
+	text, ok := res["a"]
+	if !ok {
+		return fmt.Errorf("expected key 'a'")
+	}
+	if text.Body != "mapped" {
+		return fmt.Errorf("expected body 'mapped', got %q", text.Body)
+	}
+	return nil
 }
 
 func sendInvalidPayload() error {

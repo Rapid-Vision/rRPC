@@ -37,7 +37,7 @@ func main() {
 
 	tests := []testCase{
 		{name: "empty", fn: func() error {
-			_, err := rpc.TestEmpty(client.TestEmptyParams{})
+			_, err := rpc.TestEmpty()
 			return err
 		}},
 		{name: "basic", fn: func() error {
@@ -112,7 +112,7 @@ func main() {
 			return sendInvalidPayload()
 		}},
 		{name: "unauthorized_error", fn: func() error {
-			_, err := rpc.TestUnauthorizedError(client.TestUnauthorizedErrorParams{})
+			_, err := rpc.TestUnauthorizedError()
 			var uErr client.UnauthorizedRPCError
 			if err == nil || !errors.As(err, &uErr) {
 				return fmt.Errorf("expected UnauthorizedRPCError, got %v", err)
@@ -120,7 +120,7 @@ func main() {
 			return nil
 		}},
 		{name: "forbidden_error", fn: func() error {
-			_, err := rpc.TestForbiddenError(client.TestForbiddenErrorParams{})
+			_, err := rpc.TestForbiddenError()
 			var fErr client.ForbiddenRPCError
 			if err == nil || !errors.As(err, &fErr) {
 				return fmt.Errorf("expected ForbiddenRPCError, got %v", err)
@@ -128,7 +128,7 @@ func main() {
 			return nil
 		}},
 		{name: "not_implemented_error", fn: func() error {
-			_, err := rpc.TestNotImplementedError(client.TestNotImplementedErrorParams{})
+			_, err := rpc.TestNotImplementedError()
 			var nErr client.NotImplementedRPCError
 			if err == nil || !errors.As(err, &nErr) {
 				return fmt.Errorf("expected NotImplementedRPCError, got %v", err)
@@ -136,7 +136,7 @@ func main() {
 			return nil
 		}},
 		{name: "custom_error", fn: func() error {
-			_, err := rpc.TestCustomError(client.TestCustomErrorParams{})
+			_, err := rpc.TestCustomError()
 			var cErr client.CustomRPCError
 			if err == nil || !errors.As(err, &cErr) {
 				return fmt.Errorf("expected CustomRPCError, got %v", err)
@@ -144,7 +144,7 @@ func main() {
 			return nil
 		}},
 		{name: "map_return", fn: func() error {
-			res, err := rpc.TestMapReturn(client.TestMapReturnParams{})
+			res, err := rpc.TestMapReturn()
 			if err != nil {
 				return err
 			}

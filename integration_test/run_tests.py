@@ -29,11 +29,10 @@ def main() -> int:
     workdir = Path(__file__).resolve().parent
     rrpc = root / "rRPC"
 
-    if not rrpc.exists():
-        run(
-            ["go", "build"],
-            cwd=root,
-        )
+    run(
+        ["go", "build", "-o", "rRPC"],
+        cwd=root,
+    )
 
     run(
         [str(rrpc), "server", "-o", "./go_server", "-f", "test.rrpc"],

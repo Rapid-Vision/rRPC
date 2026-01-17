@@ -176,6 +176,56 @@ func TestMapReturn(t *testing.T) {
 	}
 }
 
+func TestJson(t *testing.T) {
+	rpc := newClient()
+	payload := map[string]any{"count": 2, "tags": []any{"a", "b"}}
+	res, err := rpc.TestJson(client.TestJsonParams{Data: payload})
+	if err != nil {
+		t.Fatalf("TestJson failed: %v", err)
+	}
+	result, ok := res.(map[string]any)
+	if !ok {
+		t.Fatalf("expected map result, got %T", res)
+	}
+	if result["count"] != float64(2) {
+		t.Fatalf("expected count 2, got %v", result["count"])
+	}
+}
+
+func TestRaw(t *testing.T) {
+	rpc := newClient()
+	raw := json.RawMessage(`{"ok":true}`)
+	res, err := rpc.TestRaw(client.TestRawParams{Payload: raw})
+	if err != nil {
+		t.Fatalf("TestRaw failed: %v", err)
+	}
+	if string(res) != string(raw) {
+		t.Fatalf("expected raw %s, got %s", string(raw), string(res))
+	}
+}
+
+func TestMixedPayload(t *testing.T) {
+	rpc := newClient()
+	payload := client.PayloadModel{
+		Data:    map[string]any{"value": "x"},
+		RawData: json.RawMessage(`{"id":1}`),
+	}
+	res, err := rpc.TestMixedPayload(client.TestMixedPayloadParams{Payload: payload})
+	if err != nil {
+		t.Fatalf("TestMixedPayload failed: %v", err)
+	}
+	result, ok := res.Data.(map[string]any)
+	if !ok {
+		t.Fatalf("expected map result, got %T", res.Data)
+	}
+	if result["value"] != "x" {
+		t.Fatalf("expected value x, got %v", result["value"])
+	}
+	if string(res.RawData) != `{"id":1}` {
+		t.Fatalf("expected raw data %s, got %s", `{"id":1}`, string(res.RawData))
+	}
+}
+
 func stringPtr(value string) *string {
 	return &value
 }

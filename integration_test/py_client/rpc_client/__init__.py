@@ -11,6 +11,7 @@ from .client import EmptyModel
 from .client import TextModel
 from .client import FlagsModel
 from .client import NestedModel
+from .client import PayloadModel
 
 __all__ = [
     "RPCClient",
@@ -26,4 +27,5 @@ __all__ = [
     "TextModel",
     "FlagsModel",
     "NestedModel",
+    "PayloadModel",
 ]

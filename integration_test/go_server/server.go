@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -92,6 +93,21 @@ func (s *service) TestMapReturn(_ context.Context, params rpcserver.TestMapRetur
 		Body:  "mapped",
 	}
 	return rpcserver.TestMapReturnResult{Result: map[string]rpcserver.TextModel{"a": text}}, nil
+}
+
+func (s *service) TestJson(_ context.Context, params rpcserver.TestJsonParams) (rpcserver.TestJsonResult, error) {
+	return rpcserver.TestJsonResult{Json: params.Data}, nil
+}
+
+func (s *service) TestRaw(_ context.Context, params rpcserver.TestRawParams) (rpcserver.TestRawResult, error) {
+	if !json.Valid(params.Payload) {
+		return rpcserver.TestRawResult{}, rpcserver.ValidationError{Message: "payload is not valid json"}
+	}
+	return rpcserver.TestRawResult{Raw: params.Payload}, nil
+}
+
+func (s *service) TestMixedPayload(_ context.Context, params rpcserver.TestMixedPayloadParams) (rpcserver.TestMixedPayloadResult, error) {
+	return rpcserver.TestMixedPayloadResult{Payload: params.Payload}, nil
 }
 
 func main() {

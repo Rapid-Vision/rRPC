@@ -27,6 +27,10 @@ type NestedModel struct {
 	Items  []TextModel          `json:"items"`
 	Lookup map[string]TextModel `json:"lookup"`
 }
+type PayloadModel struct {
+	Data    any             `json:"data"`
+	RawData json.RawMessage `json:"raw_data"`
+}
 
 type TestEmptyParams struct {
 }
@@ -105,6 +109,30 @@ type TestMapReturnParams struct {
 
 type TestMapReturnResult struct {
 	Result map[string]TextModel `json:"result"`
+}
+
+type TestJsonParams struct {
+	Data any `json:"data"`
+}
+
+type TestJsonResult struct {
+	Json any `json:"json"`
+}
+
+type TestRawParams struct {
+	Payload json.RawMessage `json:"payload"`
+}
+
+type TestRawResult struct {
+	Raw json.RawMessage `json:"raw"`
+}
+
+type TestMixedPayloadParams struct {
+	Payload PayloadModel `json:"payload"`
+}
+
+type TestMixedPayloadResult struct {
+	Payload PayloadModel `json:"payload"`
 }
 
 type RPCErrorType string
@@ -320,6 +348,39 @@ func (c *RPCClient) TestMapReturn() (map[string]TextModel, error) {
 		return zero, err
 	}
 	return res.Result, nil
+}
+
+func (c *RPCClient) TestJson(params TestJsonParams) (any, error) {
+	var zero any
+	var res TestJsonResult
+	var payload any
+	payload = params
+	if err := c.doRequest("/rpc/test_json", payload, &res); err != nil {
+		return zero, err
+	}
+	return res.Json, nil
+}
+
+func (c *RPCClient) TestRaw(params TestRawParams) (json.RawMessage, error) {
+	var zero json.RawMessage
+	var res TestRawResult
+	var payload any
+	payload = params
+	if err := c.doRequest("/rpc/test_raw", payload, &res); err != nil {
+		return zero, err
+	}
+	return res.Raw, nil
+}
+
+func (c *RPCClient) TestMixedPayload(params TestMixedPayloadParams) (PayloadModel, error) {
+	var zero PayloadModel
+	var res TestMixedPayloadResult
+	var payload any
+	payload = params
+	if err := c.doRequest("/rpc/test_mixed_payload", payload, &res); err != nil {
+		return zero, err
+	}
+	return res.Payload, nil
 }
 
 func errorFromRPCError(err RPCError) error {

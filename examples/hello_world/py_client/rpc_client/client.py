@@ -90,7 +90,8 @@ class RPCClient:
             with urllib.request.urlopen(req) as resp:
                 body = resp.read()
         except urllib.error.HTTPError as err:
-            detail = err.read()
+            with err as resp:
+                detail = resp.read()
             try:
                 parsed = json.loads(detail.decode("utf-8")) if detail else None
             except json.JSONDecodeError:

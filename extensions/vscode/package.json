@@ -9,6 +9,11 @@
   "categories": [
     "Programming Languages"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rapid-Vision/rRPC",
+    "directory": "extensions/vscode"
+  },
   "contributes": {
     "languages": [
       {

@@ -1,10 +1,13 @@
-# rRPC VS Code Extension
+# rRPC vscode Extension
+
+![screenshot](screenshot.png)
 
 This extension adds basic language support for rRPC schema files (`.rrpc`) in Visual Studio Code.
 
 ## Features
-- Syntax highlighting for keywords, types, and comments.
-- Language configuration for brackets and comment tokens.
+- Syntax highlighting for rRPC keywords (`model`, `rpc`), type keywords (`list`, `map`),
+  builtins (`string`, `int`, `bool`, `json`, `raw`), comments, and punctuation.
+- Language configuration for brackets and line comments.
 
 ## Requirements
 None.

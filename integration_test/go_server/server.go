@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"integration_test/rpcserver"
+	"integration_test/server/rpcserver"
 )
 
 const bearerToken = "test_token"

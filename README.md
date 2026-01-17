@@ -40,7 +40,7 @@ go install github.com/Rapid-Vision/rRPC
 - [Protocol description](docs/protocol.md)
 
 ## Usage examples
-See [`examples/`](`examples/`) directory for server, client and Makefile implemenation examples.
+See [`examples/`](examples/) directory for server, client and Makefile implemenation examples.
 
 ## Comparison & Fit
 This project focuses on a small, typed, JSON-over-HTTP RPC flow.

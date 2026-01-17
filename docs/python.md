@@ -44,7 +44,7 @@ except ValidationRPCError as err:
 
 ## Data classes
 Generated models are `@dataclass` types with `from_dict(...)` helpers, and the client
-handles nested lists/maps automatically for payloads and responses.
+uses dataclass serialization for payloads while handling nested lists/maps automatically.
 
 ## Prefixes
 Routes are prefixed with `/rpc` by default. Override with:

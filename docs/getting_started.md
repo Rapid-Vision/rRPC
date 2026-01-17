@@ -1,6 +1,6 @@
 # Getting Started
 
-rRPC is a small schema-first RPC generator for a Go server and a Python/Go client.
+rRPC is a small schema-first RPC generator for a Go server and Python/Go clients.
 
 ## Install
 ```bash
@@ -23,6 +23,7 @@ rpc Hello(
 ```bash
 rRPC server -o . hello.rrpc
 rRPC client -o . hello.rrpc
+rRPC client --lang go -o . hello.rrpc
 ```
 Generated code is written to `./<pkg>/` (default packages: `rpcserver` and `rpc_client`).
 

@@ -7,7 +7,7 @@ This page covers server and Go client usage. See [schema_language.md](docs/schem
 rRPC server -o . hello.rrpc
 rRPC client --lang go -o . hello.rrpc
 ```
-Defaults: server package `rpcserver`, client package `rpc_client`.
+Default packages are `rpcserver` for servers and `rpc_client` for clients.
 
 ## Implement the server
 Generated handlers expect a context:
@@ -33,6 +33,7 @@ http.ListenAndServe(":8080", handler)
 client := rpc_client.NewRPCClient("http://localhost:8080")
 greeting, err := client.HelloWorld(rpc_client.HelloWorldParams{Name: "Ada"})
 ```
+Go clients return the RPC result type directly (not the wrapper struct).
 
 ## Headers and auth
 Use the headers-capable constructor for middleware or auth:

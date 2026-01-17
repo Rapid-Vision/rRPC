@@ -3,15 +3,15 @@ rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It do
 
 ## Motivation
 The industry standard for communication between services is [gRPC](https://grpc.io/). It may be good for Google-scale services, but has several disadvantages: 
-- Official protobuf compiler lacks types for Python
+- Official protobuf compiler generates Python code without type annotations
 - It is bloated
 - HTTP/2 may introduce bugs of its own
 - Binary protocol is harder to debug
 
-For small and medium size projects the performance and industrial adoption of the gRPC toolkit may not outweigh these problems.
+For small and medium-sized projects the performance and industrial adoption of the gRPC toolkit may not outweigh these problems.
 
 ## Goals
-This project aims to provide a simple tool with following properties:
+This project aims to provide a simple tool with the following properties:
 - Generated code has strict typing
 - Single binary for everything
 - JSON over HTTP protocol

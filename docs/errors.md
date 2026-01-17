@@ -30,7 +30,7 @@ All error responses are JSON with this shape:
 ## Returning errors from server code (Go)
 Generated servers expose error types. Return them from handlers:
 ```go
-func (s *service) GetUser(params rpcserver.GetUserParams) (rpcserver.GetUserResult, error) {
+func (s *service) GetUser(ctx context.Context, params rpcserver.GetUserParams) (rpcserver.GetUserResult, error) {
 	if params.Id <= 0 {
 		return rpcserver.GetUserResult{}, rpcserver.ValidationError{Message: "id must be positive"}
 	}

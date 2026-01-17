@@ -29,24 +29,39 @@ def main() -> int:
     rrpc = root / "rRPC"
 
     if not rrpc.exists():
-        run(["go", "build"], cwd=root)
+        run(
+            ["go", "build"],
+            cwd=root,
+        )
 
-    run([str(rrpc), "server", "-o", "./go_server", "-f", "test.rrpc"], cwd=workdir)
-    run([str(rrpc), "client", "--lang", "go", "-o", "./go_client", "-f", "test.rrpc"], cwd=workdir)
-    run([str(rrpc), "client", "-o", "./py_client", "-f", "test.rrpc"], cwd=workdir)
-    run([str(rrpc), "openapi", "-o", ".", "-f", "test.rrpc"], cwd=workdir)
+    run(
+        [str(rrpc), "server", "-o", "./go_server", "-f", "test.rrpc"],
+        cwd=workdir,
+    )
+    run(
+        [str(rrpc), "client", "--lang", "go", "-o", "./go_client", "-f", "test.rrpc"],
+        cwd=workdir,
+    )
+    run(
+        [str(rrpc), "client", "-o", "./py_client", "-f", "test.rrpc"],
+        cwd=workdir,
+    )
+    run(
+        [str(rrpc), "openapi", "-o", ".", "-f", "test.rrpc"],
+        cwd=workdir,
+    )
 
     server = subprocess.Popen(
-        ["go", "run", "./go_server"],
-        cwd=workdir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
+        ["go", "run", "."],
+        cwd=workdir / "go_server",
     )
     try:
         wait_for_port("127.0.0.1", 8080, timeout=5.0)
         run(["go", "test", "."], cwd=workdir / "go_client")
-        run([sys.executable, "-m", "unittest", "test_client.py"], cwd=workdir / "py_client")
+        run(
+            [sys.executable, "-m", "unittest", "test_client.py"],
+            cwd=workdir / "py_client",
+        )
     finally:
         server.terminate()
         try:
@@ -54,10 +69,6 @@ def main() -> int:
         except subprocess.TimeoutExpired:
             server.kill()
             server.wait(timeout=3.0)
-        output = server.stdout.read() if server.stdout else ""
-        if output:
-            print(output, end="", file=sys.stderr)
-
     return 0
 
 

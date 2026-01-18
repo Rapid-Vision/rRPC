@@ -128,8 +128,9 @@ func FormatSchema(schema *Schema) (string, error) {
 				b.WriteString(param.Name)
 				b.WriteString(": ")
 				b.WriteString(formatType(param.Type))
+				b.WriteString(",")
 				appendTrailing(param.Line)
-				b.WriteString(",\n")
+				b.WriteString("\n")
 			}
 			if rpc.ParamsEndLine > 0 {
 				emitLeading(rpc.ParamsEndLine, "    ")

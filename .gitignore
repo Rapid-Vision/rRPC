@@ -36,3 +36,6 @@ go.work.sum
 __pycache__/
 
 .local
+
+# packaged vs code extension
+*.vsix

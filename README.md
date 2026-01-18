@@ -42,6 +42,9 @@ go install github.com/Rapid-Vision/rRPC
 ## Usage examples
 See [`examples/`](examples/) directory for server, client and Makefile implemenation examples. Also [`integration_test/`](integration_test/) may be useful as reference too.
 
+## Editor support
+View [vs code extension](https://marketplace.visualstudio.com/items?itemName=mishapankin.rrpc) for syntax highlighting.
+
 ## Comparison & Fit
 This project focuses on a small, typed, JSON-over-HTTP RPC flow.
 

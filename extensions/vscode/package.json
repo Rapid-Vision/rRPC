@@ -2,7 +2,7 @@
   "name": "rrpc",
   "displayName": "rRPC",
   "description": "rRPC schema language support",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "mishapankin",
   "engines": {
     "vscode": "^1.108.1"

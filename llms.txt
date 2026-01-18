@@ -1,0 +1,34 @@
+# rRPC (LLM context)
+
+Repository: schema-first RPC code generator for JSON-over-HTTP APIs.
+
+## What it does
+- Parses `.rrpc` schema files (models + RPCs).
+- Generates Go servers and clients, Python clients, and OpenAPI specs.
+- Provides a small DSL with types: `string`, `int`, `bool`, `json`, `raw`, `list[T]`, `map[T]`, and optional `?`.
+
+## Key directories
+- `internal/lexer`, `internal/parser`: schema parsing and validation.
+- `internal/gen/go`, `internal/gen/python`, `internal/gen/openapi`: generators and templates.
+- `cmd/`: CLI commands (`server`, `client`, `openapi`, `debug`).
+- `examples/` and `integration_test/`: example schemas and test harness.
+
+## Core docs
+- `docs/docs.md` (index)
+- `docs/schema_language.md`
+- `docs/protocol.md`
+- `docs/go.md`
+- `docs/python.md`
+- `docs/errors.md`
+
+## Common commands
+- Build CLI: `go build`
+- Generate Go server: `rRPC server -o . schema.rrpc`
+- Generate Python client: `rRPC client -o . schema.rrpc`
+- Generate Go client: `rRPC client --lang go -o . schema.rrpc`
+- OpenAPI: `rRPC openapi -o . schema.rrpc`
+- Integration tests: `python integration_test/run_tests.py`
+
+## Examples
+- Hello world: `examples/hello_world/hello.rrpc`
+- Text demo: `examples/text/text.rrpc`

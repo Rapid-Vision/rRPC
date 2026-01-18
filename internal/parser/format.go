@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 	"strings"
+
+	"github.com/Rapid-Vision/rRPC/internal/utils"
 )
 
 func FormatSchema(schema *Schema) (string, error) {
@@ -13,33 +15,33 @@ func FormatSchema(schema *Schema) (string, error) {
 		return "", err
 	}
 
-	lineIsNode := make(map[int]struct{})
+	lineIsNode := utils.NewSet[int]()
 	for _, model := range schema.Models {
 		if model.Line > 0 {
-			lineIsNode[model.Line] = struct{}{}
+			lineIsNode.Add(model.Line)
 		}
 		if model.EndLine > 0 {
-			lineIsNode[model.EndLine] = struct{}{}
+			lineIsNode.Add(model.EndLine)
 		}
 		for _, field := range model.Fields {
 			if field.Line > 0 {
-				lineIsNode[field.Line] = struct{}{}
+				lineIsNode.Add(field.Line)
 			}
 		}
 	}
 	for _, rpc := range schema.RPCs {
 		if rpc.Line > 0 {
-			lineIsNode[rpc.Line] = struct{}{}
+			lineIsNode.Add(rpc.Line)
 		}
 		if rpc.ParamsEndLine > 0 {
-			lineIsNode[rpc.ParamsEndLine] = struct{}{}
+			lineIsNode.Add(rpc.ParamsEndLine)
 		}
 		if rpc.Returns.Line > 0 {
-			lineIsNode[rpc.Returns.Line] = struct{}{}
+			lineIsNode.Add(rpc.Returns.Line)
 		}
 		for _, param := range rpc.Parameters {
 			if param.Line > 0 {
-				lineIsNode[param.Line] = struct{}{}
+				lineIsNode.Add(param.Line)
 			}
 		}
 	}
@@ -47,7 +49,7 @@ func FormatSchema(schema *Schema) (string, error) {
 	var leadingComments []Comment
 	trailingComments := make(map[int][]Comment)
 	for _, comment := range schema.Comments {
-		if _, ok := lineIsNode[comment.Line]; ok {
+		if lineIsNode.Has(comment.Line) {
 			trailingComments[comment.Line] = append(trailingComments[comment.Line], comment)
 			continue
 		}

@@ -13,6 +13,7 @@ const (
 	TokenModel
 	TokenRpc
 	TokenIdentifier
+	TokenComment
 	TokenOptional
 	TokenColon
 	TokenComma
@@ -63,7 +64,7 @@ var rules = [...]rule{
 	{
 		Name:  "comment",
 		Regex: `(?P<comment>#[^\n]*)`,
-		Type:  TokenIgn,
+		Type:  TokenComment,
 	},
 	{
 		Name:  "model",
@@ -199,6 +200,8 @@ func TokenTypeName(tt TokenType) string {
 		return "identifier"
 	case TokenOptional:
 		return "?"
+	case TokenComment:
+		return "comment"
 	case TokenColon:
 		return ":"
 	case TokenComma:

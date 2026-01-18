@@ -128,3 +128,27 @@ rpc GetUser() User
 		})
 	}
 }
+
+func TestFormatSchemaPreservesComments(t *testing.T) {
+	input := `# top comment
+model User { # model comment
+    id: int # id comment
+}
+
+# between models and rpcs
+rpc GetUser(
+    id: int, # param comment
+) User # return comment
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	formatted, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if formatted != input {
+		t.Fatalf("formatted output mismatch:\n%s", formatted)
+	}
+}

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/Rapid-Vision/rRPC/internal/utils"
@@ -155,7 +156,7 @@ func FormatSchema(schema *Schema) (string, error) {
 		}
 	}
 
-	emitLeading(int(^uint(0)>>1), "")
+	emitLeading(math.MaxInt, "")
 
 	return b.String(), nil
 }

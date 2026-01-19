@@ -16,6 +16,8 @@ None.
 None.
 
 ## Release Notes
+### 0.0.3
+- Fixed comments to use # instead of //
 ### 0.0.2
 - Added logo
 ### 0.0.1

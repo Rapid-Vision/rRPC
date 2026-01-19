@@ -11,6 +11,12 @@ func TestIdentifierNamePascalCase(t *testing.T) {
 		{"userName", "UserName"},
 		{"UserName", "UserName"},
 		{"userID", "UserId"},
+		{"", ""},
+		{"_user_", "User"},
+		{"user--name", "UserName"},
+		{"user name", "UserName"},
+		{"user-name", "UserName"},
+		{"user2Name", "User2Name"},
 	}
 
 	for _, tt := range tests {
@@ -31,6 +37,12 @@ func TestIdentifierNameSnakeCase(t *testing.T) {
 		{"UserName", "user_name"},
 		{"UserID", "user_id"},
 		{"userID", "user_id"},
+		{"", ""},
+		{"_user_", "user"},
+		{"user--name", "user_name"},
+		{"user name", "user_name"},
+		{"user-name", "user_name"},
+		{"user2Name", "user2_name"},
 	}
 
 	for _, tt := range tests {

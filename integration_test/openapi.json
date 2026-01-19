@@ -72,6 +72,73 @@
         }
       }
     },
+    "/rpc/test_no_return": {
+      "post": {
+        "operationId": "TestNoReturn",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestNoReturnResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RPCError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/rpc/test_basic": {
       "post": {
         "operationId": "TestBasic",
@@ -999,6 +1066,16 @@
         "type": "object",
         "properties": {
           "empty": {"$ref":"#/components/schemas/EmptyModel"}
+        }
+      },
+      "TestNoReturnParams": {
+        "type": "object",
+        "properties": {
+        }
+      },
+      "TestNoReturnResult": {
+        "type": "object",
+        "properties": {
         }
       },
       "TestBasicParams": {

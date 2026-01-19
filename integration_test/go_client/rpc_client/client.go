@@ -34,9 +34,11 @@ type PayloadModel struct {
 
 type TestEmptyParams struct {
 }
-
 type TestEmptyResult struct {
 	Empty EmptyModel `json:"empty"`
+}
+
+type TestNoReturnParams struct {
 }
 
 type TestBasicParams struct {
@@ -45,7 +47,6 @@ type TestBasicParams struct {
 	Count int       `json:"count"`
 	Note  *string   `json:"note"`
 }
-
 type TestBasicResult struct {
 	Text TextModel `json:"text"`
 }
@@ -54,7 +55,6 @@ type TestListMapParams struct {
 	Texts []TextModel       `json:"texts"`
 	Flags map[string]string `json:"flags"`
 }
-
 type TestListMapResult struct {
 	Nested NestedModel `json:"nested"`
 }
@@ -63,7 +63,6 @@ type TestOptionalParams struct {
 	Text *TextModel `json:"text"`
 	Flag *bool      `json:"flag"`
 }
-
 type TestOptionalResult struct {
 	Flags FlagsModel `json:"flags"`
 }
@@ -71,42 +70,36 @@ type TestOptionalResult struct {
 type TestValidationErrorParams struct {
 	Text TextModel `json:"text"`
 }
-
 type TestValidationErrorResult struct {
 	Text TextModel `json:"text"`
 }
 
 type TestUnauthorizedErrorParams struct {
 }
-
 type TestUnauthorizedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestForbiddenErrorParams struct {
 }
-
 type TestForbiddenErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestNotImplementedErrorParams struct {
 }
-
 type TestNotImplementedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestCustomErrorParams struct {
 }
-
 type TestCustomErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestMapReturnParams struct {
 }
-
 type TestMapReturnResult struct {
 	Result map[string]TextModel `json:"result"`
 }
@@ -114,7 +107,6 @@ type TestMapReturnResult struct {
 type TestJsonParams struct {
 	Data any `json:"data"`
 }
-
 type TestJsonResult struct {
 	Json any `json:"json"`
 }
@@ -122,7 +114,6 @@ type TestJsonResult struct {
 type TestRawParams struct {
 	Payload json.RawMessage `json:"payload"`
 }
-
 type TestRawResult struct {
 	Raw json.RawMessage `json:"raw"`
 }
@@ -130,7 +121,6 @@ type TestRawResult struct {
 type TestMixedPayloadParams struct {
 	Payload PayloadModel `json:"payload"`
 }
-
 type TestMixedPayloadResult struct {
 	Payload PayloadModel `json:"payload"`
 }
@@ -239,7 +229,6 @@ func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers
 		headers: copiedHeaders,
 	}
 }
-
 func (c *RPCClient) TestEmpty() (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestEmptyResult
@@ -250,7 +239,14 @@ func (c *RPCClient) TestEmpty() (EmptyModel, error) {
 	}
 	return res.Empty, nil
 }
-
+func (c *RPCClient) TestNoReturn() error {
+	var payload any
+	payload = nil
+	if err := c.doRequest("/rpc/test_no_return", payload, nil); err != nil {
+		return err
+	}
+	return nil
+}
 func (c *RPCClient) TestBasic(params TestBasicParams) (TextModel, error) {
 	var zero TextModel
 	var res TestBasicResult
@@ -261,7 +257,6 @@ func (c *RPCClient) TestBasic(params TestBasicParams) (TextModel, error) {
 	}
 	return res.Text, nil
 }
-
 func (c *RPCClient) TestListMap(params TestListMapParams) (NestedModel, error) {
 	var zero NestedModel
 	var res TestListMapResult
@@ -272,7 +267,6 @@ func (c *RPCClient) TestListMap(params TestListMapParams) (NestedModel, error) {
 	}
 	return res.Nested, nil
 }
-
 func (c *RPCClient) TestOptional(params TestOptionalParams) (FlagsModel, error) {
 	var zero FlagsModel
 	var res TestOptionalResult
@@ -283,7 +277,6 @@ func (c *RPCClient) TestOptional(params TestOptionalParams) (FlagsModel, error) 
 	}
 	return res.Flags, nil
 }
-
 func (c *RPCClient) TestValidationError(params TestValidationErrorParams) (TextModel, error) {
 	var zero TextModel
 	var res TestValidationErrorResult
@@ -294,7 +287,6 @@ func (c *RPCClient) TestValidationError(params TestValidationErrorParams) (TextM
 	}
 	return res.Text, nil
 }
-
 func (c *RPCClient) TestUnauthorizedError() (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestUnauthorizedErrorResult
@@ -305,7 +297,6 @@ func (c *RPCClient) TestUnauthorizedError() (EmptyModel, error) {
 	}
 	return res.Empty, nil
 }
-
 func (c *RPCClient) TestForbiddenError() (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestForbiddenErrorResult
@@ -316,7 +307,6 @@ func (c *RPCClient) TestForbiddenError() (EmptyModel, error) {
 	}
 	return res.Empty, nil
 }
-
 func (c *RPCClient) TestNotImplementedError() (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestNotImplementedErrorResult
@@ -327,7 +317,6 @@ func (c *RPCClient) TestNotImplementedError() (EmptyModel, error) {
 	}
 	return res.Empty, nil
 }
-
 func (c *RPCClient) TestCustomError() (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestCustomErrorResult
@@ -338,7 +327,6 @@ func (c *RPCClient) TestCustomError() (EmptyModel, error) {
 	}
 	return res.Empty, nil
 }
-
 func (c *RPCClient) TestMapReturn() (map[string]TextModel, error) {
 	var zero map[string]TextModel
 	var res TestMapReturnResult
@@ -349,7 +337,6 @@ func (c *RPCClient) TestMapReturn() (map[string]TextModel, error) {
 	}
 	return res.Result, nil
 }
-
 func (c *RPCClient) TestJson(params TestJsonParams) (any, error) {
 	var zero any
 	var res TestJsonResult
@@ -360,7 +347,6 @@ func (c *RPCClient) TestJson(params TestJsonParams) (any, error) {
 	}
 	return res.Json, nil
 }
-
 func (c *RPCClient) TestRaw(params TestRawParams) (json.RawMessage, error) {
 	var zero json.RawMessage
 	var res TestRawResult
@@ -371,7 +357,6 @@ func (c *RPCClient) TestRaw(params TestRawParams) (json.RawMessage, error) {
 	}
 	return res.Raw, nil
 }
-
 func (c *RPCClient) TestMixedPayload(params TestMixedPayloadParams) (PayloadModel, error) {
 	var zero PayloadModel
 	var res TestMixedPayloadResult

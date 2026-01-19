@@ -27,14 +27,20 @@ type {{rpcParamsName $rpc.Name}} struct {
 {{- end}}
 }
 
+{{- if hasReturn $rpc}}
 type {{rpcResultName $rpc.Name}} struct {
 	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
 }
 {{- end}}
+{{- end}}
 
 type RPCHandler interface {
 {{- range $rpc := .RPCs}}
+	{{- if hasReturn $rpc}}
 	{{rpcMethodName $rpc.Name}}(context.Context, {{rpcParamsName $rpc.Name}}) ({{rpcResultName $rpc.Name}}, error)
+	{{- else}}
+	{{rpcMethodName $rpc.Name}}(context.Context, {{rpcParamsName $rpc.Name}}) error
+	{{- end}}
 {{- end}}
 }
 
@@ -59,12 +65,20 @@ func {{rpcHandlerName $rpc.Name}}(rpc RPCHandler) http.Handler {
 			return
 		}
 		{{- end}}
+		{{- if hasReturn $rpc}}
 		res, err := rpc.{{rpcMethodName $rpc.Name}}(r.Context(), params)
 		if err != nil {
 			writeError(w, err)
 			return
 		}
 		writeJSON(w, http.StatusOK, res)
+		{{- else}}
+		if err := rpc.{{rpcMethodName $rpc.Name}}(r.Context(), params); err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, struct{}{})
+		{{- end}}
 	})
 }
 {{- end}}

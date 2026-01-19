@@ -28,6 +28,13 @@ func TestEmpty(t *testing.T) {
 	}
 }
 
+func TestNoReturn(t *testing.T) {
+	rpc := newClient()
+	if err := rpc.TestNoReturn(); err != nil {
+		t.Fatalf("TestNoReturn failed: %v", err)
+	}
+}
+
 func TestBasic(t *testing.T) {
 	rpc := newClient()
 	note := "note"

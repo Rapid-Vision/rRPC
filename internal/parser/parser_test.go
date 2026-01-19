@@ -51,6 +51,76 @@ rpc GetUsersByName() map[list[User]]
 	}
 }
 
+func TestParseRPCNoReturn(t *testing.T) {
+	input := `rpc Ping()
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(schema.RPCs) != 1 {
+		t.Fatalf("expected 1 rpc, got %d", len(schema.RPCs))
+	}
+	if schema.RPCs[0].HasReturn {
+		t.Fatalf("expected no return type")
+	}
+}
+
+func TestParseRPCNoReturnFollowedByModel(t *testing.T) {
+	input := `rpc Ping()
+model User {}
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(schema.RPCs) != 1 || len(schema.Models) != 1 {
+		t.Fatalf("expected 1 rpc and 1 model, got %d rpcs and %d models", len(schema.RPCs), len(schema.Models))
+	}
+	if schema.RPCs[0].HasReturn {
+		t.Fatalf("expected no return type")
+	}
+}
+
+func TestParseOptionalTypesInListAndMap(t *testing.T) {
+	input := `model Text {}
+rpc ListOptional() list[string?]
+rpc MapOptional() map[Text?]
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if schema.RPCs[0].Returns.Kind != TypeList || schema.RPCs[0].Returns.Elem == nil || !schema.RPCs[0].Returns.Elem.Optional {
+		t.Fatalf("expected optional list element")
+	}
+	if schema.RPCs[1].Returns.Kind != TypeMap || schema.RPCs[1].Returns.Value == nil || !schema.RPCs[1].Returns.Value.Optional {
+		t.Fatalf("expected optional map value")
+	}
+}
+
+func TestParseEmptyModelsWithComments(t *testing.T) {
+	input := `# leading
+model Empty {
+    # inside
+}
+
+model User {
+    name: string # field
+}
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(schema.Models) != 2 {
+		t.Fatalf("expected 2 models, got %d", len(schema.Models))
+	}
+	if len(schema.Models[0].Fields) != 0 {
+		t.Fatalf("expected empty model fields")
+	}
+}
+
 func TestParseSchemaValidationErrors(t *testing.T) {
 	cases := []struct {
 		name    string

@@ -45,7 +45,8 @@ func GenerateWithPrefix(schema *parser.Schema, pkg, prefix string) (string, erro
 		"rpcRoute": func(name string) string {
 			return rpcRoute(prefix, name)
 		},
-		"resultField":    resultField,
+		"resultField": resultField,
+		"hasReturn":   hasReturn,
 	}).Parse(serverTemplate)
 	if err != nil {
 		return "", fmt.Errorf("parse template: %w", err)
@@ -114,6 +115,10 @@ func resultField(t parser.TypeRef) string {
 		return utils.NewIdentifierName(t.Name).PascalCase()
 	}
 	return "Result"
+}
+
+func hasReturn(rpc parser.RPC) bool {
+	return rpc.HasReturn
 }
 
 func goType(t parser.TypeRef) string {

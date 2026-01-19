@@ -190,6 +190,11 @@ class RPCClient:
         value = data.get("empty") if isinstance(data, dict) else data
         return EmptyModel.from_dict(value)
 
+    def test_no_return(self) -> None:
+        payload = None
+        data = self._request("test_no_return", payload)
+        return None
+
     def test_basic(self, text: TextModel, flag: bool, count: int, note: Optional[str] = None) -> TextModel:
         payload = {
             "text": text,

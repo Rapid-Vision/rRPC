@@ -28,9 +28,11 @@ type {{rpcParamsName $rpc.Name}} struct {
 {{- end}}
 }
 
+{{- if hasReturn $rpc}}
 type {{rpcResultName $rpc.Name}} struct {
 	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
 }
+{{- end}}
 {{- end}}
 
 type RPCErrorType string
@@ -140,6 +142,7 @@ func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers
 
 {{- range $rpc := .RPCs}}
 
+{{- if hasReturn $rpc}}
 func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 0}}params {{rpcParamsName $rpc.Name}}{{- end}}) ({{goType $rpc.Returns}}, error) {
 	var zero {{goType $rpc.Returns}}
 	var res {{rpcResultName $rpc.Name}}
@@ -154,6 +157,20 @@ func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 
 	}
 	return res.{{resultField $rpc.Returns}}, nil
 }
+{{- else}}
+func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 0}}params {{rpcParamsName $rpc.Name}}{{- end}}) error {
+	var payload any
+	{{- if gt (len $rpc.Parameters) 0}}
+	payload = params
+	{{- else}}
+	payload = nil
+	{{- end}}
+	if err := c.doRequest("{{rpcPath $rpc.Name}}", payload, nil); err != nil {
+		return err
+	}
+	return nil
+}
+{{- end}}
 {{- end}}
 
 func errorFromRPCError(err RPCError) error {

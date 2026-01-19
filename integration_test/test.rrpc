@@ -27,6 +27,8 @@ model Payload {
 
 rpc TestEmpty() Empty
 
+rpc TestNoReturn()
+
 rpc TestBasic(
     text: Text,
     flag: bool,

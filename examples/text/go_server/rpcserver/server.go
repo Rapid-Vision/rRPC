@@ -26,7 +26,6 @@ type StatsModel struct {
 type SubmitTextParams struct {
 	Text TextModel `json:"text"`
 }
-
 type SubmitTextResult struct {
 	Int int `json:"int"`
 }
@@ -34,7 +33,6 @@ type SubmitTextResult struct {
 type ComputeStatsParams struct {
 	TextId int `json:"text_id"`
 }
-
 type ComputeStatsResult struct {
 	Stats StatsModel `json:"stats"`
 }

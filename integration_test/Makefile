@@ -2,7 +2,7 @@ SCHEMA := test.rrpc
 ROOT   := ..
 RRPC := $(ROOT)/rRPC
 
-.PHONY: all go-server py-client openapi clean
+.PHONY: all $(RRPC) go-server py-client openapi clean
 
 all: go-server go-client py-client openapi
 

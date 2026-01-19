@@ -33,9 +33,11 @@ type PayloadModel struct {
 
 type TestEmptyParams struct {
 }
-
 type TestEmptyResult struct {
 	Empty EmptyModel `json:"empty"`
+}
+
+type TestNoReturnParams struct {
 }
 
 type TestBasicParams struct {
@@ -44,7 +46,6 @@ type TestBasicParams struct {
 	Count int       `json:"count"`
 	Note  *string   `json:"note"`
 }
-
 type TestBasicResult struct {
 	Text TextModel `json:"text"`
 }
@@ -53,7 +54,6 @@ type TestListMapParams struct {
 	Texts []TextModel       `json:"texts"`
 	Flags map[string]string `json:"flags"`
 }
-
 type TestListMapResult struct {
 	Nested NestedModel `json:"nested"`
 }
@@ -62,7 +62,6 @@ type TestOptionalParams struct {
 	Text *TextModel `json:"text"`
 	Flag *bool      `json:"flag"`
 }
-
 type TestOptionalResult struct {
 	Flags FlagsModel `json:"flags"`
 }
@@ -70,42 +69,36 @@ type TestOptionalResult struct {
 type TestValidationErrorParams struct {
 	Text TextModel `json:"text"`
 }
-
 type TestValidationErrorResult struct {
 	Text TextModel `json:"text"`
 }
 
 type TestUnauthorizedErrorParams struct {
 }
-
 type TestUnauthorizedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestForbiddenErrorParams struct {
 }
-
 type TestForbiddenErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestNotImplementedErrorParams struct {
 }
-
 type TestNotImplementedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestCustomErrorParams struct {
 }
-
 type TestCustomErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestMapReturnParams struct {
 }
-
 type TestMapReturnResult struct {
 	Result map[string]TextModel `json:"result"`
 }
@@ -113,7 +106,6 @@ type TestMapReturnResult struct {
 type TestJsonParams struct {
 	Data any `json:"data"`
 }
-
 type TestJsonResult struct {
 	Json any `json:"json"`
 }
@@ -121,7 +113,6 @@ type TestJsonResult struct {
 type TestRawParams struct {
 	Payload json.RawMessage `json:"payload"`
 }
-
 type TestRawResult struct {
 	Raw json.RawMessage `json:"raw"`
 }
@@ -129,13 +120,13 @@ type TestRawResult struct {
 type TestMixedPayloadParams struct {
 	Payload PayloadModel `json:"payload"`
 }
-
 type TestMixedPayloadResult struct {
 	Payload PayloadModel `json:"payload"`
 }
 
 type RPCHandler interface {
 	TestEmpty(context.Context, TestEmptyParams) (TestEmptyResult, error)
+	TestNoReturn(context.Context, TestNoReturnParams) error
 	TestBasic(context.Context, TestBasicParams) (TestBasicResult, error)
 	TestListMap(context.Context, TestListMapParams) (TestListMapResult, error)
 	TestOptional(context.Context, TestOptionalParams) (TestOptionalResult, error)
@@ -153,6 +144,7 @@ type RPCHandler interface {
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("POST /rpc/test_empty", CreateTestEmptyHandler(rpc))
+	mux.Handle("POST /rpc/test_no_return", CreateTestNoReturnHandler(rpc))
 	mux.Handle("POST /rpc/test_basic", CreateTestBasicHandler(rpc))
 	mux.Handle("POST /rpc/test_list_map", CreateTestListMapHandler(rpc))
 	mux.Handle("POST /rpc/test_optional", CreateTestOptionalHandler(rpc))
@@ -177,6 +169,17 @@ func CreateTestEmptyHandler(rpc RPCHandler) http.Handler {
 			return
 		}
 		writeJSON(w, http.StatusOK, res)
+	})
+}
+
+func CreateTestNoReturnHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestNoReturnParams
+		if err := rpc.TestNoReturn(r.Context(), params); err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, struct{}{})
 	})
 }
 

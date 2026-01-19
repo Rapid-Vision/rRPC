@@ -41,6 +41,7 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, err
 		"decodeExpr":     decodeExpr,
 		"hasParameters":  hasParameters,
 		"hasModelFields": hasModelFields,
+		"hasReturn":      hasReturn,
 	}).Parse(clientTemplate)
 	if err != nil {
 		return "", fmt.Errorf("parse template: %w", err)
@@ -186,6 +187,10 @@ func resultField(t parser.TypeRef) string {
 
 func hasParameters(rpc parser.RPC) bool {
 	return len(rpc.Parameters) > 0
+}
+
+func hasReturn(rpc parser.RPC) bool {
+	return rpc.HasReturn
 }
 
 func hasModelFields(model parser.Model) bool {

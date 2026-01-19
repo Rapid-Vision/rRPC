@@ -36,7 +36,8 @@ func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (string
 		"rpcPath": func(name string) string {
 			return rpcPath(prefix, name)
 		},
-		"resultField":   resultField,
+		"resultField": resultField,
+		"hasReturn":   hasReturn,
 	}).Parse(clientTemplate)
 	if err != nil {
 		return "", fmt.Errorf("parse template: %w", err)

@@ -8,8 +8,10 @@ import (
 )
 
 type Schema struct {
-	Models []Model
-	RPCs   []RPC
+	Models   []Model
+	RPCs     []RPC
+	Comments []Comment
+	Decls    []Decl
 }
 
 func (s *Schema) Dump() string {
@@ -50,25 +52,52 @@ func (s *Schema) Dump() string {
 			}
 		}
 		writeTreeLine(&b, 1, "Returns")
-		writeTreeLine(&b, 2, "Type: "+formatType(rpc.Returns))
+		if rpc.HasReturn {
+			writeTreeLine(&b, 2, "Type: "+formatType(rpc.Returns))
+		} else {
+			writeTreeLine(&b, 2, "Type: (none)")
+		}
 	}
 	return b.String()
 }
 
 type Model struct {
-	Name   string
-	Fields []Field
+	Name    string
+	Fields  []Field
+	Line    int
+	Col     int
+	EndLine int
 }
 
 type RPC struct {
-	Name       string
-	Parameters []Field
-	Returns    TypeRef
+	Name          string
+	Parameters    []Field
+	Returns       TypeRef
+	HasReturn     bool
+	Line          int
+	Col           int
+	ParamsEndLine int
+	ParamsEndCol  int
+}
+
+type DeclKind int
+
+const (
+	DeclModel DeclKind = iota
+	DeclRPC
+)
+
+type Decl struct {
+	Kind  DeclKind
+	Model *Model
+	RPC   *RPC
 }
 
 type Field struct {
 	Name string
 	Type TypeRef
+	Line int
+	Col  int
 }
 
 type TypeRef struct {
@@ -77,6 +106,14 @@ type TypeRef struct {
 	Elem     *TypeRef
 	Value    *TypeRef
 	Optional bool
+	Line     int
+	Col      int
+}
+
+type Comment struct {
+	Line int
+	Col  int
+	Text string
 }
 
 type TypeKind int
@@ -97,7 +134,20 @@ func Parse(text string) (*Schema, error) {
 	if err != nil {
 		return nil, err
 	}
-	p := NewParser(tokens)
+	parseTokens := make([]lexer.Token, 0, len(tokens))
+	comments := make([]Comment, 0)
+	for _, token := range tokens {
+		if token.Type == lexer.TokenComment {
+			comments = append(comments, Comment{
+				Line: token.Line,
+				Col:  token.Col,
+				Text: token.Value,
+			})
+			continue
+		}
+		parseTokens = append(parseTokens, token)
+	}
+	p := NewParser(parseTokens)
 	schema, err := p.parseSchema()
 	if err != nil {
 		return nil, err
@@ -105,6 +155,7 @@ func Parse(text string) (*Schema, error) {
 	if err := ValidateSchema(schema); err != nil {
 		return nil, err
 	}
+	schema.Comments = comments
 	return schema, nil
 }
 
@@ -122,12 +173,20 @@ func (p *Parser) parseSchema() (*Schema, error) {
 				return nil, err
 			}
 			schema.Models = append(schema.Models, model)
+			schema.Decls = append(schema.Decls, Decl{
+				Kind:  DeclModel,
+				Model: &schema.Models[len(schema.Models)-1],
+			})
 		case lexer.TokenRpc:
 			rpc, err := p.parseRPC()
 			if err != nil {
 				return nil, err
 			}
 			schema.RPCs = append(schema.RPCs, rpc)
+			schema.Decls = append(schema.Decls, Decl{
+				Kind: DeclRPC,
+				RPC:  &schema.RPCs[len(schema.RPCs)-1],
+			})
 		default:
 			return nil, p.unexpected("model or rpc")
 		}
@@ -136,7 +195,8 @@ func (p *Parser) parseSchema() (*Schema, error) {
 }
 
 func (p *Parser) parseModel() (Model, error) {
-	if _, err := p.expect(lexer.TokenModel); err != nil {
+	modelToken, err := p.expect(lexer.TokenModel)
+	if err != nil {
 		return Model{}, err
 	}
 	name, err := p.expect(lexer.TokenIdentifier)
@@ -158,14 +218,22 @@ func (p *Parser) parseModel() (Model, error) {
 		}
 		fields = append(fields, field)
 	}
-	if _, err := p.expect(lexer.TokenRBrace); err != nil {
+	rbrace, err := p.expect(lexer.TokenRBrace)
+	if err != nil {
 		return Model{}, err
 	}
-	return Model{Name: name.Value, Fields: fields}, nil
+	return Model{
+		Name:    name.Value,
+		Fields:  fields,
+		Line:    modelToken.Line,
+		Col:     modelToken.Col,
+		EndLine: rbrace.Line,
+	}, nil
 }
 
 func (p *Parser) parseRPC() (RPC, error) {
-	if _, err := p.expect(lexer.TokenRpc); err != nil {
+	rpcToken, err := p.expect(lexer.TokenRpc)
+	if err != nil {
 		return RPC{}, err
 	}
 	name, err := p.expect(lexer.TokenIdentifier)
@@ -199,16 +267,40 @@ func (p *Parser) parseRPC() (RPC, error) {
 			return RPC{}, p.unexpected("comma or )")
 		}
 	}
-	if _, err := p.expect(lexer.TokenRParen); err != nil {
+	rparen, err := p.expect(lexer.TokenRParen)
+	if err != nil {
 		return RPC{}, err
 	}
 
+	if p.atEnd() || p.peek().Type == lexer.TokenModel || p.peek().Type == lexer.TokenRpc {
+		return RPC{
+			Name:          name.Value,
+			Parameters:    params,
+			HasReturn:     false,
+			Line:          rpcToken.Line,
+			Col:           rpcToken.Col,
+			ParamsEndLine: rparen.Line,
+			ParamsEndCol:  rparen.Col,
+		}, nil
+	}
+	if p.peek().Type != lexer.TokenIdentifier {
+		return RPC{}, p.unexpected("return type or definition")
+	}
 	retType, err := p.parseType()
 	if err != nil {
 		return RPC{}, err
 	}
 
-	return RPC{Name: name.Value, Parameters: params, Returns: retType}, nil
+	return RPC{
+		Name:          name.Value,
+		Parameters:    params,
+		Returns:       retType,
+		HasReturn:     true,
+		Line:          rpcToken.Line,
+		Col:           rpcToken.Col,
+		ParamsEndLine: rparen.Line,
+		ParamsEndCol:  rparen.Col,
+	}, nil
 }
 
 func (p *Parser) parseField() (Field, error) {
@@ -223,7 +315,7 @@ func (p *Parser) parseField() (Field, error) {
 	if err != nil {
 		return Field{}, err
 	}
-	return Field{Name: name.Value, Type: fieldType}, nil
+	return Field{Name: name.Value, Type: fieldType, Line: name.Line, Col: name.Col}, nil
 }
 
 func (p *Parser) parseType() (TypeRef, error) {
@@ -243,7 +335,7 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if _, err := p.expect(lexer.TokenRBrack); err != nil {
 			return TypeRef{}, err
 		}
-		typeRef := TypeRef{Kind: TypeList, Elem: &elem}
+		typeRef := TypeRef{Kind: TypeList, Elem: &elem, Line: name.Line, Col: name.Col}
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
 		}
@@ -262,7 +354,7 @@ func (p *Parser) parseType() (TypeRef, error) {
 		if _, err := p.expect(lexer.TokenRBrack); err != nil {
 			return TypeRef{}, err
 		}
-		typeRef := TypeRef{Kind: TypeMap, Value: &value}
+		typeRef := TypeRef{Kind: TypeMap, Value: &value, Line: name.Line, Col: name.Col}
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
 		}
@@ -271,7 +363,7 @@ func (p *Parser) parseType() (TypeRef, error) {
 		}
 		return typeRef, nil
 	default:
-		typeRef := TypeRef{Kind: TypeIdent, Name: name.Value}
+		typeRef := TypeRef{Kind: TypeIdent, Name: name.Value, Line: name.Line, Col: name.Col}
 		if p.match(lexer.TokenOptional) {
 			typeRef.Optional = true
 		}
@@ -340,6 +432,10 @@ func formatType(t TypeRef) string {
 		b.WriteString("?")
 	}
 	return b.String()
+}
+
+func FormatType(t TypeRef) string {
+	return formatType(t)
 }
 
 func writeTreeLine(b *strings.Builder, depth int, text string) {
@@ -423,8 +519,10 @@ func ValidateSchema(schema *Schema) error {
 				return fmt.Errorf("rpc %q parameter %q: %w", rpc.Name, param.Name, err)
 			}
 		}
-		if err := validateTypeRef(rpc.Returns, models); err != nil {
-			return fmt.Errorf("rpc %q returns: %w", rpc.Name, err)
+		if rpc.HasReturn {
+			if err := validateTypeRef(rpc.Returns, models); err != nil {
+				return fmt.Errorf("rpc %q returns: %w", rpc.Name, err)
+			}
 		}
 	}
 	return nil

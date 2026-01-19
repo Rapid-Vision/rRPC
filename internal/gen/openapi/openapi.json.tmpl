@@ -113,7 +113,9 @@
       "{{resultSchemaName $rpc.Name}}": {
         "type": "object",
         "properties": {
+{{- if hasReturn $rpc}}
           "{{resultField $rpc.Returns}}": {{schemaJSON $rpc.Returns}}
+{{- end}}
         }
       }{{if lt (add $i 1) (len $.RPCs)}},{{end}}
 {{- end}}

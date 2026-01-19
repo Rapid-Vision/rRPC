@@ -48,14 +48,15 @@ func GenerateWithPrefix(schema *parser.Schema, title, version, prefix string) (s
 		"rpcRoute": func(name string) string {
 			return rpcRoute(prefix, name)
 		},
-		"rpcMethodName":    rpcMethodName,
-		"jsonName":         jsonName,
-		"schemaJSON":       schemaJSON,
-		"requiredList":     requiredList,
-		"toJSON":           toJSON,
-		"hasParameters":    hasParameters,
-		"resultField":      resultField,
-		"add":              add,
+		"rpcMethodName": rpcMethodName,
+		"jsonName":      jsonName,
+		"schemaJSON":    schemaJSON,
+		"requiredList":  requiredList,
+		"toJSON":        toJSON,
+		"hasParameters": hasParameters,
+		"resultField":   resultField,
+		"hasReturn":     hasReturn,
+		"add":           add,
 	}).Parse(openApiTemplate)
 	if err != nil {
 		return "", fmt.Errorf("parse template: %w", err)
@@ -140,16 +141,16 @@ func schemaForType(t parser.TypeRef) map[string]any {
 			schema = map[string]any{"type": "string"}
 		case "int":
 			schema = map[string]any{"type": "integer", "format": "int32"}
-	case "bool":
-		schema = map[string]any{"type": "boolean"}
-	case "json":
-		schema = map[string]any{}
-	case "raw":
-		schema = map[string]any{}
-	default:
-		schema = map[string]any{
-			"$ref": "#/components/schemas/" + modelSchemaName(t.Name),
-		}
+		case "bool":
+			schema = map[string]any{"type": "boolean"}
+		case "json":
+			schema = map[string]any{}
+		case "raw":
+			schema = map[string]any{}
+		default:
+			schema = map[string]any{
+				"$ref": "#/components/schemas/" + modelSchemaName(t.Name),
+			}
 		}
 	}
 
@@ -184,6 +185,10 @@ func resultField(t parser.TypeRef) string {
 
 func hasParameters(rpc parser.RPC) bool {
 	return len(rpc.Parameters) > 0
+}
+
+func hasReturn(rpc parser.RPC) bool {
+	return rpc.HasReturn
 }
 
 func toJSON(value any) string {

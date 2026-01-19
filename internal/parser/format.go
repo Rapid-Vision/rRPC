@@ -37,7 +37,7 @@ func FormatSchema(schema *Schema) (string, error) {
 		if rpc.ParamsEndLine > 0 {
 			lineIsNode.Add(rpc.ParamsEndLine)
 		}
-		if rpc.Returns.Line > 0 {
+		if rpc.HasReturn && rpc.Returns.Line > 0 {
 			lineIsNode.Add(rpc.Returns.Line)
 		}
 		for _, param := range rpc.Parameters {
@@ -112,11 +112,14 @@ func FormatSchema(schema *Schema) (string, error) {
 		if len(rpc.Parameters) == 0 {
 			b.WriteString("rpc ")
 			b.WriteString(rpc.Name)
-			b.WriteString("() ")
-			b.WriteString(formatType(rpc.Returns))
+			b.WriteString("()")
 			appendTrailing(rpc.Line)
-			if rpc.Returns.Line != rpc.Line {
-				appendTrailing(rpc.Returns.Line)
+			if rpc.HasReturn {
+				b.WriteString(" ")
+				b.WriteString(formatType(rpc.Returns))
+				if rpc.Returns.Line != rpc.Line {
+					appendTrailing(rpc.Returns.Line)
+				}
 			}
 			b.WriteString("\n")
 		} else {
@@ -138,16 +141,21 @@ func FormatSchema(schema *Schema) (string, error) {
 			if rpc.ParamsEndLine > 0 {
 				emitLeading(rpc.ParamsEndLine, "    ")
 			}
-			if rpc.Returns.Line > 0 {
+			if rpc.HasReturn && rpc.Returns.Line > 0 {
 				emitLeading(rpc.Returns.Line, "")
 			}
-			b.WriteString(") ")
-			b.WriteString(formatType(rpc.Returns))
-			if rpc.ParamsEndLine > 0 {
+			b.WriteString(")")
+			if rpc.HasReturn {
+				b.WriteString(" ")
+				b.WriteString(formatType(rpc.Returns))
+				if rpc.ParamsEndLine > 0 {
+					appendTrailing(rpc.ParamsEndLine)
+				}
+				if rpc.Returns.Line != rpc.ParamsEndLine {
+					appendTrailing(rpc.Returns.Line)
+				}
+			} else if rpc.ParamsEndLine > 0 {
 				appendTrailing(rpc.ParamsEndLine)
-			}
-			if rpc.Returns.Line != rpc.ParamsEndLine {
-				appendTrailing(rpc.Returns.Line)
 			}
 			b.WriteString("\n")
 		}

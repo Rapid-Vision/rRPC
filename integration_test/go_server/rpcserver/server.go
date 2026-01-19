@@ -33,7 +33,6 @@ type PayloadModel struct {
 
 type TestEmptyParams struct {
 }
-
 type TestEmptyResult struct {
 	Empty EmptyModel `json:"empty"`
 }
@@ -44,7 +43,6 @@ type TestBasicParams struct {
 	Count int       `json:"count"`
 	Note  *string   `json:"note"`
 }
-
 type TestBasicResult struct {
 	Text TextModel `json:"text"`
 }
@@ -53,7 +51,6 @@ type TestListMapParams struct {
 	Texts []TextModel       `json:"texts"`
 	Flags map[string]string `json:"flags"`
 }
-
 type TestListMapResult struct {
 	Nested NestedModel `json:"nested"`
 }
@@ -62,7 +59,6 @@ type TestOptionalParams struct {
 	Text *TextModel `json:"text"`
 	Flag *bool      `json:"flag"`
 }
-
 type TestOptionalResult struct {
 	Flags FlagsModel `json:"flags"`
 }
@@ -70,42 +66,36 @@ type TestOptionalResult struct {
 type TestValidationErrorParams struct {
 	Text TextModel `json:"text"`
 }
-
 type TestValidationErrorResult struct {
 	Text TextModel `json:"text"`
 }
 
 type TestUnauthorizedErrorParams struct {
 }
-
 type TestUnauthorizedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestForbiddenErrorParams struct {
 }
-
 type TestForbiddenErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestNotImplementedErrorParams struct {
 }
-
 type TestNotImplementedErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestCustomErrorParams struct {
 }
-
 type TestCustomErrorResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
 type TestMapReturnParams struct {
 }
-
 type TestMapReturnResult struct {
 	Result map[string]TextModel `json:"result"`
 }
@@ -113,7 +103,6 @@ type TestMapReturnResult struct {
 type TestJsonParams struct {
 	Data any `json:"data"`
 }
-
 type TestJsonResult struct {
 	Json any `json:"json"`
 }
@@ -121,7 +110,6 @@ type TestJsonResult struct {
 type TestRawParams struct {
 	Payload json.RawMessage `json:"payload"`
 }
-
 type TestRawResult struct {
 	Raw json.RawMessage `json:"raw"`
 }
@@ -129,7 +117,6 @@ type TestRawResult struct {
 type TestMixedPayloadParams struct {
 	Payload PayloadModel `json:"payload"`
 }
-
 type TestMixedPayloadResult struct {
 	Payload PayloadModel `json:"payload"`
 }

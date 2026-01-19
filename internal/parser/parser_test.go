@@ -51,6 +51,21 @@ rpc GetUsersByName() map[list[User]]
 	}
 }
 
+func TestParseRPCNoReturn(t *testing.T) {
+	input := `rpc Ping()
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(schema.RPCs) != 1 {
+		t.Fatalf("expected 1 rpc, got %d", len(schema.RPCs))
+	}
+	if schema.RPCs[0].HasReturn {
+		t.Fatalf("expected no return type")
+	}
+}
+
 func TestParseSchemaValidationErrors(t *testing.T) {
 	cases := []struct {
 		name    string

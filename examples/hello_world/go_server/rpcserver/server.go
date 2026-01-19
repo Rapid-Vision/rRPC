@@ -16,7 +16,6 @@ type HelloWorldParams struct {
 	Name    string  `json:"name"`
 	Surname *string `json:"surname"`
 }
-
 type HelloWorldResult struct {
 	GreetingMessage GreetingMessageModel `json:"greeting_message"`
 }

@@ -144,7 +144,7 @@ class RPCClient:
 
 {{- range $rpc := .RPCs}}
 
-    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{pythonType $rpc.Returns}}:
+    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{if hasReturn $rpc}}{{pythonType $rpc.Returns}}{{else}}None{{end}}:
 {{- if hasParameters $rpc}}
         payload = {
 {{- range $param := $rpc.Parameters}}
@@ -155,7 +155,11 @@ class RPCClient:
         payload = None
 {{- end}}
         data = self._request("{{rpcMethodName $rpc.Name}}", payload)
+{{- if hasReturn $rpc}}
         value = data.get("{{resultField $rpc.Returns}}") if isinstance(data, dict) else data
         return {{decodeExpr $rpc.Returns "value"}}
+{{- else}}
+        return None
+{{- end}}
 
 {{- end}}

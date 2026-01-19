@@ -51,7 +51,11 @@ func (s *Schema) Dump() string {
 			}
 		}
 		writeTreeLine(&b, 1, "Returns")
-		writeTreeLine(&b, 2, "Type: "+formatType(rpc.Returns))
+		if rpc.HasReturn {
+			writeTreeLine(&b, 2, "Type: "+formatType(rpc.Returns))
+		} else {
+			writeTreeLine(&b, 2, "Type: (none)")
+		}
 	}
 	return b.String()
 }
@@ -68,6 +72,7 @@ type RPC struct {
 	Name          string
 	Parameters    []Field
 	Returns       TypeRef
+	HasReturn     bool
 	Line          int
 	Col           int
 	ParamsEndLine int
@@ -244,6 +249,19 @@ func (p *Parser) parseRPC() (RPC, error) {
 		return RPC{}, err
 	}
 
+	if p.atEnd() || p.peek().Type == lexer.TokenModel || p.peek().Type == lexer.TokenRpc {
+		return RPC{
+			Name:          name.Value,
+			Parameters:    params,
+			HasReturn:     false,
+			Line:          rpcToken.Line,
+			Col:           rpcToken.Col,
+			ParamsEndLine: rparen.Line,
+		}, nil
+	}
+	if p.peek().Type != lexer.TokenIdentifier {
+		return RPC{}, p.unexpected("return type or definition")
+	}
 	retType, err := p.parseType()
 	if err != nil {
 		return RPC{}, err
@@ -253,6 +271,7 @@ func (p *Parser) parseRPC() (RPC, error) {
 		Name:          name.Value,
 		Parameters:    params,
 		Returns:       retType,
+		HasReturn:     true,
 		Line:          rpcToken.Line,
 		Col:           rpcToken.Col,
 		ParamsEndLine: rparen.Line,
@@ -471,8 +490,10 @@ func ValidateSchema(schema *Schema) error {
 				return fmt.Errorf("rpc %q parameter %q: %w", rpc.Name, param.Name, err)
 			}
 		}
-		if err := validateTypeRef(rpc.Returns, models); err != nil {
-			return fmt.Errorf("rpc %q returns: %w", rpc.Name, err)
+		if rpc.HasReturn {
+			if err := validateTypeRef(rpc.Returns, models); err != nil {
+				return fmt.Errorf("rpc %q returns: %w", rpc.Name, err)
+			}
 		}
 	}
 	return nil

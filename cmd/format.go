@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/Rapid-Vision/rRPC/internal/formatter"
 	"github.com/Rapid-Vision/rRPC/internal/parser"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +48,7 @@ func RunFormatCmd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("parse schema: %w", err)
 	}
 
-	formatted, err := parser.FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		return fmt.Errorf("format schema: %w", err)
 	}

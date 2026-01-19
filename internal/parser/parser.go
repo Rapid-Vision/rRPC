@@ -409,6 +409,10 @@ func formatType(t TypeRef) string {
 	return b.String()
 }
 
+func FormatType(t TypeRef) string {
+	return formatType(t)
+}
+
 func writeTreeLine(b *strings.Builder, depth int, text string) {
 	for i := 0; i < depth; i++ {
 		b.WriteString("  ")

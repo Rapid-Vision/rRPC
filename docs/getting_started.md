@@ -19,6 +19,8 @@ rpc Hello(
 ) Greeting
 ```
 
+An `.rrpc` file can be formatted using the `rRPC format` command.
+
 ## Generate code
 ```bash
 rRPC server -o . hello.rrpc

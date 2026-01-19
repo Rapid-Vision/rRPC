@@ -28,6 +28,38 @@ func FormatSchema(schema *parser.Schema) (string, error) {
 		return "", err
 	}
 
+	anchorsByLine := buildAnchorsByLine(schema)
+	leadingComments, trailingComments := partitionComments(schema, anchorsByLine)
+	decls := resolveDecls(schema)
+
+	var b strings.Builder
+	comments := newCommentEmitter(&b, leadingComments, trailingComments)
+	totalBlocks := len(decls)
+
+	for i, decl := range decls {
+		switch decl.Kind {
+		case parser.DeclModel:
+			if decl.Model == nil {
+				continue
+			}
+			writeModel(&b, comments, *decl.Model)
+		case parser.DeclRPC:
+			if decl.RPC == nil {
+				continue
+			}
+			writeRPC(&b, comments, *decl.RPC)
+		}
+		if i+1 < totalBlocks {
+			b.WriteString("\n")
+		}
+	}
+
+	comments.EmitLeading(math.MaxInt, "")
+
+	return b.String(), nil
+}
+
+func buildAnchorsByLine(schema *parser.Schema) map[int][]anchorInfo {
 	anchorsByLine := make(map[int][]anchorInfo)
 	addAnchor := func(key anchorKey) {
 		if key.line <= 0 {
@@ -60,7 +92,10 @@ func FormatSchema(schema *parser.Schema) (string, error) {
 		})
 		anchorsByLine[line] = anchors
 	}
+	return anchorsByLine
+}
 
+func partitionComments(schema *parser.Schema, anchorsByLine map[int][]anchorInfo) ([]parser.Comment, map[anchorKey][]parser.Comment) {
 	var leadingComments []parser.Comment
 	trailingComments := make(map[anchorKey][]parser.Comment)
 	for _, comment := range schema.Comments {
@@ -78,126 +113,124 @@ func FormatSchema(schema *parser.Schema) (string, error) {
 			leadingComments = append(leadingComments, comment)
 		}
 	}
+	return leadingComments, trailingComments
+}
 
-	decls := schema.Decls
-	if len(decls) == 0 {
-		decls = make([]parser.Decl, 0, len(schema.Models)+len(schema.RPCs))
-		for i := range schema.Models {
-			decls = append(decls, parser.Decl{Kind: parser.DeclModel, Model: &schema.Models[i]})
-		}
-		for i := range schema.RPCs {
-			decls = append(decls, parser.Decl{Kind: parser.DeclRPC, RPC: &schema.RPCs[i]})
-		}
+func resolveDecls(schema *parser.Schema) []parser.Decl {
+	if len(schema.Decls) > 0 {
+		return schema.Decls
 	}
-
-	var b strings.Builder
-	totalBlocks := len(decls)
-	blockIndex := 0
-	leadingIdx := 0
-
-	emitLeading := func(line int, indent string) {
-		for leadingIdx < len(leadingComments) && leadingComments[leadingIdx].Line < line {
-			b.WriteString(indent)
-			b.WriteString(leadingComments[leadingIdx].Text)
-			b.WriteString("\n")
-			leadingIdx++
-		}
+	decls := make([]parser.Decl, 0, len(schema.Models)+len(schema.RPCs))
+	for i := range schema.Models {
+		decls = append(decls, parser.Decl{Kind: parser.DeclModel, Model: &schema.Models[i]})
 	}
+	for i := range schema.RPCs {
+		decls = append(decls, parser.Decl{Kind: parser.DeclRPC, RPC: &schema.RPCs[i]})
+	}
+	return decls
+}
 
-	appendTrailing := func(key anchorKey) {
-		for _, comment := range trailingComments[key] {
+type commentEmitter struct {
+	builder    *strings.Builder
+	leading    []parser.Comment
+	trailing   map[anchorKey][]parser.Comment
+	leadingIdx int
+}
+
+func newCommentEmitter(builder *strings.Builder, leading []parser.Comment, trailing map[anchorKey][]parser.Comment) *commentEmitter {
+	return &commentEmitter{
+		builder:  builder,
+		leading:  leading,
+		trailing: trailing,
+	}
+}
+
+func (e *commentEmitter) EmitLeading(line int, indent string) {
+	for e.leadingIdx < len(e.leading) && e.leading[e.leadingIdx].Line < line {
+		e.builder.WriteString(indent)
+		e.builder.WriteString(e.leading[e.leadingIdx].Text)
+		e.builder.WriteString("\n")
+		e.leadingIdx++
+	}
+}
+
+func (e *commentEmitter) AppendTrailing(key anchorKey) {
+	for _, comment := range e.trailing[key] {
+		e.builder.WriteString(" ")
+		e.builder.WriteString(comment.Text)
+	}
+}
+
+func writeModel(b *strings.Builder, comments *commentEmitter, model parser.Model) {
+	comments.EmitLeading(model.Line, "")
+	b.WriteString("model ")
+	b.WriteString(model.Name)
+	b.WriteString(" {")
+	comments.AppendTrailing(modelAnchorKey(model))
+	b.WriteString("\n")
+	for _, field := range model.Fields {
+		comments.EmitLeading(field.Line, "    ")
+		b.WriteString("    ")
+		b.WriteString(field.Name)
+		b.WriteString(": ")
+		b.WriteString(parser.FormatType(field.Type))
+		comments.AppendTrailing(fieldAnchorKey(field))
+		b.WriteString("\n")
+	}
+	if model.EndLine > 0 {
+		comments.EmitLeading(model.EndLine, "    ")
+	}
+	b.WriteString("}")
+	comments.AppendTrailing(modelEndAnchorKey(model))
+	b.WriteString("\n")
+}
+
+func writeRPC(b *strings.Builder, comments *commentEmitter, rpc parser.RPC) {
+	comments.EmitLeading(rpc.Line, "")
+	if len(rpc.Parameters) == 0 {
+		b.WriteString("rpc ")
+		b.WriteString(rpc.Name)
+		b.WriteString("()")
+		comments.AppendTrailing(rpcAnchorKey(rpc))
+		if rpc.HasReturn {
 			b.WriteString(" ")
-			b.WriteString(comment.Text)
+			b.WriteString(parser.FormatType(rpc.Returns))
+			comments.AppendTrailing(rpcReturnAnchorKey(rpc))
 		}
+		b.WriteString("\n")
+		return
 	}
 
-	for _, decl := range decls {
-		blockIndex++
-		switch decl.Kind {
-		case parser.DeclModel:
-			if decl.Model == nil {
-				continue
-			}
-			model := *decl.Model
-			emitLeading(model.Line, "")
-			b.WriteString("model ")
-			b.WriteString(model.Name)
-			b.WriteString(" {")
-			appendTrailing(modelAnchorKey(model))
-			b.WriteString("\n")
-			for _, field := range model.Fields {
-				emitLeading(field.Line, "    ")
-				b.WriteString("    ")
-				b.WriteString(field.Name)
-				b.WriteString(": ")
-				b.WriteString(parser.FormatType(field.Type))
-				appendTrailing(fieldAnchorKey(field))
-				b.WriteString("\n")
-			}
-			if model.EndLine > 0 {
-				emitLeading(model.EndLine, "    ")
-			}
-			b.WriteString("}")
-			appendTrailing(modelEndAnchorKey(model))
-			b.WriteString("\n")
-		case parser.DeclRPC:
-			if decl.RPC == nil {
-				continue
-			}
-			rpc := *decl.RPC
-			emitLeading(rpc.Line, "")
-			if len(rpc.Parameters) == 0 {
-				b.WriteString("rpc ")
-				b.WriteString(rpc.Name)
-				b.WriteString("()")
-				appendTrailing(rpcAnchorKey(rpc))
-				if rpc.HasReturn {
-					b.WriteString(" ")
-					b.WriteString(parser.FormatType(rpc.Returns))
-					appendTrailing(rpcReturnAnchorKey(rpc))
-				}
-				b.WriteString("\n")
-			} else {
-				b.WriteString("rpc ")
-				b.WriteString(rpc.Name)
-				b.WriteString("(")
-				appendTrailing(rpcAnchorKey(rpc))
-				b.WriteString("\n")
-				for _, param := range rpc.Parameters {
-					emitLeading(param.Line, "    ")
-					b.WriteString("    ")
-					b.WriteString(param.Name)
-					b.WriteString(": ")
-					b.WriteString(parser.FormatType(param.Type))
-					b.WriteString(",")
-					appendTrailing(fieldAnchorKey(param))
-					b.WriteString("\n")
-				}
-				if rpc.ParamsEndLine > 0 {
-					emitLeading(rpc.ParamsEndLine, "    ")
-				}
-				if rpc.HasReturn && rpc.Returns.Line > 0 {
-					emitLeading(rpc.Returns.Line, "")
-				}
-				b.WriteString(")")
-				if rpc.HasReturn {
-					b.WriteString(" ")
-					b.WriteString(parser.FormatType(rpc.Returns))
-					appendTrailing(rpcReturnAnchorKey(rpc))
-				} else if rpc.ParamsEndLine > 0 {
-					appendTrailing(rpcParamsEndAnchorKey(rpc))
-				}
-				b.WriteString("\n")
-			}
-		}
-		if blockIndex < totalBlocks {
-			b.WriteString("\n")
-		}
+	b.WriteString("rpc ")
+	b.WriteString(rpc.Name)
+	b.WriteString("(")
+	comments.AppendTrailing(rpcAnchorKey(rpc))
+	b.WriteString("\n")
+	for _, param := range rpc.Parameters {
+		comments.EmitLeading(param.Line, "    ")
+		b.WriteString("    ")
+		b.WriteString(param.Name)
+		b.WriteString(": ")
+		b.WriteString(parser.FormatType(param.Type))
+		b.WriteString(",")
+		comments.AppendTrailing(fieldAnchorKey(param))
+		b.WriteString("\n")
 	}
-
-	emitLeading(math.MaxInt, "")
-
-	return b.String(), nil
+	if rpc.ParamsEndLine > 0 {
+		comments.EmitLeading(rpc.ParamsEndLine, "    ")
+	}
+	if rpc.HasReturn && rpc.Returns.Line > 0 {
+		comments.EmitLeading(rpc.Returns.Line, "")
+	}
+	b.WriteString(")")
+	if rpc.HasReturn {
+		b.WriteString(" ")
+		b.WriteString(parser.FormatType(rpc.Returns))
+		comments.AppendTrailing(rpcReturnAnchorKey(rpc))
+	} else if rpc.ParamsEndLine > 0 {
+		comments.AppendTrailing(rpcParamsEndAnchorKey(rpc))
+	}
+	b.WriteString("\n")
 }
 
 func modelAnchorKey(model parser.Model) anchorKey {
@@ -225,7 +258,7 @@ func rpcAnchorKey(rpc parser.RPC) anchorKey {
 }
 
 func rpcParamsEndAnchorKey(rpc parser.RPC) anchorKey {
-	return anchorKey{line: rpc.ParamsEndLine, col: 1, kind: "rpc_params_end"}
+	return anchorKey{line: rpc.ParamsEndLine, col: rpc.ParamsEndCol, kind: "rpc_params_end"}
 }
 
 func rpcReturnAnchorKey(rpc parser.RPC) anchorKey {

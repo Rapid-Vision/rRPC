@@ -65,8 +65,8 @@ rpc Commented(
 
 # Single-line parameter list with trailing comment
 rpc Echo(
-    msg: string, # comment
-)
+    msg: string,
+) # comment
 
 # Mixed spacing and blank lines
 model Spacing {

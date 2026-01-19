@@ -77,6 +77,7 @@ type RPC struct {
 	Line          int
 	Col           int
 	ParamsEndLine int
+	ParamsEndCol  int
 }
 
 type DeclKind int
@@ -279,6 +280,7 @@ func (p *Parser) parseRPC() (RPC, error) {
 			Line:          rpcToken.Line,
 			Col:           rpcToken.Col,
 			ParamsEndLine: rparen.Line,
+			ParamsEndCol:  rparen.Col,
 		}, nil
 	}
 	if p.peek().Type != lexer.TokenIdentifier {
@@ -297,6 +299,7 @@ func (p *Parser) parseRPC() (RPC, error) {
 		Line:          rpcToken.Line,
 		Col:           rpcToken.Col,
 		ParamsEndLine: rparen.Line,
+		ParamsEndCol:  rparen.Col,
 	}, nil
 }
 

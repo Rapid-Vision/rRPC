@@ -1,3 +1,5 @@
+# THIS CODE IS GENERATED
+
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict, is_dataclass

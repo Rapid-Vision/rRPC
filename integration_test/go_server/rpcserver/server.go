@@ -1,3 +1,5 @@
+// THIS CODE IS GENERATED
+
 package rpcserver
 
 import (

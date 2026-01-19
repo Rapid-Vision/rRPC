@@ -113,13 +113,15 @@ func FormatSchema(schema *Schema) (string, error) {
 			b.WriteString("rpc ")
 			b.WriteString(rpc.Name)
 			b.WriteString("()")
-			appendTrailing(rpc.Line)
 			if rpc.HasReturn {
 				b.WriteString(" ")
 				b.WriteString(formatType(rpc.Returns))
+				appendTrailing(rpc.Line)
 				if rpc.Returns.Line != rpc.Line {
 					appendTrailing(rpc.Returns.Line)
 				}
+			} else {
+				appendTrailing(rpc.Line)
 			}
 			b.WriteString("\n")
 		} else {

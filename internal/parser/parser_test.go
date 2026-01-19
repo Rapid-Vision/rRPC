@@ -240,6 +240,25 @@ rpc Ping() # trailing
 	}
 }
 
+func TestFormatSchemaZeroArgReturnInlineComment(t *testing.T) {
+	input := `model User {
+}
+
+rpc Get() User # comment
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	formatted, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if formatted != input {
+		t.Fatalf("formatted output mismatch:\n%s", formatted)
+	}
+}
+
 func TestFormatSchemaCommentPlacementAroundClosers(t *testing.T) {
 	input := `model User {
     name: string

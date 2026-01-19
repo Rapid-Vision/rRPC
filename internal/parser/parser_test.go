@@ -66,6 +66,61 @@ func TestParseRPCNoReturn(t *testing.T) {
 	}
 }
 
+func TestParseRPCNoReturnFollowedByModel(t *testing.T) {
+	input := `rpc Ping()
+model User {}
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(schema.RPCs) != 1 || len(schema.Models) != 1 {
+		t.Fatalf("expected 1 rpc and 1 model, got %d rpcs and %d models", len(schema.RPCs), len(schema.Models))
+	}
+	if schema.RPCs[0].HasReturn {
+		t.Fatalf("expected no return type")
+	}
+}
+
+func TestParseOptionalTypesInListAndMap(t *testing.T) {
+	input := `model Text {}
+rpc ListOptional() list[string?]
+rpc MapOptional() map[Text?]
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if schema.RPCs[0].Returns.Kind != TypeList || schema.RPCs[0].Returns.Elem == nil || !schema.RPCs[0].Returns.Elem.Optional {
+		t.Fatalf("expected optional list element")
+	}
+	if schema.RPCs[1].Returns.Kind != TypeMap || schema.RPCs[1].Returns.Value == nil || !schema.RPCs[1].Returns.Value.Optional {
+		t.Fatalf("expected optional map value")
+	}
+}
+
+func TestParseEmptyModelsWithComments(t *testing.T) {
+	input := `# leading
+model Empty {
+    # inside
+}
+
+model User {
+    name: string # field
+}
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(schema.Models) != 2 {
+		t.Fatalf("expected 2 models, got %d", len(schema.Models))
+	}
+	if len(schema.Models[0].Fields) != 0 {
+		t.Fatalf("expected empty model fields")
+	}
+}
+
 func TestParseSchemaValidationErrors(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -165,5 +220,76 @@ rpc GetUser(
 	}
 	if formatted != input {
 		t.Fatalf("formatted output mismatch:\n%s", formatted)
+	}
+}
+
+func TestFormatSchemaNoReturnRPCWithComments(t *testing.T) {
+	input := `# head
+rpc Ping() # trailing
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	formatted, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if formatted != input {
+		t.Fatalf("formatted output mismatch:\n%s", formatted)
+	}
+}
+
+func TestFormatSchemaCommentPlacementAroundClosers(t *testing.T) {
+	input := `model User {
+    name: string
+} # end model
+
+rpc Hello(
+    name: string,
+) # end params
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	formatted, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if formatted != input {
+		t.Fatalf("formatted output mismatch:\n%s", formatted)
+	}
+}
+
+func TestFormatSchemaIdempotent(t *testing.T) {
+	input := `# top
+model User {
+    id: int # id
+}
+
+rpc Ping()
+rpc Echo(
+    msg: string,
+) string
+`
+	schema, err := Parse(input)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	first, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	schema2, err := Parse(first)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	second, err := FormatSchema(schema2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if first != second {
+		t.Fatalf("expected idempotent formatting")
 	}
 }

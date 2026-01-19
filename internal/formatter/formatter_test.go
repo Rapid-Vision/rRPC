@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
+
+	_ "embed"
 )
 
 func TestFormatSchemaPreservesComments(t *testing.T) {
@@ -136,5 +138,25 @@ rpc Echo(
 	}
 	if first != second {
 		t.Fatalf("expected idempotent formatting")
+	}
+}
+
+//go:embed test_input.rrpc
+var testInput string
+
+//go:embed test_expected.rrpc
+var testExpected string
+
+func TestFormatFromTestFile(t *testing.T) {
+	schema, err := parser.Parse(testInput)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	formatted, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if formatted != testExpected {
+		t.Fatalf("formatted output mismatch:\n%s", formatted)
 	}
 }

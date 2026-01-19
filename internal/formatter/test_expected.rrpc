@@ -1,0 +1,79 @@
+# Formatting fixtures for formatter tests and manual inspection.
+# Empty models and fields
+model Empty {
+}
+
+model User {
+    id: int
+    name: string
+    nickname: string?
+}
+
+# Inline comments
+model Inline {
+    value: string # trailing field comment
+} # trailing model comment
+
+# Optional, list, map, and nested types
+model Types {
+    names: list[string]
+    tags: list[string?]
+    lookup: map[string]
+    typed_lookup: map[User]
+    nested: map[list[User?]]
+}
+
+# RPCs without params/returns
+rpc Ping()
+
+# RPCs with inline comments and returns
+rpc GetUser() User # return comment
+
+# RPCs with parameters and returns
+rpc FindUser(
+    id: int,
+    name: string?,
+) User
+
+# RPCs with no return but with parameters
+rpc TouchUser(
+    id: int,
+    note: string?,
+)
+
+# RPCs with list/map returns
+rpc ListUsers() list[User]
+
+rpc MapUsers() map[User]
+
+# RPCs with JSON/raw payloads
+rpc SubmitPayload(
+    data: json,
+    raw: raw,
+) json
+
+# Multiple definitions on a single line
+model OneLine {
+}
+
+rpc OneLineRpc() User # inline
+
+# Comments around RPC closers
+rpc Commented(
+    id: int,
+) # end params
+
+# Single-line parameter list with trailing comment
+rpc Echo(
+    msg: string, # comment
+)
+
+# Mixed spacing and blank lines
+model Spacing {
+    a: int
+    b: int
+}
+
+# Another empty model
+model AnotherEmpty {
+}

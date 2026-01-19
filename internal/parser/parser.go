@@ -11,6 +11,7 @@ type Schema struct {
 	Models   []Model
 	RPCs     []RPC
 	Comments []Comment
+	Decls    []Decl
 }
 
 func (s *Schema) Dump() string {
@@ -76,6 +77,19 @@ type RPC struct {
 	Line          int
 	Col           int
 	ParamsEndLine int
+}
+
+type DeclKind int
+
+const (
+	DeclModel DeclKind = iota
+	DeclRPC
+)
+
+type Decl struct {
+	Kind  DeclKind
+	Model *Model
+	RPC   *RPC
 }
 
 type Field struct {
@@ -158,12 +172,20 @@ func (p *Parser) parseSchema() (*Schema, error) {
 				return nil, err
 			}
 			schema.Models = append(schema.Models, model)
+			schema.Decls = append(schema.Decls, Decl{
+				Kind:  DeclModel,
+				Model: &schema.Models[len(schema.Models)-1],
+			})
 		case lexer.TokenRpc:
 			rpc, err := p.parseRPC()
 			if err != nil {
 				return nil, err
 			}
 			schema.RPCs = append(schema.RPCs, rpc)
+			schema.Decls = append(schema.Decls, Decl{
+				Kind: DeclRPC,
+				RPC:  &schema.RPCs[len(schema.RPCs)-1],
+			})
 		default:
 			return nil, p.unexpected("model or rpc")
 		}

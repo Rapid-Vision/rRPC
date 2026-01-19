@@ -79,8 +79,19 @@ func FormatSchema(schema *parser.Schema) (string, error) {
 		}
 	}
 
+	decls := schema.Decls
+	if len(decls) == 0 {
+		decls = make([]parser.Decl, 0, len(schema.Models)+len(schema.RPCs))
+		for i := range schema.Models {
+			decls = append(decls, parser.Decl{Kind: parser.DeclModel, Model: &schema.Models[i]})
+		}
+		for i := range schema.RPCs {
+			decls = append(decls, parser.Decl{Kind: parser.DeclRPC, RPC: &schema.RPCs[i]})
+		}
+	}
+
 	var b strings.Builder
-	totalBlocks := len(schema.Models) + len(schema.RPCs)
+	totalBlocks := len(decls)
 	blockIndex := 0
 	leadingIdx := 0
 
@@ -100,79 +111,84 @@ func FormatSchema(schema *parser.Schema) (string, error) {
 		}
 	}
 
-	for _, model := range schema.Models {
-		emitLeading(model.Line, "")
+	for _, decl := range decls {
 		blockIndex++
-		b.WriteString("model ")
-		b.WriteString(model.Name)
-		b.WriteString(" {")
-		appendTrailing(modelAnchorKey(model))
-		b.WriteString("\n")
-		for _, field := range model.Fields {
-			emitLeading(field.Line, "    ")
-			b.WriteString("    ")
-			b.WriteString(field.Name)
-			b.WriteString(": ")
-			b.WriteString(parser.FormatType(field.Type))
-			appendTrailing(fieldAnchorKey(field))
-			b.WriteString("\n")
-		}
-		if model.EndLine > 0 {
-			emitLeading(model.EndLine, "    ")
-		}
-		b.WriteString("}")
-		appendTrailing(modelEndAnchorKey(model))
-		b.WriteString("\n")
-		if blockIndex < totalBlocks {
-			b.WriteString("\n")
-		}
-	}
-
-	for _, rpc := range schema.RPCs {
-		emitLeading(rpc.Line, "")
-		blockIndex++
-		if len(rpc.Parameters) == 0 {
-			b.WriteString("rpc ")
-			b.WriteString(rpc.Name)
-			b.WriteString("()")
-			appendTrailing(rpcAnchorKey(rpc))
-			if rpc.HasReturn {
-				b.WriteString(" ")
-				b.WriteString(parser.FormatType(rpc.Returns))
-				appendTrailing(rpcReturnAnchorKey(rpc))
+		switch decl.Kind {
+		case parser.DeclModel:
+			if decl.Model == nil {
+				continue
 			}
+			model := *decl.Model
+			emitLeading(model.Line, "")
+			b.WriteString("model ")
+			b.WriteString(model.Name)
+			b.WriteString(" {")
+			appendTrailing(modelAnchorKey(model))
 			b.WriteString("\n")
-		} else {
-			b.WriteString("rpc ")
-			b.WriteString(rpc.Name)
-			b.WriteString("(")
-			appendTrailing(rpcAnchorKey(rpc))
-			b.WriteString("\n")
-			for _, param := range rpc.Parameters {
-				emitLeading(param.Line, "    ")
+			for _, field := range model.Fields {
+				emitLeading(field.Line, "    ")
 				b.WriteString("    ")
-				b.WriteString(param.Name)
+				b.WriteString(field.Name)
 				b.WriteString(": ")
-				b.WriteString(parser.FormatType(param.Type))
-				b.WriteString(",")
-				appendTrailing(fieldAnchorKey(param))
+				b.WriteString(parser.FormatType(field.Type))
+				appendTrailing(fieldAnchorKey(field))
 				b.WriteString("\n")
 			}
-			if rpc.ParamsEndLine > 0 {
-				emitLeading(rpc.ParamsEndLine, "    ")
+			if model.EndLine > 0 {
+				emitLeading(model.EndLine, "    ")
 			}
-			if rpc.HasReturn && rpc.Returns.Line > 0 {
-				emitLeading(rpc.Returns.Line, "")
-			}
-			b.WriteString(")")
-			if rpc.HasReturn {
-				b.WriteString(" ")
-				b.WriteString(parser.FormatType(rpc.Returns))
-				appendTrailing(rpcReturnAnchorKey(rpc))
-			} else if rpc.ParamsEndLine > 0 {
-				appendTrailing(rpcParamsEndAnchorKey(rpc))
-			}
+			b.WriteString("}")
+			appendTrailing(modelEndAnchorKey(model))
 			b.WriteString("\n")
+		case parser.DeclRPC:
+			if decl.RPC == nil {
+				continue
+			}
+			rpc := *decl.RPC
+			emitLeading(rpc.Line, "")
+			if len(rpc.Parameters) == 0 {
+				b.WriteString("rpc ")
+				b.WriteString(rpc.Name)
+				b.WriteString("()")
+				appendTrailing(rpcAnchorKey(rpc))
+				if rpc.HasReturn {
+					b.WriteString(" ")
+					b.WriteString(parser.FormatType(rpc.Returns))
+					appendTrailing(rpcReturnAnchorKey(rpc))
+				}
+				b.WriteString("\n")
+			} else {
+				b.WriteString("rpc ")
+				b.WriteString(rpc.Name)
+				b.WriteString("(")
+				appendTrailing(rpcAnchorKey(rpc))
+				b.WriteString("\n")
+				for _, param := range rpc.Parameters {
+					emitLeading(param.Line, "    ")
+					b.WriteString("    ")
+					b.WriteString(param.Name)
+					b.WriteString(": ")
+					b.WriteString(parser.FormatType(param.Type))
+					b.WriteString(",")
+					appendTrailing(fieldAnchorKey(param))
+					b.WriteString("\n")
+				}
+				if rpc.ParamsEndLine > 0 {
+					emitLeading(rpc.ParamsEndLine, "    ")
+				}
+				if rpc.HasReturn && rpc.Returns.Line > 0 {
+					emitLeading(rpc.Returns.Line, "")
+				}
+				b.WriteString(")")
+				if rpc.HasReturn {
+					b.WriteString(" ")
+					b.WriteString(parser.FormatType(rpc.Returns))
+					appendTrailing(rpcReturnAnchorKey(rpc))
+				} else if rpc.ParamsEndLine > 0 {
+					appendTrailing(rpcParamsEndAnchorKey(rpc))
+				}
+				b.WriteString("\n")
+			}
 		}
 		if blockIndex < totalBlocks {
 			b.WriteString("\n")

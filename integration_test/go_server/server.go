@@ -20,6 +20,11 @@ func (s *service) TestEmpty(_ context.Context, params rpcserver.TestEmptyParams)
 	return rpcserver.TestEmptyResult{Empty: rpcserver.EmptyModel{}}, nil
 }
 
+func (s *service) TestNoReturn(_ context.Context, params rpcserver.TestNoReturnParams) error {
+	_ = params
+	return nil
+}
+
 func (s *service) TestBasic(_ context.Context, params rpcserver.TestBasicParams) (rpcserver.TestBasicResult, error) {
 	title := params.Text.Title
 	if title == nil && params.Note != nil {

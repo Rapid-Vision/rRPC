@@ -38,6 +38,9 @@ type TestEmptyResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
+type TestNoReturnParams struct {
+}
+
 type TestBasicParams struct {
 	Text  TextModel `json:"text"`
 	Flag  bool      `json:"flag"`
@@ -235,6 +238,14 @@ func (c *RPCClient) TestEmpty() (EmptyModel, error) {
 		return zero, err
 	}
 	return res.Empty, nil
+}
+func (c *RPCClient) TestNoReturn() error {
+	var payload any
+	payload = nil
+	if err := c.doRequest("/rpc/test_no_return", payload, nil); err != nil {
+		return err
+	}
+	return nil
 }
 func (c *RPCClient) TestBasic(params TestBasicParams) (TextModel, error) {
 	var zero TextModel

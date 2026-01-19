@@ -37,6 +37,9 @@ type TestEmptyResult struct {
 	Empty EmptyModel `json:"empty"`
 }
 
+type TestNoReturnParams struct {
+}
+
 type TestBasicParams struct {
 	Text  TextModel `json:"text"`
 	Flag  bool      `json:"flag"`
@@ -123,6 +126,7 @@ type TestMixedPayloadResult struct {
 
 type RPCHandler interface {
 	TestEmpty(context.Context, TestEmptyParams) (TestEmptyResult, error)
+	TestNoReturn(context.Context, TestNoReturnParams) error
 	TestBasic(context.Context, TestBasicParams) (TestBasicResult, error)
 	TestListMap(context.Context, TestListMapParams) (TestListMapResult, error)
 	TestOptional(context.Context, TestOptionalParams) (TestOptionalResult, error)
@@ -140,6 +144,7 @@ type RPCHandler interface {
 func CreateHTTPHandler(rpc RPCHandler) http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("POST /rpc/test_empty", CreateTestEmptyHandler(rpc))
+	mux.Handle("POST /rpc/test_no_return", CreateTestNoReturnHandler(rpc))
 	mux.Handle("POST /rpc/test_basic", CreateTestBasicHandler(rpc))
 	mux.Handle("POST /rpc/test_list_map", CreateTestListMapHandler(rpc))
 	mux.Handle("POST /rpc/test_optional", CreateTestOptionalHandler(rpc))
@@ -164,6 +169,17 @@ func CreateTestEmptyHandler(rpc RPCHandler) http.Handler {
 			return
 		}
 		writeJSON(w, http.StatusOK, res)
+	})
+}
+
+func CreateTestNoReturnHandler(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params TestNoReturnParams
+		if err := rpc.TestNoReturn(r.Context(), params); err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, struct{}{})
 	})
 }
 

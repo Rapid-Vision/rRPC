@@ -23,6 +23,10 @@ class RPCClientTest(unittest.TestCase):
         empty = self.rpc.test_empty()
         self.assertIsInstance(empty, EmptyModel)
 
+    def test_no_return(self) -> None:
+        result = self.rpc.test_no_return()
+        self.assertIsNone(result)
+
     def test_basic(self) -> None:
         text = TextModel(title=None, body="  hello  ")
         basic = self.rpc.test_basic(text=text, flag=True, count=3, note="note")

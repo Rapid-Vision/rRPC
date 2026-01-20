@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -236,8 +237,53 @@ func TestMixedPayload(t *testing.T) {
 	}
 }
 
+func TestContextCancelled(t *testing.T) {
+	httpClient := &http.Client{
+		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			return nil, req.Context().Err()
+		}),
+	}
+	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	ctx, cancel := context.WithCancel(backgroundCtx)
+	cancel()
+	_, err := rpc.TestEmpty(ctx)
+	if err == nil || !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
+	}
+}
+
+func TestHTTPError(t *testing.T) {
+	httpClient := &http.Client{
+		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       io.NopCloser(strings.NewReader("boom")),
+				Header:     make(http.Header),
+			}, nil
+		}),
+	}
+	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	_, err := rpc.TestEmpty(backgroundCtx)
+	var httpErr client.ErrHTTP
+	if err == nil || !errors.As(err, &httpErr) {
+		t.Fatalf("expected ErrHTTP, got %v", err)
+	}
+	if httpErr.Status != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", httpErr.Status)
+	}
+	if httpErr.Body != "boom" {
+		t.Fatalf("expected body 'boom', got %q", httpErr.Body)
+	}
+}
+
 func stringPtr(value string) *string {
 	return &value
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (fn roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return fn(req)
 }
 
 func sendInvalidPayload() error {

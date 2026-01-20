@@ -1,6 +1,6 @@
 # Protocol
 
-rRPC uses JSON over HTTP with a fixed request/response shape.
+rRPC uses JSON over HTTP with a fixed request/response shape. It is recommended to not interact with the protocol directly and stick to using generated methods. This information is helpful for learning and debugging purposes.
 
 ## HTTP method and route
 All RPCs are called with `POST`.

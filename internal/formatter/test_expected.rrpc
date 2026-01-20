@@ -63,6 +63,12 @@ rpc Commented(
     id: int,
 ) # end params
 
+# Trailing comments before return type
+rpc ReturnAfter(
+    id: int,
+) # params comment
+User
+
 # Single-line parameter list with trailing comment
 rpc Echo(
     msg: string,

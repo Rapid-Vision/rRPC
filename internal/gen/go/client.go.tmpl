@@ -4,6 +4,7 @@ package {{.Package}}
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -59,6 +60,18 @@ type RPCErrorException struct {
 
 func (e RPCErrorException) Error() string {
 	return e.Err.Message
+}
+
+type ErrHTTP struct {
+	Status int
+	Body   string
+}
+
+func (e ErrHTTP) Error() string {
+	if e.Body == "" {
+		return fmt.Sprintf("rpc error: status %d", e.Status)
+	}
+	return fmt.Sprintf("rpc error: status %d: %s", e.Status, e.Body)
 }
 
 type CustomRPCError struct {
@@ -145,7 +158,7 @@ func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers
 {{- range $rpc := .RPCs}}
 
 {{- if hasReturn $rpc}}
-func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 0}}params {{rpcParamsName $rpc.Name}}{{- end}}) ({{goType $rpc.Returns}}, error) {
+func (c *RPCClient) {{rpcMethodName $rpc.Name}}(ctx context.Context{{- if gt (len $rpc.Parameters) 0}}, params {{rpcParamsName $rpc.Name}}{{- end}}) ({{goType $rpc.Returns}}, error) {
 	var zero {{goType $rpc.Returns}}
 	var res {{rpcResultName $rpc.Name}}
 	var payload any
@@ -154,20 +167,20 @@ func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 
 	{{- else}}
 	payload = nil
 	{{- end}}
-	if err := c.doRequest("{{rpcPath $rpc.Name}}", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "{{rpcPath $rpc.Name}}", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.{{resultField $rpc.Returns}}, nil
 }
 {{- else}}
-func (c *RPCClient) {{rpcMethodName $rpc.Name}}({{- if gt (len $rpc.Parameters) 0}}params {{rpcParamsName $rpc.Name}}{{- end}}) error {
+func (c *RPCClient) {{rpcMethodName $rpc.Name}}(ctx context.Context{{- if gt (len $rpc.Parameters) 0}}, params {{rpcParamsName $rpc.Name}}{{- end}}) error {
 	var payload any
 	{{- if gt (len $rpc.Parameters) 0}}
 	payload = params
 	{{- else}}
 	payload = nil
 	{{- end}}
-	if err := c.doRequest("{{rpcPath $rpc.Name}}", payload, nil); err != nil {
+	if err := c.doRequest(ctx, "{{rpcPath $rpc.Name}}", payload, nil); err != nil {
 		return err
 	}
 	return nil
@@ -194,7 +207,10 @@ func errorFromRPCError(err RPCError) error {
 	}
 }
 
-func (c *RPCClient) doRequest(path string, payload any, out any) error {
+func (c *RPCClient) doRequest(ctx context.Context, path string, payload any, out any) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	url := c.baseURL + path
 	var body io.Reader
 	if payload != nil {
@@ -204,7 +220,7 @@ func (c *RPCClient) doRequest(path string, payload any, out any) error {
 		}
 		body = bytes.NewReader(raw)
 	}
-	req, err := http.NewRequest(http.MethodPost, url, body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
@@ -228,10 +244,10 @@ func (c *RPCClient) doRequest(path string, payload any, out any) error {
 				return errorFromRPCError(rpcErr)
 			}
 			if strings.TrimSpace(string(raw)) != "" {
-				return fmt.Errorf("rpc error: %s", strings.TrimSpace(string(raw)))
+				return ErrHTTP{Status: resp.StatusCode, Body: strings.TrimSpace(string(raw))}
 			}
 		}
-		return fmt.Errorf("rpc error: status %d", resp.StatusCode)
+		return ErrHTTP{Status: resp.StatusCode}
 	}
 	if out == nil || len(raw) == 0 {
 		return nil

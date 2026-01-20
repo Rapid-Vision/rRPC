@@ -31,9 +31,16 @@ http.ListenAndServe(":8080", handler)
 ## Go client usage
 ```go
 client := rpc_client.NewRPCClient("http://localhost:8080")
-greeting, err := client.HelloWorld(rpc_client.HelloWorldParams{Name: "Ada"})
+greeting, err := client.HelloWorld(context.Background(), rpc_client.HelloWorldParams{Name: "Ada"})
 ```
 Go clients return the RPC result type directly (not the wrapper struct).
+
+## Context and HTTP client
+RPC methods accept `context.Context` for cancellation and deadlines. To customize timeouts, proxies, or TLS, pass your own `*http.Client`:
+```go
+httpClient := &http.Client{Timeout: 5 * time.Second}
+client := rpc_client.NewRPCClientWithHTTP("http://localhost:8080", httpClient)
+```
 
 ## Headers and auth
 Use the headers-capable constructor for middleware or auth:

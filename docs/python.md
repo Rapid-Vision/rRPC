@@ -16,6 +16,12 @@ rpc = RPCClient("http://localhost:8080")
 greeting = rpc.hello_world(name="Ada", surname="Lovelace")
 ```
 
+## Timeout
+Pass a timeout (seconds):
+```python
+rpc = RPCClient("http://localhost:8080", timeout=5.0)
+```
+
 ## Headers and auth
 Pass custom headers when creating the client:
 ```python

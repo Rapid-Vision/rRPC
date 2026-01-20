@@ -7,6 +7,7 @@ All error responses are JSON with this shape:
   "message": "field name is required"
 }
 ```
+User should not interact with them directly and use generated wrappers as decribed bellow.
 
 ## Error types
 

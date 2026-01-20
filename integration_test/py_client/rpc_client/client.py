@@ -1,3 +1,5 @@
+# THIS CODE IS GENERATED
+
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict, is_dataclass
@@ -132,20 +134,51 @@ class PayloadModel:
 
 
 class RPCClient:
-    def __init__(self, base_url: str, headers: Optional[Dict[str, str]] = None) -> None:
-        self.base_url = base_url.rstrip("/")
+    def __init__(
+        self,
+        base_url: str,
+        prefix: str = "/rpc",
+        headers: Optional[Dict[str, str]] = None,
+        timeout: Optional[float] = None,
+    ) -> None:
+        self.base_url = self._normalize_base_url(base_url)
+        self.prefix = self._normalize_prefix(prefix)
         self.headers = headers or {}
+        self.timeout = timeout
+
+    @staticmethod
+    def _normalize_base_url(base_url: str) -> str:
+        base_url = base_url.strip()
+        if "://" not in base_url:
+            base_url = "http://" + base_url
+        return base_url.rstrip("/")
+
+    @staticmethod
+    def _normalize_prefix(prefix: str) -> str:
+        prefix = prefix.strip()
+        if prefix == "":
+            return ""
+        if not prefix.startswith("/"):
+            prefix = "/" + prefix
+        return prefix.rstrip("/")
 
     def _request(self, path: str, payload: Optional[Dict[str, Any]]) -> Any:
-        url = f"{self.base_url}/rpc/{path}"
+        if self.prefix:
+            url = f"{self.base_url}{self.prefix}/{path}"
+        else:
+            url = f"{self.base_url}/{path}"
         data = None
         if payload is not None:
             data = json.dumps(self._encode_payload(payload)).encode("utf-8")
         headers = {**self.headers, "Content-Type": "application/json"}
         req = urllib.request.Request(url, data=data, method="POST", headers=headers)
         try:
-            with urllib.request.urlopen(req) as resp:
-                body = resp.read()
+            if self.timeout is None:
+                with urllib.request.urlopen(req) as resp:
+                    body = resp.read()
+            else:
+                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                    body = resp.read()
         except urllib.error.HTTPError as err:
             with err as resp:
                 detail = resp.read()
@@ -155,8 +188,9 @@ class RPCClient:
                 parsed = None
             if parsed is not None:
                 self._raise_if_error(parsed)
-            text = detail.decode("utf-8", errors="replace")
-            raise RuntimeError(f"rpc error: {text}") from err
+            raise RPCErrorException(
+                RPCError(type="custom", message=f"rpc error: status {err.code}")
+            ) from err
         if not body:
             return None
         return json.loads(body.decode("utf-8"))

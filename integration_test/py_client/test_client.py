@@ -109,6 +109,16 @@ class RPCClientTest(unittest.TestCase):
         self.assertEqual(result.data.get("value"), "x")
         self.assertEqual(result.raw_data.get("id"), 1)
 
+    def test_client_normalization(self) -> None:
+        rpc = RPCClient(
+            "localhost:8080/",
+            prefix="rpc",
+            headers={"Authorization": "Bearer test_token"},
+            timeout=5.0,
+        )
+        result = rpc.test_empty()
+        self.assertIsInstance(result, EmptyModel)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -187,15 +187,23 @@ func writeModel(b *strings.Builder, comments *commentEmitter, model parser.Model
 
 func writeRPC(b *strings.Builder, comments *commentEmitter, rpc parser.RPC) {
 	comments.EmitLeading(rpc.Line, "")
+	returnOnNewLine := rpc.HasReturn && rpc.Returns.Line > 0 && ((len(rpc.Parameters) == 0 && rpc.Returns.Line > rpc.Line) || (len(rpc.Parameters) > 0 && rpc.Returns.Line > rpc.ParamsEndLine))
 	if len(rpc.Parameters) == 0 {
 		b.WriteString("rpc ")
 		b.WriteString(rpc.Name)
 		b.WriteString("()")
 		comments.AppendTrailing(rpcAnchorKey(rpc))
 		if rpc.HasReturn {
-			b.WriteString(" ")
-			b.WriteString(parser.FormatType(rpc.Returns))
-			comments.AppendTrailing(rpcReturnAnchorKey(rpc))
+			if returnOnNewLine {
+				b.WriteString("\n")
+				comments.EmitLeading(rpc.Returns.Line, "")
+				b.WriteString(parser.FormatType(rpc.Returns))
+				comments.AppendTrailing(rpcReturnAnchorKey(rpc))
+			} else {
+				b.WriteString(" ")
+				b.WriteString(parser.FormatType(rpc.Returns))
+				comments.AppendTrailing(rpcReturnAnchorKey(rpc))
+			}
 		}
 		b.WriteString("\n")
 		return
@@ -219,11 +227,19 @@ func writeRPC(b *strings.Builder, comments *commentEmitter, rpc parser.RPC) {
 	if rpc.ParamsEndLine > 0 {
 		comments.EmitLeading(rpc.ParamsEndLine, "    ")
 	}
-	if rpc.HasReturn && rpc.Returns.Line > 0 {
-		comments.EmitLeading(rpc.Returns.Line, "")
-	}
 	b.WriteString(")")
 	if rpc.HasReturn {
+		if rpc.ParamsEndLine > 0 {
+			comments.AppendTrailing(rpcParamsEndAnchorKey(rpc))
+		}
+		if returnOnNewLine {
+			b.WriteString("\n")
+			comments.EmitLeading(rpc.Returns.Line, "")
+			b.WriteString(parser.FormatType(rpc.Returns))
+			comments.AppendTrailing(rpcReturnAnchorKey(rpc))
+			b.WriteString("\n")
+			return
+		}
 		b.WriteString(" ")
 		b.WriteString(parser.FormatType(rpc.Returns))
 		comments.AppendTrailing(rpcReturnAnchorKey(rpc))

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -15,6 +17,8 @@ const (
 	bearerToken = "test_token"
 )
 
+var backgroundCtx = context.Background()
+
 func newClient() *client.RPCClient {
 	return client.NewRPCClientWithHeaders(baseURL, map[string]string{
 		"Authorization": "Bearer " + bearerToken,
@@ -23,14 +27,14 @@ func newClient() *client.RPCClient {
 
 func TestEmpty(t *testing.T) {
 	rpc := newClient()
-	if _, err := rpc.TestEmpty(); err != nil {
+	if _, err := rpc.TestEmpty(backgroundCtx); err != nil {
 		t.Fatalf("TestEmpty failed: %v", err)
 	}
 }
 
 func TestNoReturn(t *testing.T) {
 	rpc := newClient()
-	if err := rpc.TestNoReturn(); err != nil {
+	if err := rpc.TestNoReturn(backgroundCtx); err != nil {
 		t.Fatalf("TestNoReturn failed: %v", err)
 	}
 }
@@ -38,7 +42,7 @@ func TestNoReturn(t *testing.T) {
 func TestBasic(t *testing.T) {
 	rpc := newClient()
 	note := "note"
-	res, err := rpc.TestBasic(client.TestBasicParams{
+	res, err := rpc.TestBasic(backgroundCtx, client.TestBasicParams{
 		Text:  client.TextModel{Title: nil, Body: "  hello  "},
 		Flag:  true,
 		Count: 3,
@@ -57,7 +61,7 @@ func TestBasic(t *testing.T) {
 
 func TestListMap(t *testing.T) {
 	rpc := newClient()
-	res, err := rpc.TestListMap(client.TestListMapParams{
+	res, err := rpc.TestListMap(backgroundCtx, client.TestListMapParams{
 		Texts: []client.TextModel{
 			{Title: stringPtr("t1"), Body: "b1"},
 			{Title: stringPtr("t2"), Body: "b2"},
@@ -83,7 +87,7 @@ func TestListMap(t *testing.T) {
 
 func TestOptional(t *testing.T) {
 	rpc := newClient()
-	res, err := rpc.TestOptional(client.TestOptionalParams{
+	res, err := rpc.TestOptional(backgroundCtx, client.TestOptionalParams{
 		Text: nil,
 		Flag: nil,
 	})
@@ -97,7 +101,7 @@ func TestOptional(t *testing.T) {
 
 func TestValidationError(t *testing.T) {
 	rpc := newClient()
-	_, err := rpc.TestValidationError(client.TestValidationErrorParams{
+	_, err := rpc.TestValidationError(backgroundCtx, client.TestValidationErrorParams{
 		Text: client.TextModel{Title: nil, Body: ""},
 	})
 	var vErr client.ValidationRPCError
@@ -114,7 +118,7 @@ func TestInputError(t *testing.T) {
 
 func TestUnauthorizedError(t *testing.T) {
 	rpc := newClient()
-	_, err := rpc.TestUnauthorizedError()
+	_, err := rpc.TestUnauthorizedError(backgroundCtx)
 	var uErr client.UnauthorizedRPCError
 	if err == nil || !errors.As(err, &uErr) {
 		t.Fatalf("expected UnauthorizedRPCError, got %v", err)
@@ -123,7 +127,7 @@ func TestUnauthorizedError(t *testing.T) {
 
 func TestAuthMiddlewareMissingToken(t *testing.T) {
 	rpc := client.NewRPCClient(baseURL)
-	_, err := rpc.TestEmpty()
+	_, err := rpc.TestEmpty(backgroundCtx)
 	var uErr client.UnauthorizedRPCError
 	if err == nil || !errors.As(err, &uErr) {
 		t.Fatalf("expected UnauthorizedRPCError from middleware, got %v", err)
@@ -134,7 +138,7 @@ func TestAuthMiddlewareInvalidToken(t *testing.T) {
 	rpc := client.NewRPCClientWithHeaders(baseURL, map[string]string{
 		"Authorization": "Bearer bad_token",
 	})
-	_, err := rpc.TestEmpty()
+	_, err := rpc.TestEmpty(backgroundCtx)
 	var uErr client.UnauthorizedRPCError
 	if err == nil || !errors.As(err, &uErr) {
 		t.Fatalf("expected UnauthorizedRPCError from middleware, got %v", err)
@@ -143,7 +147,7 @@ func TestAuthMiddlewareInvalidToken(t *testing.T) {
 
 func TestForbiddenError(t *testing.T) {
 	rpc := newClient()
-	_, err := rpc.TestForbiddenError()
+	_, err := rpc.TestForbiddenError(backgroundCtx)
 	var fErr client.ForbiddenRPCError
 	if err == nil || !errors.As(err, &fErr) {
 		t.Fatalf("expected ForbiddenRPCError, got %v", err)
@@ -152,7 +156,7 @@ func TestForbiddenError(t *testing.T) {
 
 func TestNotImplementedError(t *testing.T) {
 	rpc := newClient()
-	_, err := rpc.TestNotImplementedError()
+	_, err := rpc.TestNotImplementedError(backgroundCtx)
 	var nErr client.NotImplementedRPCError
 	if err == nil || !errors.As(err, &nErr) {
 		t.Fatalf("expected NotImplementedRPCError, got %v", err)
@@ -161,7 +165,7 @@ func TestNotImplementedError(t *testing.T) {
 
 func TestCustomError(t *testing.T) {
 	rpc := newClient()
-	_, err := rpc.TestCustomError()
+	_, err := rpc.TestCustomError(backgroundCtx)
 	var cErr client.CustomRPCError
 	if err == nil || !errors.As(err, &cErr) {
 		t.Fatalf("expected CustomRPCError, got %v", err)
@@ -170,7 +174,7 @@ func TestCustomError(t *testing.T) {
 
 func TestMapReturn(t *testing.T) {
 	rpc := newClient()
-	res, err := rpc.TestMapReturn()
+	res, err := rpc.TestMapReturn(backgroundCtx)
 	if err != nil {
 		t.Fatalf("TestMapReturn failed: %v", err)
 	}
@@ -186,7 +190,7 @@ func TestMapReturn(t *testing.T) {
 func TestJson(t *testing.T) {
 	rpc := newClient()
 	payload := map[string]any{"count": 2, "tags": []any{"a", "b"}}
-	res, err := rpc.TestJson(client.TestJsonParams{Data: payload})
+	res, err := rpc.TestJson(backgroundCtx, client.TestJsonParams{Data: payload})
 	if err != nil {
 		t.Fatalf("TestJson failed: %v", err)
 	}
@@ -202,7 +206,7 @@ func TestJson(t *testing.T) {
 func TestRaw(t *testing.T) {
 	rpc := newClient()
 	raw := json.RawMessage(`{"ok":true}`)
-	res, err := rpc.TestRaw(client.TestRawParams{Payload: raw})
+	res, err := rpc.TestRaw(backgroundCtx, client.TestRawParams{Payload: raw})
 	if err != nil {
 		t.Fatalf("TestRaw failed: %v", err)
 	}
@@ -217,7 +221,7 @@ func TestMixedPayload(t *testing.T) {
 		Data:    map[string]any{"value": "x"},
 		RawData: json.RawMessage(`{"id":1}`),
 	}
-	res, err := rpc.TestMixedPayload(client.TestMixedPayloadParams{Payload: payload})
+	res, err := rpc.TestMixedPayload(backgroundCtx, client.TestMixedPayloadParams{Payload: payload})
 	if err != nil {
 		t.Fatalf("TestMixedPayload failed: %v", err)
 	}
@@ -233,8 +237,53 @@ func TestMixedPayload(t *testing.T) {
 	}
 }
 
+func TestContextCancelled(t *testing.T) {
+	httpClient := &http.Client{
+		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			return nil, req.Context().Err()
+		}),
+	}
+	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	ctx, cancel := context.WithCancel(backgroundCtx)
+	cancel()
+	_, err := rpc.TestEmpty(ctx)
+	if err == nil || !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
+	}
+}
+
+func TestHTTPError(t *testing.T) {
+	httpClient := &http.Client{
+		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       io.NopCloser(strings.NewReader("boom")),
+				Header:     make(http.Header),
+			}, nil
+		}),
+	}
+	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	_, err := rpc.TestEmpty(backgroundCtx)
+	var httpErr client.ErrHTTP
+	if err == nil || !errors.As(err, &httpErr) {
+		t.Fatalf("expected ErrHTTP, got %v", err)
+	}
+	if httpErr.Status != http.StatusInternalServerError {
+		t.Fatalf("expected status 500, got %d", httpErr.Status)
+	}
+	if httpErr.Body != "boom" {
+		t.Fatalf("expected body 'boom', got %q", httpErr.Body)
+	}
+}
+
 func stringPtr(value string) *string {
 	return &value
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (fn roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return fn(req)
 }
 
 func sendInvalidPayload() error {

@@ -1,7 +1,10 @@
+// THIS CODE IS GENERATED
+
 package rpc_client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -149,6 +152,18 @@ func (e RPCErrorException) Error() string {
 	return e.Err.Message
 }
 
+type ErrHTTP struct {
+	Status int
+	Body   string
+}
+
+func (e ErrHTTP) Error() string {
+	if e.Body == "" {
+		return fmt.Sprintf("rpc error: status %d", e.Status)
+	}
+	return fmt.Sprintf("rpc error: status %d: %s", e.Status, e.Body)
+}
+
 type CustomRPCError struct {
 	RPCError
 }
@@ -229,140 +244,140 @@ func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers
 		headers: copiedHeaders,
 	}
 }
-func (c *RPCClient) TestEmpty() (EmptyModel, error) {
+func (c *RPCClient) TestEmpty(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestEmptyResult
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_empty", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_empty", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Empty, nil
 }
-func (c *RPCClient) TestNoReturn() error {
+func (c *RPCClient) TestNoReturn(ctx context.Context) error {
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_no_return", payload, nil); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_no_return", payload, nil); err != nil {
 		return err
 	}
 	return nil
 }
-func (c *RPCClient) TestBasic(params TestBasicParams) (TextModel, error) {
+func (c *RPCClient) TestBasic(ctx context.Context, params TestBasicParams) (TextModel, error) {
 	var zero TextModel
 	var res TestBasicResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_basic", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_basic", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Text, nil
 }
-func (c *RPCClient) TestListMap(params TestListMapParams) (NestedModel, error) {
+func (c *RPCClient) TestListMap(ctx context.Context, params TestListMapParams) (NestedModel, error) {
 	var zero NestedModel
 	var res TestListMapResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_list_map", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_list_map", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Nested, nil
 }
-func (c *RPCClient) TestOptional(params TestOptionalParams) (FlagsModel, error) {
+func (c *RPCClient) TestOptional(ctx context.Context, params TestOptionalParams) (FlagsModel, error) {
 	var zero FlagsModel
 	var res TestOptionalResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_optional", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_optional", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Flags, nil
 }
-func (c *RPCClient) TestValidationError(params TestValidationErrorParams) (TextModel, error) {
+func (c *RPCClient) TestValidationError(ctx context.Context, params TestValidationErrorParams) (TextModel, error) {
 	var zero TextModel
 	var res TestValidationErrorResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_validation_error", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_validation_error", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Text, nil
 }
-func (c *RPCClient) TestUnauthorizedError() (EmptyModel, error) {
+func (c *RPCClient) TestUnauthorizedError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestUnauthorizedErrorResult
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_unauthorized_error", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_unauthorized_error", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Empty, nil
 }
-func (c *RPCClient) TestForbiddenError() (EmptyModel, error) {
+func (c *RPCClient) TestForbiddenError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestForbiddenErrorResult
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_forbidden_error", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_forbidden_error", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Empty, nil
 }
-func (c *RPCClient) TestNotImplementedError() (EmptyModel, error) {
+func (c *RPCClient) TestNotImplementedError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestNotImplementedErrorResult
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_not_implemented_error", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_not_implemented_error", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Empty, nil
 }
-func (c *RPCClient) TestCustomError() (EmptyModel, error) {
+func (c *RPCClient) TestCustomError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestCustomErrorResult
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_custom_error", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_custom_error", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Empty, nil
 }
-func (c *RPCClient) TestMapReturn() (map[string]TextModel, error) {
+func (c *RPCClient) TestMapReturn(ctx context.Context) (map[string]TextModel, error) {
 	var zero map[string]TextModel
 	var res TestMapReturnResult
 	var payload any
 	payload = nil
-	if err := c.doRequest("/rpc/test_map_return", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_map_return", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Result, nil
 }
-func (c *RPCClient) TestJson(params TestJsonParams) (any, error) {
+func (c *RPCClient) TestJson(ctx context.Context, params TestJsonParams) (any, error) {
 	var zero any
 	var res TestJsonResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_json", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_json", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Json, nil
 }
-func (c *RPCClient) TestRaw(params TestRawParams) (json.RawMessage, error) {
+func (c *RPCClient) TestRaw(ctx context.Context, params TestRawParams) (json.RawMessage, error) {
 	var zero json.RawMessage
 	var res TestRawResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_raw", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_raw", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Raw, nil
 }
-func (c *RPCClient) TestMixedPayload(params TestMixedPayloadParams) (PayloadModel, error) {
+func (c *RPCClient) TestMixedPayload(ctx context.Context, params TestMixedPayloadParams) (PayloadModel, error) {
 	var zero PayloadModel
 	var res TestMixedPayloadResult
 	var payload any
 	payload = params
-	if err := c.doRequest("/rpc/test_mixed_payload", payload, &res); err != nil {
+	if err := c.doRequest(ctx, "/rpc/test_mixed_payload", payload, &res); err != nil {
 		return zero, err
 	}
 	return res.Payload, nil
@@ -387,7 +402,10 @@ func errorFromRPCError(err RPCError) error {
 	}
 }
 
-func (c *RPCClient) doRequest(path string, payload any, out any) error {
+func (c *RPCClient) doRequest(ctx context.Context, path string, payload any, out any) error {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	url := c.baseURL + path
 	var body io.Reader
 	if payload != nil {
@@ -397,7 +415,7 @@ func (c *RPCClient) doRequest(path string, payload any, out any) error {
 		}
 		body = bytes.NewReader(raw)
 	}
-	req, err := http.NewRequest(http.MethodPost, url, body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
@@ -421,10 +439,10 @@ func (c *RPCClient) doRequest(path string, payload any, out any) error {
 				return errorFromRPCError(rpcErr)
 			}
 			if strings.TrimSpace(string(raw)) != "" {
-				return fmt.Errorf("rpc error: %s", strings.TrimSpace(string(raw)))
+				return ErrHTTP{Status: resp.StatusCode, Body: strings.TrimSpace(string(raw))}
 			}
 		}
-		return fmt.Errorf("rpc error: status %d", resp.StatusCode)
+		return ErrHTTP{Status: resp.StatusCode}
 	}
 	if out == nil || len(raw) == 0 {
 		return nil

@@ -1,3 +1,5 @@
+# THIS CODE IS GENERATED
+
 from .client import RPCClient
 from .client import RPCError
 from .client import RPCErrorException

@@ -39,7 +39,7 @@ Go clients return the RPC result type directly (not the wrapper struct).
 RPC methods accept `context.Context` for cancellation and deadlines. To customize timeouts, proxies, or TLS, pass your own `*http.Client`:
 ```go
 httpClient := &http.Client{Timeout: 5 * time.Second}
-client := rpcclient.NewRPCClientWithHTTP("http://localhost:8080", httpClient)
+client := rpcclient.NewRPCClient("http://localhost:8080").WithHTTPClient(httpClient)
 ```
 
 ## Headers and auth
@@ -50,8 +50,7 @@ client := rpcclient.NewRPCClient("http://localhost:8080").WithBearerToken("token
 
 Or add authorization header manually:
 ```go
-client := rpcclient.NewRPCClientWithHeaders(
-	"http://localhost:8080",
+client := rpcclient.NewRPCClient("http://localhost:8080").WithHeaders(
 	map[string]string{"Authorization": "Bearer <token>"},
 )
 ```

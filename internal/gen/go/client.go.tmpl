@@ -130,35 +130,50 @@ type RPCClient struct {
 }
 
 func NewRPCClient(baseURL string) *RPCClient {
-	return NewRPCClientWithHTTPAndHeaders(baseURL, nil, nil)
+	return &RPCClient{
+		baseURL: strings.TrimRight(baseURL, "/"),
+		client:  http.DefaultClient,
+		headers: map[string]string{},
+	}
 }
 
-func NewRPCClientWithHTTP(baseURL string, client *http.Client) *RPCClient {
-	return NewRPCClientWithHTTPAndHeaders(baseURL, client, nil)
-}
-
-func NewRPCClientWithHeaders(baseURL string, headers map[string]string) *RPCClient {
-	return NewRPCClientWithHTTPAndHeaders(baseURL, nil, headers)
-}
-
-func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers map[string]string) *RPCClient {
+func (c *RPCClient) WithHTTPClient(client *http.Client) *RPCClient {
 	if client == nil {
 		client = http.DefaultClient
 	}
-	copiedHeaders := make(map[string]string, len(headers))
+	next := c.clone()
+	next.client = client
+	return next
+}
+
+func (c *RPCClient) WithHeaders(headers map[string]string) *RPCClient {
+	next := c.clone()
+	if headers == nil {
+		return next
+	}
 	for key, value := range headers {
-		copiedHeaders[key] = value
+		next.headers[key] = value
 	}
-	return &RPCClient{
-		baseURL: strings.TrimRight(baseURL, "/"),
-		client:  client,
-		headers: copiedHeaders,
-	}
+	return next
 }
 
 func (c *RPCClient) WithBearerToken(token string) *RPCClient {
-	c.bearerToken = token
-	return c
+	next := c.clone()
+	next.bearerToken = token
+	return next
+}
+
+func (c *RPCClient) clone() *RPCClient {
+	copiedHeaders := make(map[string]string, len(c.headers))
+	for key, value := range c.headers {
+		copiedHeaders[key] = value
+	}
+	return &RPCClient{
+		baseURL:     c.baseURL,
+		client:      c.client,
+		headers:     copiedHeaders,
+		bearerToken: c.bearerToken,
+	}
 }
 
 {{- range $rpc := .RPCs}}

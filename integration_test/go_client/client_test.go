@@ -239,7 +239,7 @@ func TestContextCancelled(t *testing.T) {
 			return nil, req.Context().Err()
 		}),
 	}
-	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	rpc := client.NewRPCClient(baseURL).WithHTTPClient(httpClient)
 	ctx, cancel := context.WithCancel(backgroundCtx)
 	cancel()
 	_, err := rpc.TestEmpty(ctx)
@@ -258,7 +258,7 @@ func TestHTTPError(t *testing.T) {
 			}, nil
 		}),
 	}
-	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	rpc := client.NewRPCClient(baseURL).WithHTTPClient(httpClient)
 	_, err := rpc.TestEmpty(backgroundCtx)
 	var httpErr client.ErrHTTP
 	if err == nil || !errors.As(err, &httpErr) {
@@ -284,7 +284,7 @@ func TestWithBearerTokenHeader(t *testing.T) {
 			}, nil
 		}),
 	}
-	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient).WithBearerToken(bearerToken)
+	rpc := client.NewRPCClient(baseURL).WithHTTPClient(httpClient).WithBearerToken(bearerToken)
 	if err := rpc.TestNoReturn(backgroundCtx); err != nil {
 		t.Fatalf("TestNoReturn failed: %v", err)
 	}

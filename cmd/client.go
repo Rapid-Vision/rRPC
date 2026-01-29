@@ -28,7 +28,7 @@ var (
 func init() {
 	rootCmd.AddCommand(clientCmd)
 	clientCmd.Flags().StringVar(&clientLang, "lang", "python", "Output language")
-	clientCmd.Flags().StringVarP(&clientPkg, "pkg", "p", "rpc_client", "Python package name for generated code")
+	clientCmd.Flags().StringVarP(&clientPkg, "pkg", "p", "rpcclient", "Python package name for generated code")
 	clientCmd.Flags().StringVarP(&clientOut, "output", "o", ".", "Output base directory")
 	clientCmd.Flags().BoolVarP(&clientForce, "force", "f", false, "Overwrite output file if it exists")
 	clientCmd.Flags().StringVar(&clientPrefix, "prefix", "rpc", "URL path prefix (empty for none)")

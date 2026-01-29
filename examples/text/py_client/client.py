@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from rpc_client import RPCClient, TextModel
+from rpcclient import RPCClient, TextModel
 
 
 def main() -> None:

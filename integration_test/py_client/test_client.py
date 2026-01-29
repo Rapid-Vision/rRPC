@@ -1,6 +1,6 @@
 import unittest
 
-from rpc_client import (
+from rpcclient import (
     RPCClient,
     EmptyModel,
     PayloadModel,
@@ -17,7 +17,9 @@ from rpc_client import (
 class RPCClientTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.rpc = RPCClient("http://localhost:8080", headers={"Authorization": "Bearer test_token"})
+        cls.rpc = RPCClient(
+            "http://localhost:8080", headers={"Authorization": "Bearer test_token"}
+        )
 
     def test_empty(self) -> None:
         empty = self.rpc.test_empty()

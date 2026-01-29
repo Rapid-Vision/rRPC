@@ -22,4 +22,4 @@ $(RRPC):
 	cd $(ROOT) && go build
 
 clean:
-	rm -rf go_server/rpcserver go_client/rpc_client py_client/rpc_client openapi.json
+	rm -rf go_server/rpcserver go_client/rpcclient py_client/rpcclient openapi.json

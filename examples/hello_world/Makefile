@@ -32,4 +32,4 @@ go-build:
 	cd $(ROOT) && go build
 
 clean:
-	rm -rf ./go_server/rpcserver ./py_client/rpc_client openapi.json
+	rm -rf ./go_server/rpcserver ./py_client/rpcclient openapi.json

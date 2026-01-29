@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	client "integration_test/client/rpc_client"
+	client "integration_test/client/rpcclient"
 )
 
 const (

@@ -1,6 +1,6 @@
 // THIS CODE IS GENERATED
 
-package rpc_client
+package rpcclient
 
 import (
 	"bytes"

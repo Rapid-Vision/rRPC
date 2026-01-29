@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/pmezard/go-difflib/difflib"
 
 	_ "embed"
 )
@@ -156,7 +157,50 @@ func TestFormatFromTestFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
 	if formatted != testExpected {
-		t.Fatalf("formatted output mismatch:\n%s", formatted)
+		diff := difflib.UnifiedDiff{
+			A:        difflib.SplitLines(formatted),
+			B:        difflib.SplitLines(testExpected),
+			FromFile: "formatted",
+			ToFile:   "expected",
+			Context:  3,
+		}
+		text, _ := difflib.GetUnifiedDiffString(diff)
+
+		t.Fatalf("formatted output mismatch:\n%s", text)
+	}
+}
+
+func TestFormatIdempotanceFromTestFile(t *testing.T) {
+	schema, err := parser.Parse(testInput)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	formatted, err := FormatSchema(schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	formatted_schema, err := parser.Parse(formatted)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	formatted_twice, err := FormatSchema(formatted_schema)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if formatted != formatted_twice {
+		diff := difflib.UnifiedDiff{
+			A:        difflib.SplitLines(formatted),
+			B:        difflib.SplitLines(formatted_twice),
+			FromFile: "formatted",
+			ToFile:   "formatted_twice",
+			Context:  3,
+		}
+		text, _ := difflib.GetUnifiedDiffString(diff)
+
+		t.Fatalf("formatted idempotency failed:\n%s", text)
 	}
 }

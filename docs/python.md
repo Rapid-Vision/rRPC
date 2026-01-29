@@ -6,11 +6,11 @@ This page covers generating a Python client. See [schema_language.md](docs/schem
 ```bash
 rRPC client -o . hello.rrpc
 ```
-The default output package is `rpc_client`.
+The default output package is `rpcclient`.
 
 ## Client usage
 ```python
-from rpc_client import RPCClient
+from rpcclient import RPCClient
 
 rpc = RPCClient("http://localhost:8080")
 greeting = rpc.hello_world(name="Ada", surname="Lovelace")

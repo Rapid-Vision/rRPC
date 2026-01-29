@@ -7,7 +7,7 @@ This page covers server and Go client usage. See [schema_language.md](docs/schem
 rRPC server -o . hello.rrpc
 rRPC client --lang go -o . hello.rrpc
 ```
-Default packages are `rpcserver` for servers and `rpc_client` for clients.
+Default packages are `rpcserver` for servers and `rpcclient` for clients.
 
 ## Implement the server
 Generated handlers expect a context:
@@ -30,8 +30,8 @@ http.ListenAndServe(":8080", handler)
 
 ## Go client usage
 ```go
-client := rpc_client.NewRPCClient("http://localhost:8080")
-greeting, err := client.HelloWorld(context.Background(), rpc_client.HelloWorldParams{Name: "Ada"})
+client := rpcclient.NewRPCClient("http://localhost:8080")
+greeting, err := client.HelloWorld(context.Background(), rpcclient.HelloWorldParams{Name: "Ada"})
 ```
 Go clients return the RPC result type directly (not the wrapper struct).
 
@@ -39,26 +39,30 @@ Go clients return the RPC result type directly (not the wrapper struct).
 RPC methods accept `context.Context` for cancellation and deadlines. To customize timeouts, proxies, or TLS, pass your own `*http.Client`:
 ```go
 httpClient := &http.Client{Timeout: 5 * time.Second}
-client := rpc_client.NewRPCClientWithHTTP("http://localhost:8080", httpClient)
+client := rpcclient.NewRPCClient("http://localhost:8080").WithHTTPClient(httpClient)
 ```
 
 ## Headers and auth
-Use the headers-capable constructor for middleware or auth:
+Use WithBearerToken to set a bearer token:
 ```go
-client := rpc_client.NewRPCClientWithHeaders(
-	"http://localhost:8080",
-	map[string]string{"Authorization": "Bearer token"},
+client := rpcclient.NewRPCClient("http://localhost:8080").WithBearerToken("token")
+```
+
+Or add authorization header manually:
+```go
+client := rpcclient.NewRPCClient("http://localhost:8080").WithHeaders(
+	map[string]string{"Authorization": "Bearer <token>"},
 )
 ```
 
 ## Error handling
 Errors are returned as typed Go errors on non-2xx responses:
-- `rpc_client.ValidationRPCError`
-- `rpc_client.InputRPCError`
-- `rpc_client.UnauthorizedRPCError`
-- `rpc_client.ForbiddenRPCError`
-- `rpc_client.NotImplementedRPCError`
-- `rpc_client.CustomRPCError`
+- `rpcclient.ValidationRPCError`
+- `rpcclient.InputRPCError`
+- `rpcclient.UnauthorizedRPCError`
+- `rpcclient.ForbiddenRPCError`
+- `rpcclient.NotImplementedRPCError`
+- `rpcclient.CustomRPCError`
 
 For middleware, generated servers expose helpers like:
 ```go

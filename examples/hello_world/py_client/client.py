@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from rpc_client import RPCClient
+from rpcclient import RPCClient
 
 
 def main() -> None:

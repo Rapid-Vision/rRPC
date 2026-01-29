@@ -1,11 +1,17 @@
+import io
 import unittest
+import urllib.error
+import urllib.request
+from typing import Optional
+from unittest import mock
 
-from rpc_client import (
+from rpcclient import (
     RPCClient,
     EmptyModel,
     PayloadModel,
     TextModel,
     CustomRPCError,
+    RPCErrorException,
     InputRPCError,
     ValidationRPCError,
     UnauthorizedRPCError,
@@ -17,7 +23,9 @@ from rpc_client import (
 class RPCClientTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.rpc = RPCClient("http://localhost:8080", headers={"Authorization": "Bearer test_token"})
+        cls.rpc = RPCClient(
+            "http://localhost:8080", headers={"Authorization": "Bearer test_token"}
+        )
 
     def test_empty(self) -> None:
         empty = self.rpc.test_empty()
@@ -108,6 +116,21 @@ class RPCClientTest(unittest.TestCase):
         self.assertIsInstance(result, PayloadModel)
         self.assertEqual(result.data.get("value"), "x")
         self.assertEqual(result.raw_data.get("id"), 1)
+
+    def test_http_error_non_json(self) -> None:
+        def raise_http_error(req: urllib.request.Request, timeout: Optional[float] = None) -> None:
+            _ = timeout
+            fp = io.BytesIO(b"boom")
+            raise urllib.error.HTTPError(
+                req.full_url, 500, "Internal Server Error", hdrs=None, fp=fp
+            )
+
+        rpc = RPCClient("http://localhost:8080")
+        with mock.patch("rpcclient.client.urllib.request.urlopen", side_effect=raise_http_error):
+            with self.assertRaises(RPCErrorException) as ctx:
+                rpc.test_empty()
+        self.assertEqual(ctx.exception.error.type, "custom")
+        self.assertEqual(ctx.exception.error.message, "rpc error: status 500")
 
     def test_client_normalization(self) -> None:
         rpc = RPCClient(

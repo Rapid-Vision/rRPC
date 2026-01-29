@@ -1,6 +1,6 @@
 // THIS CODE IS GENERATED
 
-package rpc_client
+package rpcclient
 
 import (
 	"bytes"
@@ -213,35 +213,56 @@ func (e NotImplementedRPCError) Error() string {
 }
 
 type RPCClient struct {
-	baseURL string
-	client  *http.Client
-	headers map[string]string
+	baseURL     string
+	client      *http.Client
+	headers     map[string]string
+	bearerToken string
 }
 
 func NewRPCClient(baseURL string) *RPCClient {
-	return NewRPCClientWithHTTPAndHeaders(baseURL, nil, nil)
+	return &RPCClient{
+		baseURL: strings.TrimRight(baseURL, "/"),
+		client:  http.DefaultClient,
+		headers: map[string]string{},
+	}
 }
 
-func NewRPCClientWithHTTP(baseURL string, client *http.Client) *RPCClient {
-	return NewRPCClientWithHTTPAndHeaders(baseURL, client, nil)
-}
-
-func NewRPCClientWithHeaders(baseURL string, headers map[string]string) *RPCClient {
-	return NewRPCClientWithHTTPAndHeaders(baseURL, nil, headers)
-}
-
-func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers map[string]string) *RPCClient {
+func (c *RPCClient) WithHTTPClient(client *http.Client) *RPCClient {
 	if client == nil {
 		client = http.DefaultClient
 	}
-	copiedHeaders := make(map[string]string, len(headers))
+	next := c.clone()
+	next.client = client
+	return next
+}
+
+func (c *RPCClient) WithHeaders(headers map[string]string) *RPCClient {
+	next := c.clone()
+	if headers == nil {
+		return next
+	}
 	for key, value := range headers {
+		next.headers[key] = value
+	}
+	return next
+}
+
+func (c *RPCClient) WithBearerToken(token string) *RPCClient {
+	next := c.clone()
+	next.bearerToken = token
+	return next
+}
+
+func (c *RPCClient) clone() *RPCClient {
+	copiedHeaders := make(map[string]string, len(c.headers))
+	for key, value := range c.headers {
 		copiedHeaders[key] = value
 	}
 	return &RPCClient{
-		baseURL: strings.TrimRight(baseURL, "/"),
-		client:  client,
-		headers: copiedHeaders,
+		baseURL:     c.baseURL,
+		client:      c.client,
+		headers:     copiedHeaders,
+		bearerToken: c.bearerToken,
 	}
 }
 func (c *RPCClient) TestEmpty(ctx context.Context) (EmptyModel, error) {
@@ -420,6 +441,18 @@ func (c *RPCClient) doRequest(ctx context.Context, path string, payload any, out
 		return fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if c.bearerToken != "" {
+		hasAuthHeader := false
+		for key := range c.headers {
+			if http.CanonicalHeaderKey(key) == "Authorization" {
+				hasAuthHeader = true
+				break
+			}
+		}
+		if !hasAuthHeader {
+			req.Header.Set("Authorization", "Bearer "+c.bearerToken)
+		}
+	}
 	for key, value := range c.headers {
 		req.Header.Set(key, value)
 	}

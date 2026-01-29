@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	client "integration_test/client/rpc_client"
+	client "integration_test/client/rpcclient"
 )
 
 const (
@@ -20,9 +20,7 @@ const (
 var backgroundCtx = context.Background()
 
 func newClient() *client.RPCClient {
-	return client.NewRPCClientWithHeaders(baseURL, map[string]string{
-		"Authorization": "Bearer " + bearerToken,
-	})
+	return client.NewRPCClient(baseURL).WithBearerToken(bearerToken)
 }
 
 func TestEmpty(t *testing.T) {
@@ -135,9 +133,7 @@ func TestAuthMiddlewareMissingToken(t *testing.T) {
 }
 
 func TestAuthMiddlewareInvalidToken(t *testing.T) {
-	rpc := client.NewRPCClientWithHeaders(baseURL, map[string]string{
-		"Authorization": "Bearer bad_token",
-	})
+	rpc := client.NewRPCClient(baseURL).WithBearerToken("bad_token")
 	_, err := rpc.TestEmpty(backgroundCtx)
 	var uErr client.UnauthorizedRPCError
 	if err == nil || !errors.As(err, &uErr) {
@@ -243,7 +239,7 @@ func TestContextCancelled(t *testing.T) {
 			return nil, req.Context().Err()
 		}),
 	}
-	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	rpc := client.NewRPCClient(baseURL).WithHTTPClient(httpClient)
 	ctx, cancel := context.WithCancel(backgroundCtx)
 	cancel()
 	_, err := rpc.TestEmpty(ctx)
@@ -262,7 +258,7 @@ func TestHTTPError(t *testing.T) {
 			}, nil
 		}),
 	}
-	rpc := client.NewRPCClientWithHTTP(baseURL, httpClient)
+	rpc := client.NewRPCClient(baseURL).WithHTTPClient(httpClient)
 	_, err := rpc.TestEmpty(backgroundCtx)
 	var httpErr client.ErrHTTP
 	if err == nil || !errors.As(err, &httpErr) {
@@ -273,6 +269,27 @@ func TestHTTPError(t *testing.T) {
 	}
 	if httpErr.Body != "boom" {
 		t.Fatalf("expected body 'boom', got %q", httpErr.Body)
+	}
+}
+
+func TestWithBearerTokenHeader(t *testing.T) {
+	var authHeader string
+	httpClient := &http.Client{
+		Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			authHeader = req.Header.Get("Authorization")
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body:       io.NopCloser(strings.NewReader("")),
+				Header:     make(http.Header),
+			}, nil
+		}),
+	}
+	rpc := client.NewRPCClient(baseURL).WithHTTPClient(httpClient).WithBearerToken(bearerToken)
+	if err := rpc.TestNoReturn(backgroundCtx); err != nil {
+		t.Fatalf("TestNoReturn failed: %v", err)
+	}
+	if authHeader != "Bearer "+bearerToken {
+		t.Fatalf("expected Authorization header set, got %q", authHeader)
 	}
 }
 

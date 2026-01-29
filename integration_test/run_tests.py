@@ -58,7 +58,12 @@ def main() -> int:
     )
     try:
         wait_for_port("127.0.0.1", 8080, timeout=5.0)
+        print("Running go tests:")
         run(["go", "test", "."], cwd=workdir / "go_client")
+
+        print("\n")
+
+        print("Running python tests:")
         run(
             [sys.executable, "-m", "unittest", "test_client.py"],
             cwd=workdir / "py_client",

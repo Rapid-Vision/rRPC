@@ -1,3 +1,5 @@
+# THIS CODE IS GENERATED
+
 from .client import RPCClient
 from .client import RPCError
 from .client import RPCErrorException
@@ -7,7 +9,11 @@ from .client import InputRPCError
 from .client import UnauthorizedRPCError
 from .client import ForbiddenRPCError
 from .client import NotImplementedRPCError
-from .client import GreetingMessageModel
+from .client import EmptyModel
+from .client import TextModel
+from .client import FlagsModel
+from .client import NestedModel
+from .client import PayloadModel
 
 __all__ = [
     "RPCClient",
@@ -19,5 +25,9 @@ __all__ = [
     "UnauthorizedRPCError",
     "ForbiddenRPCError",
     "NotImplementedRPCError",
-    "GreetingMessageModel",
+    "EmptyModel",
+    "TextModel",
+    "FlagsModel",
+    "NestedModel",
+    "PayloadModel",
 ]

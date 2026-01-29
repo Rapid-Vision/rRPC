@@ -27,7 +27,7 @@ rRPC server -o . hello.rrpc
 rRPC client -o . hello.rrpc
 rRPC client --lang go -o . hello.rrpc
 ```
-Generated code is written to `./<pkg>/` (default packages: `rpcserver` and `rpc_client`).
+Generated code is written to `./<pkg>/` (default packages: `rpcserver` and `rpcclient`).
 
 ## Implement RPCHandler interface
 

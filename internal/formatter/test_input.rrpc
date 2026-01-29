@@ -7,6 +7,8 @@ model Empty {
 model User {
 id: int
 name: string
+
+
 nickname: string?
 }
 
@@ -22,6 +24,8 @@ model Types {
         lookup: map[string]
         typed_lookup: map[User]
         nested: map[list[User?]]
+
+
 }
 
 # RPCs without params/returns
@@ -34,6 +38,7 @@ rpc GetUser() User # return comment
 rpc FindUser(
     id: int,
     name: string?,
+    
 ) User
 
 # RPCs with no return but with parameters

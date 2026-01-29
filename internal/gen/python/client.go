@@ -61,6 +61,8 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, err
 
 func GeneratePythonInit(schema *parser.Schema) string {
 	var b strings.Builder
+	b.WriteString("# THIS CODE IS GENERATED\n\n")
+
 	b.WriteString("from .client import RPCClient\n")
 	b.WriteString("from .client import RPCError\n")
 	b.WriteString("from .client import RPCErrorException\n")

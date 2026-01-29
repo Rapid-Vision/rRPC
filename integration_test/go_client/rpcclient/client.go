@@ -213,9 +213,10 @@ func (e NotImplementedRPCError) Error() string {
 }
 
 type RPCClient struct {
-	baseURL string
-	client  *http.Client
-	headers map[string]string
+	baseURL     string
+	client      *http.Client
+	headers     map[string]string
+	bearerToken string
 }
 
 func NewRPCClient(baseURL string) *RPCClient {
@@ -243,6 +244,11 @@ func NewRPCClientWithHTTPAndHeaders(baseURL string, client *http.Client, headers
 		client:  client,
 		headers: copiedHeaders,
 	}
+}
+
+func (c *RPCClient) WithBearerToken(token string) *RPCClient {
+	c.bearerToken = token
+	return c
 }
 func (c *RPCClient) TestEmpty(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
@@ -420,6 +426,18 @@ func (c *RPCClient) doRequest(ctx context.Context, path string, payload any, out
 		return fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if c.bearerToken != "" {
+		hasAuthHeader := false
+		for key := range c.headers {
+			if http.CanonicalHeaderKey(key) == "Authorization" {
+				hasAuthHeader = true
+				break
+			}
+		}
+		if !hasAuthHeader {
+			req.Header.Set("Authorization", "Bearer "+c.bearerToken)
+		}
+	}
 	for key, value := range c.headers {
 		req.Header.Set(key, value)
 	}

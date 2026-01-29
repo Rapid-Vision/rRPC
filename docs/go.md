@@ -43,11 +43,16 @@ client := rpcclient.NewRPCClientWithHTTP("http://localhost:8080", httpClient)
 ```
 
 ## Headers and auth
-Use the headers-capable constructor for middleware or auth:
+Use WithBearerToken to set a bearer token:
+```go
+client := rpcclient.NewRPCClient("http://localhost:8080").WithBearerToken("token")
+```
+
+Or add authorization header manually:
 ```go
 client := rpcclient.NewRPCClientWithHeaders(
 	"http://localhost:8080",
-	map[string]string{"Authorization": "Bearer token"},
+	map[string]string{"Authorization": "Bearer <token>"},
 )
 ```
 

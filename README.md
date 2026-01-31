@@ -23,6 +23,7 @@ This project aims to provide a simple tool with the following properties:
 | --- | --- | --- |
 | Go | ✅ | ✅ |
 | Python | ❌ | ✅ |
+| Typescript | ❌ | ✅ |
 
 Other languages can be supported via OpenAPI toolkits.
 
@@ -37,6 +38,7 @@ go install github.com/Rapid-Vision/rRPC
 - [Error handling](docs/errors.md)
 - [Go guide](docs/go.md)
 - [Python guide](docs/python.md)
+- [TypeScript guide](docs/typescript.md)
 - [Protocol description](docs/protocol.md)
 
 ## Usage examples
@@ -61,5 +63,5 @@ This project focuses on a small, typed, JSON-over-HTTP RPC flow.
 
 ### When this is not a good fit
 - You need streaming, bidirectional RPC, or advanced middleware.
-- You need multi-language support beyond Go/Python.
+- You need multi-language support beyond Go/Python/TypeScript.
 - You want REST or GraphQL semantics and tooling.

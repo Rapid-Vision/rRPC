@@ -8,6 +8,7 @@ Core references:
 Language guides:
 - [Go guide](go.md)
 - [Python guide](python.md)
+- [TypeScript guide](typescript.md)
 
 Protocol:
 - [Protocol](protocol.md)

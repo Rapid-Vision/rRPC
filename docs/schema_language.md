@@ -28,7 +28,7 @@ Parameters are named fields. The return type is a single type.
 - Maps: `map[Type]` (JSON keys are strings)
 
 ## json and raw
-- `json` is arbitrary JSON data decoded into language-native structures (maps/lists in Go/Python).
+- `json` is arbitrary JSON data decoded into language-native structures (maps/lists in Go/Python, objects/arrays in TypeScript).
 - `raw` preserves the raw JSON payload (Go uses `json.RawMessage`; Python exposes it as an untyped value).
 
 ## Nesting

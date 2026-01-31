@@ -49,7 +49,7 @@ func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("parse schema: %w", err)
 	}
-	code, err := gogen.GenerateWithPrefix(schema, serverPkg, serverPrefix)
+	files, err := gogen.GenerateWithPrefix(schema, serverPkg, serverPrefix)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}
@@ -57,17 +57,26 @@ func RunServerCmd(cmd *cobra.Command, args []string) error {
 	if outputDir == "" {
 		outputDir = "."
 	}
-	outputPath := filepath.Join(outputDir, serverPkg, "server.go")
+	filePaths := make([]string, 0, len(files))
+	for name := range files {
+		filePaths = append(filePaths, filepath.Join(outputDir, serverPkg, name))
+	}
 	if !serverForce {
-		if _, statErr := os.Stat(outputPath); statErr == nil {
-			return fmt.Errorf("output file exists: %s (use --force to overwrite)", outputPath)
+		for _, path := range filePaths {
+			if _, statErr := os.Stat(path); statErr == nil {
+				return fmt.Errorf("output file exists: %s (use --force to overwrite)", path)
+			}
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0o755); err != nil {
+	outputBase := filepath.Join(outputDir, serverPkg)
+	if err := os.MkdirAll(outputBase, 0o755); err != nil {
 		return fmt.Errorf("create output dir: %w", err)
 	}
-	if err := os.WriteFile(outputPath, []byte(code), 0o644); err != nil {
-		return fmt.Errorf("write output: %w", err)
+	for name, contents := range files {
+		outPath := filepath.Join(outputBase, name)
+		if err := os.WriteFile(outPath, []byte(contents), 0o644); err != nil {
+			return fmt.Errorf("write output: %w", err)
+		}
 	}
 	return nil
 }

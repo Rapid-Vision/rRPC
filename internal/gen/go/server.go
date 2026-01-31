@@ -3,6 +3,7 @@ package gogen
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -13,8 +14,17 @@ import (
 	"go/format"
 )
 
-//go:embed server.go.tmpl
-var serverTemplate string
+//go:embed server_models.go.tmpl
+var serverModelsTemplate string
+
+//go:embed server_errors.go.tmpl
+var serverErrorsTemplate string
+
+//go:embed server_utils.go.tmpl
+var serverUtilsTemplate string
+
+//go:embed server_rpcs.go.tmpl
+var serverRPCsTemplate string
 
 type templateData struct {
 	Package string
@@ -22,18 +32,23 @@ type templateData struct {
 	RPCs    []parser.RPC
 }
 
-func Generate(schema *parser.Schema, pkg string) (string, error) {
+func Generate(schema *parser.Schema, pkg string) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
 	return GenerateWithPrefix(schema, pkg, "rpc")
 }
 
-func GenerateWithPrefix(schema *parser.Schema, pkg, prefix string) (string, error) {
+func GenerateWithPrefix(schema *parser.Schema, pkg, prefix string) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
-	tmpl, err := template.New("server.go.tmpl").Funcs(template.FuncMap{
+	data := templateData{
+		Package: pkg,
+		Models:  schema.Models,
+		RPCs:    schema.RPCs,
+	}
+	funcMap := template.FuncMap{
 		"modelTypeName":  modelTypeName,
 		"fieldName":      fieldName,
 		"jsonName":       jsonName,
@@ -47,26 +62,68 @@ func GenerateWithPrefix(schema *parser.Schema, pkg, prefix string) (string, erro
 		},
 		"resultField": resultField,
 		"hasReturn":   hasReturn,
-	}).Parse(serverTemplate)
-	if err != nil {
-		return "", fmt.Errorf("parse template: %w", err)
+		"hasRPCs": func(data templateData) bool {
+			return len(data.RPCs) > 0
+		},
+		"usesRawInModels": func(data templateData) bool {
+			return parser.UsesRawInModels(*schema)
+		},
+		"usesRawInRPCs": func(data templateData) bool {
+			return parser.UsesRawInRPCs(*schema)
+		},
+		"usesJSONDecoder": func(data templateData) bool {
+			return usesJSONDecoder(data.RPCs)
+		},
 	}
 
-	data := templateData{
-		Package: pkg,
-		Models:  schema.Models,
-		RPCs:    schema.RPCs,
-	}
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("execute template: %w", err)
+	templates := map[string]string{
+		"models.go": serverModelsTemplate,
+		"errors.go": serverErrorsTemplate,
+		"utils.go":  serverUtilsTemplate,
+		"rpcs.go":   serverRPCsTemplate,
 	}
 
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		return "", fmt.Errorf("formatting error: %w", err)
+	files := make(map[string]string, len(templates))
+	for name, tmplText := range templates {
+		tmpl, err := template.New(name).Funcs(funcMap).Parse(tmplText)
+		if err != nil {
+			return nil, fmt.Errorf("parse template %s: %w", name, err)
+		}
+		var buf bytes.Buffer
+		buf.WriteString("// THIS CODE IS GENERATED\n\n")
+		buf.WriteString("package ")
+		buf.WriteString(pkg)
+		buf.WriteString("\n\n")
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return nil, fmt.Errorf("execute template %s: %w", name, err)
+		}
+		formatted, err := format.Source(buf.Bytes())
+		if err != nil {
+			return nil, fmt.Errorf("formatting error %s: %w", name, err)
+		}
+		files[name] = string(formatted)
 	}
-	return string(formatted), nil
+
+	ordered := make([]string, 0, len(files))
+	for name := range files {
+		ordered = append(ordered, name)
+	}
+	sort.Strings(ordered)
+	for _, name := range ordered {
+		if strings.TrimSpace(files[name]) == "" {
+			delete(files, name)
+		}
+	}
+	return files, nil
+}
+
+func usesJSONDecoder(rpcs []parser.RPC) bool {
+	for _, rpc := range rpcs {
+		if len(rpc.Parameters) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func modelTypeName(name string) string {

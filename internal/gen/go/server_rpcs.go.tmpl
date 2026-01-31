@@ -1,0 +1,79 @@
+{{- if hasRPCs .}}
+
+import (
+	"context"
+{{- if usesJSONDecoder .}}
+	"encoding/json"
+	"io"
+{{- else if usesRawInRPCs .}}
+	"encoding/json"
+{{- end}}
+	"net/http"
+)
+{{- end}}
+
+{{- range $rpc := .RPCs}}
+
+type {{rpcParamsName $rpc.Name}} struct {
+{{- range $param := $rpc.Parameters}}
+	{{fieldName $param.Name}} {{goType $param.Type}} `json:"{{jsonName $param.Name}}"`
+{{- end}}
+}
+
+{{- if hasReturn $rpc}}
+type {{rpcResultName $rpc.Name}} struct {
+	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
+}
+{{- end}}
+{{- end}}
+
+{{- if hasRPCs .}}
+type RPCHandler interface {
+{{- range $rpc := .RPCs}}
+	{{- if hasReturn $rpc}}
+	{{rpcMethodName $rpc.Name}}(context.Context, {{rpcParamsName $rpc.Name}}) ({{rpcResultName $rpc.Name}}, error)
+	{{- else}}
+	{{rpcMethodName $rpc.Name}}(context.Context, {{rpcParamsName $rpc.Name}}) error
+	{{- end}}
+{{- end}}
+}
+
+func CreateHTTPHandler(rpc RPCHandler) http.Handler {
+	mux := http.NewServeMux()
+{{- range $rpc := .RPCs}}
+	mux.Handle("{{rpcRoute $rpc.Name}}", {{rpcHandlerName $rpc.Name}}(rpc))
+{{- end}}
+	return mux
+}
+{{- end}}
+
+{{- range $rpc := .RPCs}}
+
+func {{rpcHandlerName $rpc.Name}}(rpc RPCHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var params {{rpcParamsName $rpc.Name}}
+		{{- if gt (len $rpc.Parameters) 0}}
+		decoder := json.NewDecoder(r.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&params); err != nil && err != io.EOF {
+			writeError(w, InputError{Message: err.Error()})
+			return
+		}
+		{{- end}}
+		{{- if hasReturn $rpc}}
+		res, err := rpc.{{rpcMethodName $rpc.Name}}(r.Context(), params)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, res)
+		{{- else}}
+		if err := rpc.{{rpcMethodName $rpc.Name}}(r.Context(), params); err != nil {
+			writeError(w, err)
+			return
+		}
+		writeJSON(w, http.StatusOK, struct{}{})
+		{{- end}}
+	})
+}
+{{- end}}

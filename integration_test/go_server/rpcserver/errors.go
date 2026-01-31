@@ -1,0 +1,52 @@
+// THIS CODE IS GENERATED
+
+package rpcserver
+
+type ValidationError struct {
+	Message string
+}
+
+func (e ValidationError) Error() string {
+	return e.Message
+}
+
+type InputError struct {
+	Message string
+}
+
+func (e InputError) Error() string {
+	return e.Message
+}
+
+type UnauthorizedError struct {
+	Message string
+}
+
+func (e UnauthorizedError) Error() string {
+	return e.Message
+}
+
+type ForbiddenError struct {
+	Message string
+}
+
+func (e ForbiddenError) Error() string {
+	return e.Message
+}
+
+type NotImplementedError struct {
+	Message string
+}
+
+func (e NotImplementedError) Error() string {
+	return e.Message
+}
+
+const (
+	errorTypeCustom     = "custom"
+	errorTypeValidation = "validation"
+	errorTypeInput      = "input"
+	errorTypeAuth       = "unauthorized"
+	errorTypeForbidden  = "forbidden"
+	errorTypeNotImpl    = "not_implemented"
+)

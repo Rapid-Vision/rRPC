@@ -1,0 +1,54 @@
+{{- if hasRPCs .}}
+
+import (
+	"context"
+{{- if usesRawInRPCs .}}
+	"encoding/json"
+{{- end}}
+)
+{{- end}}
+
+{{- range $rpc := .RPCs}}
+
+type {{rpcParamsName $rpc.Name}} struct {
+{{- range $param := $rpc.Parameters}}
+	{{fieldName $param.Name}} {{goType $param.Type}} `json:"{{jsonName $param.Name}}"`
+{{- end}}
+}
+
+{{- if hasReturn $rpc}}
+type {{rpcResultName $rpc.Name}} struct {
+	{{resultField $rpc.Returns}} {{goType $rpc.Returns}} `json:"{{jsonName (resultField $rpc.Returns)}}"`
+}
+{{- end}}
+
+{{- if hasReturn $rpc}}
+func (c *RPCClient) {{rpcMethodName $rpc.Name}}(ctx context.Context{{- if gt (len $rpc.Parameters) 0}}, params {{rpcParamsName $rpc.Name}}{{- end}}) ({{goType $rpc.Returns}}, error) {
+	var zero {{goType $rpc.Returns}}
+	var res {{rpcResultName $rpc.Name}}
+	var payload any
+	{{- if gt (len $rpc.Parameters) 0}}
+	payload = params
+	{{- else}}
+	payload = nil
+	{{- end}}
+	if err := c.doRequest(ctx, "{{rpcPath $rpc.Name}}", payload, &res); err != nil {
+		return zero, err
+	}
+	return res.{{resultField $rpc.Returns}}, nil
+}
+{{- else}}
+func (c *RPCClient) {{rpcMethodName $rpc.Name}}(ctx context.Context{{- if gt (len $rpc.Parameters) 0}}, params {{rpcParamsName $rpc.Name}}{{- end}}) error {
+	var payload any
+	{{- if gt (len $rpc.Parameters) 0}}
+	payload = params
+	{{- else}}
+	payload = nil
+	{{- end}}
+	if err := c.doRequest(ctx, "{{rpcPath $rpc.Name}}", payload, nil); err != nil {
+		return err
+	}
+	return nil
+}
+{{- end}}
+{{- end}}

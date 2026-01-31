@@ -58,10 +58,10 @@ func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (map[st
 		"resultField": resultField,
 		"hasReturn":   hasReturn,
 		"usesRawInModels": func(data templateData) bool {
-			return usesRawInModels(data.Models)
+			return parser.UsesRawInModels(*schema)
 		},
 		"usesRawInRPCs": func(data templateData) bool {
-			return usesRawInRPCs(data.RPCs)
+			return parser.UsesRawInRPCs(*schema)
 		},
 		"hasRPCs": func(data templateData) bool {
 			return len(data.RPCs) > 0
@@ -108,46 +108,4 @@ func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (map[st
 		}
 	}
 	return files, nil
-}
-
-func usesRawInModels(models []parser.Model) bool {
-	for _, model := range models {
-		for _, field := range model.Fields {
-			if hasRawType(field.Type) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func usesRawInRPCs(rpcs []parser.RPC) bool {
-	for _, rpc := range rpcs {
-		for _, param := range rpc.Parameters {
-			if hasRawType(param.Type) {
-				return true
-			}
-		}
-		if rpc.HasReturn && hasRawType(rpc.Returns) {
-			return true
-		}
-	}
-	return false
-}
-
-func hasRawType(t parser.TypeRef) bool {
-	switch t.Kind {
-	case parser.TypeList:
-		if t.Elem == nil {
-			return false
-		}
-		return hasRawType(*t.Elem)
-	case parser.TypeMap:
-		if t.Value == nil {
-			return false
-		}
-		return hasRawType(*t.Value)
-	default:
-		return t.Name == "raw"
-	}
 }

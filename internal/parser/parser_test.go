@@ -1,8 +1,10 @@
-package parser
+package parser_test
 
 import (
 	"strings"
 	"testing"
+
+	"github.com/Rapid-Vision/rRPC/internal/parser"
 )
 
 func TestParseSchema(t *testing.T) {
@@ -16,7 +18,7 @@ rpc HelloWorld(
 ) GreetingMessage
 `
 
-	schema, err := Parse(input)
+	schema, err := parser.Parse(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -39,14 +41,14 @@ func TestParseListAndMapTypes(t *testing.T) {
 rpc GetUsers() list[User]
 rpc GetUsersByName() map[list[User]]
 `
-	schema, err := Parse(input)
+	schema, err := parser.Parse(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if len(schema.RPCs) != 2 {
 		t.Fatalf("expected 2 rpcs, got %d", len(schema.RPCs))
 	}
-	if schema.RPCs[1].Returns.Kind != TypeMap {
+	if schema.RPCs[1].Returns.Kind != parser.TypeMap {
 		t.Fatalf("expected map return type, got %v", schema.RPCs[1].Returns.Kind)
 	}
 }
@@ -54,7 +56,7 @@ rpc GetUsersByName() map[list[User]]
 func TestParseRPCNoReturn(t *testing.T) {
 	input := `rpc Ping()
 `
-	schema, err := Parse(input)
+	schema, err := parser.Parse(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -70,7 +72,7 @@ func TestParseRPCNoReturnFollowedByModel(t *testing.T) {
 	input := `rpc Ping()
 model User {}
 `
-	schema, err := Parse(input)
+	schema, err := parser.Parse(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -87,14 +89,14 @@ func TestParseOptionalTypesInListAndMap(t *testing.T) {
 rpc ListOptional() list[string?]
 rpc MapOptional() map[Text?]
 `
-	schema, err := Parse(input)
+	schema, err := parser.Parse(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if schema.RPCs[0].Returns.Kind != TypeList || schema.RPCs[0].Returns.Elem == nil || !schema.RPCs[0].Returns.Elem.Optional {
+	if schema.RPCs[0].Returns.Kind != parser.TypeList || schema.RPCs[0].Returns.Elem == nil || !schema.RPCs[0].Returns.Elem.Optional {
 		t.Fatalf("expected optional list element")
 	}
-	if schema.RPCs[1].Returns.Kind != TypeMap || schema.RPCs[1].Returns.Value == nil || !schema.RPCs[1].Returns.Value.Optional {
+	if schema.RPCs[1].Returns.Kind != parser.TypeMap || schema.RPCs[1].Returns.Value == nil || !schema.RPCs[1].Returns.Value.Optional {
 		t.Fatalf("expected optional map value")
 	}
 }
@@ -109,7 +111,7 @@ model User {
     name: string # field
 }
 `
-	schema, err := Parse(input)
+	schema, err := parser.Parse(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -188,7 +190,7 @@ rpc GetUser() User
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := Parse(tc.input)
+			_, err := parser.Parse(tc.input)
 			if err == nil {
 				t.Fatalf("expected error, got nil")
 			}

@@ -1,5 +1,9 @@
 // THIS CODE IS GENERATED
 
+{{- if .Zod}}
+import { z } from "zod";
+
+{{- end}}
 export type RPCErrorType =
 	| "custom"
 	| "validation"
@@ -49,6 +53,16 @@ export interface {{className $model.Name}} {
 {{- end}}
 {{- end}}
 }
+{{- if $.Zod}}
+
+export const {{className $model.Name}}Schema = z.object({
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+	{{jsonName $field.Name}}: {{zodType $field.Type}}{{if $field.Type.Optional}}.optional(){{end}},
+{{- end}}
+{{- end}}
+});
+{{- end}}
 {{- end}}
 
 {{- range $rpc := .RPCs}}
@@ -59,6 +73,14 @@ export interface {{rpcParamsName $rpc.Name}} {
 	{{jsonName $param.Name}}{{if $param.Type.Optional}}?{{end}}: {{tsType $param.Type}};
 {{- end}}
 }
+{{- if $.Zod}}
+
+export const {{rpcParamsName $rpc.Name}}Schema = z.object({
+{{- range $param := $rpc.Parameters}}
+	{{jsonName $param.Name}}: {{zodType $param.Type}}{{if $param.Type.Optional}}.optional(){{end}},
+{{- end}}
+});
+{{- end}}
 {{- end}}
 
 {{- if hasReturn $rpc}}
@@ -176,13 +198,13 @@ export class RPCClient {
 
 {{- if hasReturn $rpc}}
 	async {{rpcMethodName $rpc.Name}}({{- if hasParameters $rpc}}params: {{rpcParamsName $rpc.Name}}{{- end}}): Promise<{{tsType $rpc.Returns}}> {
-		const payload = {{- if hasParameters $rpc}} params {{- else}} undefined {{- end}};
+		const payload = {{- if hasParameters $rpc}}{{- if $.Zod}} {{rpcParamsName $rpc.Name}}Schema.parse(params) {{- else}} params {{- end}}{{- else}} undefined {{- end}};
 		const res = (await this.request("{{rpcPath $rpc.Name}}", payload)) as {{rpcResultName $rpc.Name}};
 		return res.{{resultField $rpc.Returns}};
 	}
 {{- else}}
 	async {{rpcMethodName $rpc.Name}}({{- if hasParameters $rpc}}params: {{rpcParamsName $rpc.Name}}{{- end}}): Promise<void> {
-		const payload = {{- if hasParameters $rpc}} params {{- else}} undefined {{- end}};
+		const payload = {{- if hasParameters $rpc}}{{- if $.Zod}} {{rpcParamsName $rpc.Name}}Schema.parse(params) {{- else}} params {{- end}}{{- else}} undefined {{- end}};
 		await this.request("{{rpcPath $rpc.Name}}", payload);
 	}
 {{- end}}

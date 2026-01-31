@@ -7,6 +7,10 @@ This page covers generating a TypeScript client. See [schema_language.md](docs/s
 rRPC client --lang ts -o . hello.rrpc
 ```
 The default output package is `rpcclient`.
+For zod input validation:
+```bash
+rRPC client --lang ts --ts-zod -o . hello.rrpc
+```
 
 ## Basic usage
 ```ts
@@ -38,6 +42,14 @@ const rpc = new RPCClient("localhost:8080", {
 - `headers` adds custom headers to every request.
 - `timeoutMs` sets an abort timeout in milliseconds.
 - `fetchFn` lets you inject a custom `fetch` implementation for testing or instrumentation.
+
+## Zod validation
+When generated with `--zod`, the client validates RPC inputs using zod before sending requests.
+Install zod in your project:
+```bash
+npm install zod
+```
+The generated file exports `*Schema` constants (e.g. `UserModelSchema`, `HelloParamsSchema`) that you can reuse.
 
 ## Error handling
 RPC errors are thrown as typed exceptions:

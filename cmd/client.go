@@ -24,6 +24,7 @@ var (
 	clientOut    string
 	clientForce  bool
 	clientPrefix string
+	clientZod    bool
 )
 
 func init() {
@@ -33,6 +34,7 @@ func init() {
 	clientCmd.Flags().StringVarP(&clientOut, "output", "o", ".", "Output base directory")
 	clientCmd.Flags().BoolVarP(&clientForce, "force", "f", false, "Overwrite output file if it exists")
 	clientCmd.Flags().StringVar(&clientPrefix, "prefix", "rpc", "URL path prefix (empty for none)")
+	clientCmd.Flags().BoolVar(&clientZod, "ts-zod", false, "Generate TypeScript client with zod input validation")
 }
 
 func RunClientCmd(cmd *cobra.Command, args []string) error {
@@ -76,7 +78,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 	if clientLang == "ts" || clientLang == "typescript" {
-		code, err := tsgen.GenerateClientWithPrefix(schema, clientPrefix)
+		code, err := tsgen.GenerateClientWithPrefixAndZod(schema, clientPrefix, clientZod)
 		if err != nil {
 			return fmt.Errorf("generate code: %w", err)
 		}
@@ -96,7 +98,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 		if err := os.WriteFile(clientPath, []byte(code), 0o644); err != nil {
 			return fmt.Errorf("write output: %w", err)
 		}
-		if err := os.WriteFile(indexPath, []byte(tsgen.GenerateTypeScriptIndex(schema)), 0o644); err != nil {
+		if err := os.WriteFile(indexPath, []byte(tsgen.GenerateTypeScriptIndexWithZod(schema, clientZod)), 0o644); err != nil {
 			return fmt.Errorf("write output: %w", err)
 		}
 		return nil

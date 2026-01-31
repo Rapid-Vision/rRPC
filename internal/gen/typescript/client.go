@@ -19,16 +19,21 @@ type templateData struct {
 	Models []parser.Model
 	RPCs   []parser.RPC
 	Prefix string
+	Zod    bool
 }
 
 func GenerateClient(schema *parser.Schema) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
-	return GenerateClientWithPrefix(schema, "rpc")
+	return GenerateClientWithPrefixAndZod(schema, "rpc", false)
 }
 
 func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, error) {
+	return GenerateClientWithPrefixAndZod(schema, prefix, false)
+}
+
+func GenerateClientWithPrefixAndZod(schema *parser.Schema, prefix string, zod bool) (string, error) {
 	if schema == nil {
 		return "", fmt.Errorf("schema is nil")
 	}
@@ -37,6 +42,7 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, err
 		"fieldName":      fieldName,
 		"jsonName":       jsonName,
 		"tsType":         tsType,
+		"zodType":        zodType,
 		"rpcMethodName":  rpcMethodName,
 		"rpcPath":        rpcPath,
 		"rpcParamsName":  rpcParamsName,
@@ -54,6 +60,7 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, err
 		Models: schema.Models,
 		RPCs:   schema.RPCs,
 		Prefix: prefixPath(prefix),
+		Zod:    zod,
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
@@ -63,6 +70,10 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, err
 }
 
 func GenerateTypeScriptIndex(schema *parser.Schema) string {
+	return GenerateTypeScriptIndexWithZod(schema, false)
+}
+
+func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 	var b strings.Builder
 	b.WriteString("// THIS CODE IS GENERATED\n\n")
 	b.WriteString("export {\n")
@@ -74,6 +85,20 @@ func GenerateTypeScriptIndex(schema *parser.Schema) string {
 	b.WriteString("\tUnauthorizedRPCError,\n")
 	b.WriteString("\tForbiddenRPCError,\n")
 	b.WriteString("\tNotImplementedRPCError,\n")
+	if zod {
+		for _, model := range schema.Models {
+			b.WriteString("\t")
+			b.WriteString(className(model.Name))
+			b.WriteString("Schema,\n")
+		}
+		for _, rpc := range schema.RPCs {
+			if len(rpc.Parameters) > 0 {
+				b.WriteString("\t")
+				b.WriteString(rpcParamsName(rpc.Name))
+				b.WriteString("Schema,\n")
+			}
+		}
+	}
 	b.WriteString("} from \"./client\";\n\n")
 
 	b.WriteString("export type {\n")
@@ -170,6 +195,45 @@ func tsBaseType(t parser.TypeRef) string {
 			return "any"
 		default:
 			return utils.NewIdentifierName(t.Name).PascalCase() + "Model"
+		}
+	}
+}
+
+func zodType(t parser.TypeRef) string {
+	base := zodBaseType(t)
+	if t.Optional {
+		return "z.union([" + base + ", z.null()])"
+	}
+	return base
+}
+
+func zodBaseType(t parser.TypeRef) string {
+	switch t.Kind {
+	case parser.TypeList:
+		if t.Elem == nil {
+			return "z.array(z.any())"
+		}
+		return "z.array(" + zodType(*t.Elem) + ")"
+	case parser.TypeMap:
+		valueType := "z.any()"
+		if t.Value != nil {
+			valueType = zodType(*t.Value)
+		}
+		return "z.record(" + valueType + ")"
+	default:
+		switch t.Name {
+		case "string":
+			return "z.string()"
+		case "int":
+			return "z.number().int()"
+		case "bool":
+			return "z.boolean()"
+		case "json":
+			return "z.any()"
+		case "raw":
+			return "z.any()"
+		default:
+			return "z.lazy(() => " + utils.NewIdentifierName(t.Name).PascalCase() + "ModelSchema)"
 		}
 	}
 }

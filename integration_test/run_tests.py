@@ -47,6 +47,10 @@ def main() -> int:
         cwd=workdir,
     )
     run(
+        [str(rrpc), "client", "--lang", "ts", "-o", "./ts_client", "-f", "test.rrpc"],
+        cwd=workdir,
+    )
+    run(
         [str(rrpc), "openapi", "-o", ".", "-f", "test.rrpc"],
         cwd=workdir,
     )
@@ -68,6 +72,11 @@ def main() -> int:
             [sys.executable, "-m", "unittest", "test_client.py"],
             cwd=workdir / "py_client",
         )
+
+        print("\n")
+
+        print("Running typescript tests:")
+        run(["bun", "test"], cwd=workdir / "ts_client")
     finally:
         try:
             os.killpg(server.pid, signal.SIGTERM)

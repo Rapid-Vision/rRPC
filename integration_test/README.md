@@ -23,6 +23,27 @@ From the repo root:
 python integration_test/run_tests.py
 ```
 
+### Requirements
+Go, Python, Bun
+
+If you run TypeScript tests manually, install dependencies first:
+```bash
+cd integration_test/ts_client
+bun install
+```
+
+### Optional tests
+Use `--test` to select specific suites. By default, all tests run.
+Valid values: `go`, `py`, `ts-all`, `ts-bare`, `ts-zod`.
+
+Examples:
+```bash
+python integration_test/run_tests.py --test go,py
+python integration_test/run_tests.py --test ts-bare
+python integration_test/run_tests.py --test ts-zod
+python integration_test/run_tests.py --test ts-all
+```
+
 ## Run manually
 
 Build rRPC tool
@@ -57,5 +78,7 @@ python -m unittest test_client.py
 Run typescript client tests
 ```bash
 cd integration_test/ts_client
-bun test test_client.ts
+bun install
+bun test client.test.ts
+bun test client_zod.test.ts
 ```

@@ -44,7 +44,7 @@ const rpc = new RPCClient("localhost:8080", {
 - `fetchFn` lets you inject a custom `fetch` implementation for testing or instrumentation.
 
 ## Zod validation
-When generated with `--zod`, the client validates RPC inputs using zod before sending requests.
+When generated with `--ts-zod`, the client validates RPC inputs using zod before sending requests.
 Install zod in your project:
 ```bash
 npm install zod

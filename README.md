@@ -1,5 +1,5 @@
 # rRPC
-rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new procol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs.
+rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new protocol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs. Currently it supports generating a go server and clients for go, python and typescript.
 
 ## Motivation
 The industry standard for communication between services is [gRPC](https://grpc.io/). It may be good for Google-scale services, but has several disadvantages: 

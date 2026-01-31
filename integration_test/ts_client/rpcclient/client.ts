@@ -30,10 +30,24 @@ import type {
 	TestMixedPayloadResult,
 } from "./models";
 
+export type FetchResponse = {
+	ok: boolean;
+	status: number;
+	json(): Promise<unknown>;
+	text(): Promise<string>;
+};
+
+export type FetchInit = {
+	method?: string;
+	headers?: Record<string, string>;
+	body?: string;
+	signal?: AbortSignal | null;
+};
+
 export type FetchFn = (
-	input: RequestInfo | URL,
-	init?: RequestInit
-) => Promise<Response>;
+	input: string,
+	init?: FetchInit
+) => Promise<FetchResponse>;
 
 export interface RPCClientOptions {
 	prefix?: string;
@@ -57,7 +71,10 @@ export class RPCClient {
 		this.headers = { ...(options.headers ?? {}) };
 		this.bearerToken = options.bearerToken ?? "";
 		this.timeoutMs = options.timeoutMs;
-		this.fetchFn = options.fetchFn ?? fetch;
+		this.fetchFn =
+			options.fetchFn ??
+			(async (input, init) =>
+				(fetch(input, init as unknown as RequestInit) as unknown as FetchResponse));
 	}
 
 	private static normalizeBaseURL(baseURL: string): string {

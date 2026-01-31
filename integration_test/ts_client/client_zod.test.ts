@@ -6,6 +6,7 @@ import {
 	TextModelSchema,
 	TestOptionalParamsSchema,
 } from "./rpcclientzod";
+import type { TextModel } from "./rpcclientzod";
 
 const baseURL = "http://localhost:8080";
 

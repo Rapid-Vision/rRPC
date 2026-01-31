@@ -167,7 +167,7 @@ func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 		}
 	}
 	b.WriteString("} from \"./models\";\n")
-	b.WriteString("export type { FetchFn, RPCClientOptions } from \"./client\";\n")
+	b.WriteString("export type { FetchFn, FetchInit, FetchResponse, RPCClientOptions } from \"./client\";\n")
 	b.WriteString("export type { RPCErrorType, RPCError } from \"./errors\";\n")
 	return b.String()
 }

@@ -25,6 +25,7 @@ var (
 	clientForce  bool
 	clientPrefix string
 	clientZod    bool
+	clientPyd    bool
 )
 
 func init() {
@@ -35,6 +36,7 @@ func init() {
 	clientCmd.Flags().BoolVarP(&clientForce, "force", "f", false, "Overwrite output file if it exists")
 	clientCmd.Flags().StringVar(&clientPrefix, "prefix", "rpc", "URL path prefix (empty for none)")
 	clientCmd.Flags().BoolVar(&clientZod, "ts-zod", false, "Generate TypeScript client with zod input validation")
+	clientCmd.Flags().BoolVar(&clientPyd, "py-pydantic", false, "Generate Python client with pydantic input validation")
 }
 
 func RunClientCmd(cmd *cobra.Command, args []string) error {
@@ -118,7 +120,7 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	files, err := pygen.GenerateClientWithPrefix(schema, clientPrefix)
+	files, err := pygen.GenerateClientWithPrefixAndPydantic(schema, clientPrefix, clientPyd)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}

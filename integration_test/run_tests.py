@@ -75,6 +75,22 @@ def codegen(
             str(rrpc),
             "client",
             "--lang",
+            "py",
+            "--py-pydantic",
+            "--pkg",
+            "rpclient_pydantic",
+            "-o",
+            "./py_client",
+            "-f",
+            "test.rrpc",
+        ],
+        cwd=workdir,
+    )
+    run(
+        [
+            str(rrpc),
+            "client",
+            "--lang",
             "ts",
             "-o",
             "./ts_client",
@@ -135,7 +151,13 @@ def main() -> int:
         if run_py:
             print("Running python tests:")
             run(
-                [sys.executable, "-m", "unittest", "test_client.py"],
+                [
+                    sys.executable,
+                    "-m",
+                    "unittest",
+                    "test_client.py",
+                    "test_client_pydantic.py",
+                ],
                 cwd=workdir / "py_client",
             )
             print("\n")

@@ -11,14 +11,15 @@ go-server: $(SCHEMA) $(RRPC)
 	$(RRPC) server -o ./go_server -f $(SCHEMA)
 
 py-client: $(SCHEMA) $(RRPC)
-	$(RRPC) client -o ./py_client -f $(SCHEMA)
+	$(RRPC) client --lang py -o ./py_client -f $(SCHEMA)
+	$(RRPC) client --lang py --py-pydantic --pkg rpclient_pydantic -o ./py_client -f $(SCHEMA)
 
 go-client: $(SCHEMA) $(RRPC)
 	$(RRPC) client --lang go -o ./go_client -f $(SCHEMA)
 
 ts-client: $(SCHEMA) $(RRPC)
 	$(RRPC) client --lang ts -o ./ts_client -f $(SCHEMA)
-	$(RRPC) client --lang ts --ts-zod --pkg rpcclientzod -o ./ts_client -f $(SCHEMA)
+	$(RRPC) client --lang ts --ts-zod --pkg rpcclient_zod -o ./ts_client -f $(SCHEMA)
 
 openapi: $(SCHEMA) $(RRPC)
 	$(RRPC) openapi -o . -f $(SCHEMA)

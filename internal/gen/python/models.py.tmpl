@@ -1,11 +1,35 @@
 from __future__ import annotations
 
+{{if isPydantic .}}
+from pydantic import BaseModel
+{{else}}
 from dataclasses import dataclass
+{{end}}
 from typing import Any, Dict, List, Optional
 
 {{- range $model := .Models}}
 
 
+{{- if isPydantic $}}
+class {{className $model.Name}}(BaseModel):
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+    {{fieldName $field.Name}}: {{pythonType $field.Type}}
+{{- end}}
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "{{className $model.Name}}":
+        try:
+            return cls.model_validate(data)
+        except AttributeError:
+            return cls.parse_obj(data)
+{{- else}}
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "{{className $model.Name}}":
+        _ = data
+        return cls()
+{{end}}
+{{else}}
 @dataclass
 class {{className $model.Name}}:
 {{- if hasModelFields $model}}
@@ -25,6 +49,7 @@ class {{className $model.Name}}:
     def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
         _ = data
         return {{className $model.Name}}()
-{{- end}}
+{{end}}
+{{end}}
 
 {{- end}}

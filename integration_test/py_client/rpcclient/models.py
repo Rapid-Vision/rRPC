@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+
 from dataclasses import dataclass
+
 from typing import Any, Dict, List, Optional
-
-
 @dataclass
 class EmptyModel:
     @staticmethod
@@ -26,7 +26,6 @@ class TextModel:
             body=data.get("body"),
         )
 
-
 @dataclass
 class FlagsModel:
     enabled: bool
@@ -42,7 +41,6 @@ class FlagsModel:
             labels=[item for item in data.get("labels")],
             meta={k: v for k, v in data.get("meta").items()},
         )
-
 
 @dataclass
 class NestedModel:
@@ -60,7 +58,6 @@ class NestedModel:
             lookup={k: TextModel.from_dict(v) for k, v in data.get("lookup").items()},
         )
 
-
 @dataclass
 class PayloadModel:
     data: Any
@@ -72,3 +69,4 @@ class PayloadModel:
             data=data.get("data"),
             raw_data=data.get("raw_data"),
         )
+

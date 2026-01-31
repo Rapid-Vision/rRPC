@@ -16,6 +16,33 @@ from .models import (
     NestedModel,
     PayloadModel,
 )
+from pydantic import BaseModel
+
+class TestBasicParamsParams(BaseModel):
+    text: TextModel
+    flag: bool
+    count: int
+    note: Optional[str]
+
+class TestListMapParamsParams(BaseModel):
+    texts: List[TextModel]
+    flags: Dict[str, str]
+
+class TestOptionalParamsParams(BaseModel):
+    text: Optional[TextModel]
+    flag: Optional[bool]
+
+class TestValidationErrorParamsParams(BaseModel):
+    text: TextModel
+
+class TestJsonParamsParams(BaseModel):
+    data: Any
+
+class TestRawParamsParams(BaseModel):
+    payload: Any
+
+class TestMixedPayloadParamsParams(BaseModel):
+    payload: PayloadModel
 
 
 class RPCClient:
@@ -91,8 +118,19 @@ class RPCClient:
         if exc_type is None:
             return
         raise exc_type(RPCError(type=err_type, message=message))
+    @staticmethod
+    def _validate_params(model: Type[BaseModel], payload: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            return model.model_validate(payload).model_dump()
+        except AttributeError:
+            return model.parse_obj(payload).dict()
 
     def _encode_payload(self, value: Any) -> Any:
+        if isinstance(value, BaseModel):
+            try:
+                return value.model_dump()
+            except AttributeError:
+                return value.dict()
         if is_dataclass(value):
             return asdict(value)
         if isinstance(value, dict):
@@ -121,6 +159,7 @@ class RPCClient:
             "count": count,
             "note": note,
         }
+        payload = self._validate_params(TestBasicParamsParams, payload)
         data = self._request("test_basic", payload)
         value = data.get("text") if isinstance(data, dict) else data
         return TextModel.from_dict(value)
@@ -130,6 +169,7 @@ class RPCClient:
             "texts": texts,
             "flags": flags,
         }
+        payload = self._validate_params(TestListMapParamsParams, payload)
         data = self._request("test_list_map", payload)
         value = data.get("nested") if isinstance(data, dict) else data
         return NestedModel.from_dict(value)
@@ -139,6 +179,7 @@ class RPCClient:
             "text": text,
             "flag": flag,
         }
+        payload = self._validate_params(TestOptionalParamsParams, payload)
         data = self._request("test_optional", payload)
         value = data.get("flags") if isinstance(data, dict) else data
         return FlagsModel.from_dict(value)
@@ -147,6 +188,7 @@ class RPCClient:
         payload = {
             "text": text,
         }
+        payload = self._validate_params(TestValidationErrorParamsParams, payload)
         data = self._request("test_validation_error", payload)
         value = data.get("text") if isinstance(data, dict) else data
         return TextModel.from_dict(value)
@@ -185,6 +227,7 @@ class RPCClient:
         payload = {
             "data": data,
         }
+        payload = self._validate_params(TestJsonParamsParams, payload)
         data = self._request("test_json", payload)
         value = data.get("json") if isinstance(data, dict) else data
         return value
@@ -193,6 +236,7 @@ class RPCClient:
         payload = {
             "payload": payload,
         }
+        payload = self._validate_params(TestRawParamsParams, payload)
         data = self._request("test_raw", payload)
         value = data.get("raw") if isinstance(data, dict) else data
         return value
@@ -201,6 +245,7 @@ class RPCClient:
         payload = {
             "payload": payload,
         }
+        payload = self._validate_params(TestMixedPayloadParamsParams, payload)
         data = self._request("test_mixed_payload", payload)
         value = data.get("payload") if isinstance(data, dict) else data
         return PayloadModel.from_dict(value)

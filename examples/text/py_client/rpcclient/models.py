@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+
 from dataclasses import dataclass
+
 from typing import Any, Dict, List, Optional
-
-
 @dataclass
 class TextModel:
     title: Optional[str]
@@ -18,7 +18,6 @@ class TextModel:
             data=data.get("data"),
         )
 
-
 @dataclass
 class SliceModel:
     begin: int
@@ -30,7 +29,6 @@ class SliceModel:
             begin=data.get("begin"),
             end=data.get("end"),
         )
-
 
 @dataclass
 class StatsModel:
@@ -47,3 +45,4 @@ class StatsModel:
             total_words=data.get("total_words"),
             sentences=[SliceModel.from_dict(item) for item in data.get("sentences")],
         )
+

@@ -5,8 +5,8 @@ import {
 	RPCClient,
 	TextModelSchema,
 	TestOptionalParamsSchema,
-} from "./rpcclientzod";
-import type { TextModel } from "./rpcclientzod";
+} from "./rpcclient_zod";
+import type { TextModel } from "./rpcclient_zod";
 
 const baseURL = "http://localhost:8080";
 

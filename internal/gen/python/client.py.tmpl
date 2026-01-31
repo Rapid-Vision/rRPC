@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, is_dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 import json
 import urllib.error
 import urllib.request
@@ -13,6 +13,21 @@ from .models import (
     {{className $model.Name}},
 {{- end}}
 )
+{{- end}}
+{{- if isPydantic .}}
+from pydantic import BaseModel
+{{- end}}
+
+{{- if isPydantic .}}
+{{- range $rpc := .RPCs}}
+{{- if hasParameters $rpc}}
+
+class {{paramsClassName $rpc.Name}}Params(BaseModel):
+{{- range $param := $rpc.Parameters}}
+    {{fieldName $param.Name}}: {{pythonType $param.Type}}
+{{- end}}
+{{- end}}
+{{- end}}
 {{- end}}
 
 
@@ -90,7 +105,23 @@ class RPCClient:
             return
         raise exc_type(RPCError(type=err_type, message=message))
 
+{{- if isPydantic .}}
+    @staticmethod
+    def _validate_params(model: Type[BaseModel], payload: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            return model.model_validate(payload).model_dump()
+        except AttributeError:
+            return model.parse_obj(payload).dict()
+{{- end}}
+
     def _encode_payload(self, value: Any) -> Any:
+{{- if isPydantic .}}
+        if isinstance(value, BaseModel):
+            try:
+                return value.model_dump()
+            except AttributeError:
+                return value.dict()
+{{- end}}
         if is_dataclass(value):
             return asdict(value)
         if isinstance(value, dict):
@@ -110,6 +141,9 @@ class RPCClient:
             "{{jsonName $param.Name}}": {{fieldName $param.Name}},
 {{- end}}
         }
+{{- if isPydantic $}}
+        payload = self._validate_params({{paramsClassName $rpc.Name}}Params, payload)
+{{- end}}
 {{- else}}
         payload = None
 {{- end}}

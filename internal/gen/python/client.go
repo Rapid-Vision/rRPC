@@ -25,16 +25,21 @@ type templateData struct {
 	Models []parser.Model
 	RPCs   []parser.RPC
 	Prefix string
+	Pydantic bool
 }
 
 func GenerateClient(schema *parser.Schema) (map[string]string, error) {
 	if schema == nil {
 		return nil, fmt.Errorf("schema is nil")
 	}
-	return GenerateClientWithPrefix(schema, "rpc")
+	return GenerateClientWithPrefixAndPydantic(schema, "rpc", false)
 }
 
 func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (map[string]string, error) {
+	return GenerateClientWithPrefixAndPydantic(schema, prefix, false)
+}
+
+func GenerateClientWithPrefixAndPydantic(schema *parser.Schema, prefix string, pydantic bool) (map[string]string, error) {
 	if schema == nil {
 		return nil, fmt.Errorf("schema is nil")
 	}
@@ -42,9 +47,11 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (map[string]
 		Models: schema.Models,
 		RPCs:   schema.RPCs,
 		Prefix: prefixPath(prefix),
+		Pydantic: pydantic,
 	}
 	funcMap := template.FuncMap{
 		"className":      className,
+		"paramsClassName": paramsClassName,
 		"fieldName":      fieldName,
 		"jsonName":       jsonName,
 		"pythonType":     pythonType,
@@ -56,6 +63,9 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (map[string]
 		"hasReturn":      hasReturn,
 		"hasModels": func(data templateData) bool {
 			return len(data.Models) > 0
+		},
+		"isPydantic": func(data templateData) bool {
+			return data.Pydantic
 		},
 	}
 
@@ -133,6 +143,10 @@ func GeneratePythonInit(schema *parser.Schema) string {
 
 func className(name string) string {
 	return utils.NewIdentifierName(name).PascalCase() + "Model"
+}
+
+func paramsClassName(name string) string {
+	return utils.NewIdentifierName(name).PascalCase() + "Params"
 }
 
 func fieldName(name string) string {

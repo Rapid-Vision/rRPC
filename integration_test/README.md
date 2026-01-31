@@ -32,6 +32,8 @@ cd integration_test/ts_client
 bun install
 ```
 
+Pydantic should be installed into the environment from which tests are ran
+
 ### Optional tests
 Use `--test` to select specific suites. By default, all tests run.
 Valid values: `go`, `py`, `ts-all`, `ts-bare`, `ts-zod`.

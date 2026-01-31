@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"sort"
 	"strings"
 	"text/template"
 	"unicode"
@@ -11,6 +12,12 @@ import (
 	"github.com/Rapid-Vision/rRPC/internal/parser"
 	"github.com/Rapid-Vision/rRPC/internal/utils"
 )
+
+//go:embed errors.ts.tmpl
+var errorsTemplate string
+
+//go:embed models.ts.tmpl
+var modelsTemplate string
 
 //go:embed client.ts.tmpl
 var clientTemplate string
@@ -22,22 +29,30 @@ type templateData struct {
 	Zod    bool
 }
 
-func GenerateClient(schema *parser.Schema) (string, error) {
+func GenerateClient(schema *parser.Schema) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
 	return GenerateClientWithPrefixAndZod(schema, "rpc", false)
 }
 
-func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, error) {
+func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (map[string]string, error) {
 	return GenerateClientWithPrefixAndZod(schema, prefix, false)
 }
 
-func GenerateClientWithPrefixAndZod(schema *parser.Schema, prefix string, zod bool) (string, error) {
+func GenerateClientWithPrefixAndZod(schema *parser.Schema, prefix string, zod bool) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
-	tmpl, err := template.New("client.ts.tmpl").Funcs(template.FuncMap{
+
+	data := templateData{
+		Models: schema.Models,
+		RPCs:   schema.RPCs,
+		Prefix: prefixPath(prefix),
+		Zod:    zod,
+	}
+
+	funcMap := template.FuncMap{
 		"className":      className,
 		"fieldName":      fieldName,
 		"jsonName":       jsonName,
@@ -51,22 +66,50 @@ func GenerateClientWithPrefixAndZod(schema *parser.Schema, prefix string, zod bo
 		"hasParameters":  hasParameters,
 		"hasModelFields": hasModelFields,
 		"hasReturn":      hasReturn,
-	}).Parse(clientTemplate)
-	if err != nil {
-		return "", fmt.Errorf("parse template: %w", err)
+		"hasTypes": func(data templateData) bool {
+			if len(data.Models) > 0 {
+				return true
+			}
+			for _, rpc := range data.RPCs {
+				if len(rpc.Parameters) > 0 || rpc.HasReturn {
+					return true
+				}
+			}
+			return false
+		},
 	}
 
-	data := templateData{
-		Models: schema.Models,
-		RPCs:   schema.RPCs,
-		Prefix: prefixPath(prefix),
-		Zod:    zod,
+	templates := map[string]string{
+		"errors.ts": errorsTemplate,
+		"models.ts": modelsTemplate,
+		"client.ts": clientTemplate,
 	}
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("execute template: %w", err)
+
+	files := make(map[string]string, len(templates))
+	for name, tmplText := range templates {
+		tmpl, err := template.New(name).Funcs(funcMap).Parse(tmplText)
+		if err != nil {
+			return nil, fmt.Errorf("parse template %s: %w", name, err)
+		}
+		var buf bytes.Buffer
+		buf.WriteString("// THIS CODE IS GENERATED\n\n")
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return nil, fmt.Errorf("execute template %s: %w", name, err)
+		}
+		files[name] = buf.String()
 	}
-	return buf.String(), nil
+
+	ordered := make([]string, 0, len(files))
+	for name := range files {
+		ordered = append(ordered, name)
+	}
+	sort.Strings(ordered)
+	for _, name := range ordered {
+		if strings.TrimSpace(files[name]) == "" {
+			delete(files, name)
+		}
+	}
+	return files, nil
 }
 
 func GenerateTypeScriptIndex(schema *parser.Schema) string {
@@ -76,8 +119,9 @@ func GenerateTypeScriptIndex(schema *parser.Schema) string {
 func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 	var b strings.Builder
 	b.WriteString("// THIS CODE IS GENERATED\n\n")
+
+	b.WriteString("export { RPCClient } from \"./client\";\n")
 	b.WriteString("export {\n")
-	b.WriteString("\tRPCClient,\n")
 	b.WriteString("\tRPCErrorException,\n")
 	b.WriteString("\tCustomRPCError,\n")
 	b.WriteString("\tValidationRPCError,\n")
@@ -85,7 +129,9 @@ func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 	b.WriteString("\tUnauthorizedRPCError,\n")
 	b.WriteString("\tForbiddenRPCError,\n")
 	b.WriteString("\tNotImplementedRPCError,\n")
+	b.WriteString("} from \"./errors\";\n")
 	if zod {
+		b.WriteString("export {\n")
 		for _, model := range schema.Models {
 			b.WriteString("\t")
 			b.WriteString(className(model.Name))
@@ -98,13 +144,11 @@ func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 				b.WriteString("Schema,\n")
 			}
 		}
+		b.WriteString("} from \"./models\";\n")
 	}
-	b.WriteString("} from \"./client\";\n\n")
+	b.WriteString("\n")
 
 	b.WriteString("export type {\n")
-	b.WriteString("\tRPCClientOptions,\n")
-	b.WriteString("\tRPCErrorType,\n")
-	b.WriteString("\tRPCError,\n")
 	for _, model := range schema.Models {
 		b.WriteString("\t")
 		b.WriteString(className(model.Name))
@@ -122,7 +166,9 @@ func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 			b.WriteString(",\n")
 		}
 	}
-	b.WriteString("} from \"./client\";\n")
+	b.WriteString("} from \"./models\";\n")
+	b.WriteString("export type { RPCClientOptions } from \"./client\";\n")
+	b.WriteString("export type { RPCErrorType, RPCError } from \"./errors\";\n")
 	return b.String()
 }
 

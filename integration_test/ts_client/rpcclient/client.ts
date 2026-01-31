@@ -1,128 +1,37 @@
 // THIS CODE IS GENERATED
-export type RPCErrorType =
-	| "custom"
-	| "validation"
-	| "input"
-	| "unauthorized"
-	| "forbidden"
-	| "not_implemented";
 
-export interface RPCError {
-	type: RPCErrorType;
-	message: string;
-}
-
-export class RPCErrorException extends Error {
-	readonly error: RPCError;
-
-	constructor(error: RPCError) {
-		super(error.message);
-		this.error = error;
-	}
-}
-
-export class CustomRPCError extends RPCErrorException {}
-export class ValidationRPCError extends RPCErrorException {}
-export class InputRPCError extends RPCErrorException {}
-export class UnauthorizedRPCError extends RPCErrorException {}
-export class ForbiddenRPCError extends RPCErrorException {}
-export class NotImplementedRPCError extends RPCErrorException {}
-
-const ERROR_EXCEPTIONS: Record<string, typeof RPCErrorException> = {
-	custom: CustomRPCError,
-	validation: ValidationRPCError,
-	input: InputRPCError,
-	unauthorized: UnauthorizedRPCError,
-	forbidden: ForbiddenRPCError,
-	not_implemented: NotImplementedRPCError,
-};
-export interface EmptyModel {
-}
-export interface TextModel {
-	title?: string | null;
-	body: string;
-}
-export interface FlagsModel {
-	enabled: boolean;
-	retries: number;
-	labels: Array<string>;
-	meta: Record<string, string>;
-}
-export interface NestedModel {
-	text: TextModel;
-	flags?: FlagsModel | null;
-	items: Array<TextModel>;
-	lookup: Record<string, TextModel>;
-}
-export interface PayloadModel {
-	data: any;
-	raw_data: any;
-}
-export interface TestEmptyResult {
-	empty: EmptyModel;
-}
-export interface TestBasicParams {
-	text: TextModel;
-	flag: boolean;
-	count: number;
-	note?: string | null;
-}
-export interface TestBasicResult {
-	text: TextModel;
-}
-export interface TestListMapParams {
-	texts: Array<TextModel>;
-	flags: Record<string, string>;
-}
-export interface TestListMapResult {
-	nested: NestedModel;
-}
-export interface TestOptionalParams {
-	text?: TextModel | null;
-	flag?: boolean | null;
-}
-export interface TestOptionalResult {
-	flags: FlagsModel;
-}
-export interface TestValidationErrorParams {
-	text: TextModel;
-}
-export interface TestValidationErrorResult {
-	text: TextModel;
-}
-export interface TestUnauthorizedErrorResult {
-	empty: EmptyModel;
-}
-export interface TestForbiddenErrorResult {
-	empty: EmptyModel;
-}
-export interface TestNotImplementedErrorResult {
-	empty: EmptyModel;
-}
-export interface TestCustomErrorResult {
-	empty: EmptyModel;
-}
-export interface TestMapReturnResult {
-	result: Record<string, TextModel>;
-}
-export interface TestJsonParams {
-	data: any;
-}
-export interface TestJsonResult {
-	json: any;
-}
-export interface TestRawParams {
-	payload: any;
-}
-export interface TestRawResult {
-	raw: any;
-}
-export interface TestMixedPayloadParams {
-	payload: PayloadModel;
-}
-export interface TestMixedPayloadResult {
-	payload: PayloadModel;
-}
+import {
+	ERROR_EXCEPTIONS,
+	RPCError,
+	RPCErrorException,
+} from "./errors";
+import type {
+	EmptyModel,
+	TextModel,
+	FlagsModel,
+	NestedModel,
+	PayloadModel,
+	TestEmptyResult,
+	TestBasicParams,
+	TestBasicResult,
+	TestListMapParams,
+	TestListMapResult,
+	TestOptionalParams,
+	TestOptionalResult,
+	TestValidationErrorParams,
+	TestValidationErrorResult,
+	TestUnauthorizedErrorResult,
+	TestForbiddenErrorResult,
+	TestNotImplementedErrorResult,
+	TestCustomErrorResult,
+	TestMapReturnResult,
+	TestJsonParams,
+	TestJsonResult,
+	TestRawParams,
+	TestRawResult,
+	TestMixedPayloadParams,
+	TestMixedPayloadResult,
+} from "./models";
 
 export interface RPCClientOptions {
 	prefix?: string;

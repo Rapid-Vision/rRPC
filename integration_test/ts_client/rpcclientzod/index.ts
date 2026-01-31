@@ -1,7 +1,7 @@
 // THIS CODE IS GENERATED
 
+export { RPCClient } from "./client";
 export {
-	RPCClient,
 	RPCErrorException,
 	CustomRPCError,
 	ValidationRPCError,
@@ -9,6 +9,8 @@ export {
 	UnauthorizedRPCError,
 	ForbiddenRPCError,
 	NotImplementedRPCError,
+} from "./errors";
+export {
 	EmptyModelSchema,
 	TextModelSchema,
 	FlagsModelSchema,
@@ -21,12 +23,9 @@ export {
 	TestJsonParamsSchema,
 	TestRawParamsSchema,
 	TestMixedPayloadParamsSchema,
-} from "./client";
+} from "./models";
 
 export type {
-	RPCClientOptions,
-	RPCErrorType,
-	RPCError,
 	EmptyModel,
 	TextModel,
 	FlagsModel,
@@ -52,4 +51,6 @@ export type {
 	TestRawResult,
 	TestMixedPayloadParams,
 	TestMixedPayloadResult,
-} from "./client";
+} from "./models";
+export type { RPCClientOptions } from "./client";
+export type { RPCErrorType, RPCError } from "./errors";

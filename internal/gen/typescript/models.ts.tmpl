@@ -1,0 +1,51 @@
+{{- if .Zod}}
+import { z } from "zod";
+
+{{- end}}
+{{- range $index, $model := .Models}}
+{{- if gt $index 0}}
+
+{{- end}}
+export interface {{className $model.Name}} {
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+	{{jsonName $field.Name}}{{if $field.Type.Optional}}?{{end}}: {{tsType $field.Type}};
+{{- end}}
+{{- end}}
+}
+{{- if $.Zod}}
+
+export const {{className $model.Name}}Schema = z.object({
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+	{{jsonName $field.Name}}: {{zodType $field.Type}}{{if $field.Type.Optional}}.optional(){{end}},
+{{- end}}
+{{- end}}
+});
+{{- end}}
+{{- end}}
+
+{{- range $rpc := .RPCs}}
+
+{{- if hasParameters $rpc}}
+export interface {{rpcParamsName $rpc.Name}} {
+{{- range $param := $rpc.Parameters}}
+	{{jsonName $param.Name}}{{if $param.Type.Optional}}?{{end}}: {{tsType $param.Type}};
+{{- end}}
+}
+{{- if $.Zod}}
+
+export const {{rpcParamsName $rpc.Name}}Schema = z.object({
+{{- range $param := $rpc.Parameters}}
+	{{jsonName $param.Name}}: {{zodType $param.Type}}{{if $param.Type.Optional}}.optional(){{end}},
+{{- end}}
+});
+{{- end}}
+{{- end}}
+
+{{- if hasReturn $rpc}}
+export interface {{rpcResultName $rpc.Name}} {
+	{{resultField $rpc.Returns}}: {{tsType $rpc.Returns}};
+}
+{{- end}}
+{{- end}}

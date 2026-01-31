@@ -1,189 +1,46 @@
 // THIS CODE IS GENERATED
-import { z } from "zod";
-export type RPCErrorType =
-	| "custom"
-	| "validation"
-	| "input"
-	| "unauthorized"
-	| "forbidden"
-	| "not_implemented";
 
-export interface RPCError {
-	type: RPCErrorType;
-	message: string;
-}
-
-export class RPCErrorException extends Error {
-	readonly error: RPCError;
-
-	constructor(error: RPCError) {
-		super(error.message);
-		this.error = error;
-	}
-}
-
-export class CustomRPCError extends RPCErrorException {}
-export class ValidationRPCError extends RPCErrorException {}
-export class InputRPCError extends RPCErrorException {}
-export class UnauthorizedRPCError extends RPCErrorException {}
-export class ForbiddenRPCError extends RPCErrorException {}
-export class NotImplementedRPCError extends RPCErrorException {}
-
-const ERROR_EXCEPTIONS: Record<string, typeof RPCErrorException> = {
-	custom: CustomRPCError,
-	validation: ValidationRPCError,
-	input: InputRPCError,
-	unauthorized: UnauthorizedRPCError,
-	forbidden: ForbiddenRPCError,
-	not_implemented: NotImplementedRPCError,
-};
-export interface EmptyModel {
-}
-
-export const EmptyModelSchema = z.object({
-});
-export interface TextModel {
-	title?: string | null;
-	body: string;
-}
-
-export const TextModelSchema = z.object({
-	title: z.union([z.string(), z.null()]).optional(),
-	body: z.string(),
-});
-export interface FlagsModel {
-	enabled: boolean;
-	retries: number;
-	labels: Array<string>;
-	meta: Record<string, string>;
-}
-
-export const FlagsModelSchema = z.object({
-	enabled: z.boolean(),
-	retries: z.number().int(),
-	labels: z.array(z.string()),
-	meta: z.record(z.string()),
-});
-export interface NestedModel {
-	text: TextModel;
-	flags?: FlagsModel | null;
-	items: Array<TextModel>;
-	lookup: Record<string, TextModel>;
-}
-
-export const NestedModelSchema = z.object({
-	text: z.lazy(() => TextModelSchema),
-	flags: z.union([z.lazy(() => FlagsModelSchema), z.null()]).optional(),
-	items: z.array(z.lazy(() => TextModelSchema)),
-	lookup: z.record(z.lazy(() => TextModelSchema)),
-});
-export interface PayloadModel {
-	data: any;
-	raw_data: any;
-}
-
-export const PayloadModelSchema = z.object({
-	data: z.any(),
-	raw_data: z.any(),
-});
-export interface TestEmptyResult {
-	empty: EmptyModel;
-}
-export interface TestBasicParams {
-	text: TextModel;
-	flag: boolean;
-	count: number;
-	note?: string | null;
-}
-
-export const TestBasicParamsSchema = z.object({
-	text: z.lazy(() => TextModelSchema),
-	flag: z.boolean(),
-	count: z.number().int(),
-	note: z.union([z.string(), z.null()]).optional(),
-});
-export interface TestBasicResult {
-	text: TextModel;
-}
-export interface TestListMapParams {
-	texts: Array<TextModel>;
-	flags: Record<string, string>;
-}
-
-export const TestListMapParamsSchema = z.object({
-	texts: z.array(z.lazy(() => TextModelSchema)),
-	flags: z.record(z.string()),
-});
-export interface TestListMapResult {
-	nested: NestedModel;
-}
-export interface TestOptionalParams {
-	text?: TextModel | null;
-	flag?: boolean | null;
-}
-
-export const TestOptionalParamsSchema = z.object({
-	text: z.union([z.lazy(() => TextModelSchema), z.null()]).optional(),
-	flag: z.union([z.boolean(), z.null()]).optional(),
-});
-export interface TestOptionalResult {
-	flags: FlagsModel;
-}
-export interface TestValidationErrorParams {
-	text: TextModel;
-}
-
-export const TestValidationErrorParamsSchema = z.object({
-	text: z.lazy(() => TextModelSchema),
-});
-export interface TestValidationErrorResult {
-	text: TextModel;
-}
-export interface TestUnauthorizedErrorResult {
-	empty: EmptyModel;
-}
-export interface TestForbiddenErrorResult {
-	empty: EmptyModel;
-}
-export interface TestNotImplementedErrorResult {
-	empty: EmptyModel;
-}
-export interface TestCustomErrorResult {
-	empty: EmptyModel;
-}
-export interface TestMapReturnResult {
-	result: Record<string, TextModel>;
-}
-export interface TestJsonParams {
-	data: any;
-}
-
-export const TestJsonParamsSchema = z.object({
-	data: z.any(),
-});
-export interface TestJsonResult {
-	json: any;
-}
-export interface TestRawParams {
-	payload: any;
-}
-
-export const TestRawParamsSchema = z.object({
-	payload: z.any(),
-});
-export interface TestRawResult {
-	raw: any;
-}
-export interface TestMixedPayloadParams {
-	payload: PayloadModel;
-}
-
-export const TestMixedPayloadParamsSchema = z.object({
-	payload: z.lazy(() => PayloadModelSchema),
-});
-export interface TestMixedPayloadResult {
-	payload: PayloadModel;
-}
+import {
+	ERROR_EXCEPTIONS,
+	RPCError,
+	RPCErrorException,
+} from "./errors";
+import type {
+	EmptyModel,
+	TextModel,
+	FlagsModel,
+	NestedModel,
+	PayloadModel,
+	TestEmptyResult,
+	TestBasicParams,
+	TestBasicResult,
+	TestListMapParams,
+	TestListMapResult,
+	TestOptionalParams,
+	TestOptionalResult,
+	TestValidationErrorParams,
+	TestValidationErrorResult,
+	TestUnauthorizedErrorResult,
+	TestForbiddenErrorResult,
+	TestNotImplementedErrorResult,
+	TestCustomErrorResult,
+	TestMapReturnResult,
+	TestJsonParams,
+	TestJsonResult,
+	TestRawParams,
+	TestRawResult,
+	TestMixedPayloadParams,
+	TestMixedPayloadResult,
+} from "./models";
+import {
+	TestBasicParamsSchema,
+	TestListMapParamsSchema,
+	TestOptionalParamsSchema,
+	TestValidationErrorParamsSchema,
+	TestJsonParamsSchema,
+	TestRawParamsSchema,
+	TestMixedPayloadParamsSchema,
+} from "./models";
 
 export interface RPCClientOptions {
 	prefix?: string;

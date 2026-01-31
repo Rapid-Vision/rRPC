@@ -1,19 +1,19 @@
 # THIS CODE IS GENERATED
 
 from .client import RPCClient
-from .client import RPCError
-from .client import RPCErrorException
-from .client import CustomRPCError
-from .client import ValidationRPCError
-from .client import InputRPCError
-from .client import UnauthorizedRPCError
-from .client import ForbiddenRPCError
-from .client import NotImplementedRPCError
-from .client import EmptyModel
-from .client import TextModel
-from .client import FlagsModel
-from .client import NestedModel
-from .client import PayloadModel
+from .errors import RPCError
+from .errors import RPCErrorException
+from .errors import CustomRPCError
+from .errors import ValidationRPCError
+from .errors import InputRPCError
+from .errors import UnauthorizedRPCError
+from .errors import ForbiddenRPCError
+from .errors import NotImplementedRPCError
+from .models import EmptyModel
+from .models import TextModel
+from .models import FlagsModel
+from .models import NestedModel
+from .models import PayloadModel
 
 __all__ = [
     "RPCClient",

@@ -112,25 +112,31 @@ func RunClientCmd(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	code, err := pygen.GenerateClientWithPrefix(schema, clientPrefix)
+	files, err := pygen.GenerateClientWithPrefix(schema, clientPrefix)
 	if err != nil {
 		return fmt.Errorf("generate code: %w", err)
 	}
-	clientPath := filepath.Join(baseDir, "client.py")
+	filePaths := make([]string, 0, len(files)+1)
+	for name := range files {
+		filePaths = append(filePaths, filepath.Join(baseDir, name))
+	}
 	initPath := filepath.Join(baseDir, "__init__.py")
+	filePaths = append(filePaths, initPath)
 	if !clientForce {
-		if _, statErr := os.Stat(clientPath); statErr == nil {
-			return fmt.Errorf("output file exists: %s (use --force to overwrite)", clientPath)
-		}
-		if _, statErr := os.Stat(initPath); statErr == nil {
-			return fmt.Errorf("output file exists: %s (use --force to overwrite)", initPath)
+		for _, path := range filePaths {
+			if _, statErr := os.Stat(path); statErr == nil {
+				return fmt.Errorf("output file exists: %s (use --force to overwrite)", path)
+			}
 		}
 	}
 	if err := os.MkdirAll(baseDir, 0o755); err != nil {
 		return fmt.Errorf("create output dir: %w", err)
 	}
-	if err := os.WriteFile(clientPath, []byte(code), 0o644); err != nil {
-		return fmt.Errorf("write output: %w", err)
+	for name, contents := range files {
+		outPath := filepath.Join(baseDir, name)
+		if err := os.WriteFile(outPath, []byte(contents), 0o644); err != nil {
+			return fmt.Errorf("write output: %w", err)
+		}
 	}
 	if err := os.WriteFile(initPath, []byte(pygen.GeneratePythonInit(schema)), 0o644); err != nil {
 		return fmt.Errorf("write output: %w", err)

@@ -1,0 +1,30 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+{{- range $model := .Models}}
+
+
+@dataclass
+class {{className $model.Name}}:
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+    {{fieldName $field.Name}}: {{pythonType $field.Type}}
+{{- end}}
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
+        return {{className $model.Name}}(
+{{- range $field := $model.Fields}}
+            {{fieldName $field.Name}}={{decodeExpr $field.Type (print "data.get(\"" (jsonName $field.Name) "\")")}},
+{{- end}}
+        )
+{{- else}}
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> "{{className $model.Name}}":
+        _ = data
+        return {{className $model.Name}}()
+{{- end}}
+
+{{- end}}

@@ -1,10 +1,7 @@
 // THIS CODE IS GENERATED
 
-import {
-	ERROR_EXCEPTIONS,
-	RPCError,
-	RPCErrorException,
-} from "./errors";
+import { ERROR_EXCEPTIONS, RPCErrorException } from "./errors";
+import type { RPCError } from "./errors";
 import type {
 	EmptyModel,
 	TextModel,
@@ -42,12 +39,17 @@ import {
 	TestMixedPayloadParamsSchema,
 } from "./models";
 
+export type FetchFn = (
+	input: RequestInfo | URL,
+	init?: RequestInit
+) => Promise<Response>;
+
 export interface RPCClientOptions {
 	prefix?: string;
 	headers?: Record<string, string>;
 	bearerToken?: string;
 	timeoutMs?: number;
-	fetchFn?: typeof fetch;
+	fetchFn?: FetchFn;
 }
 
 export class RPCClient {
@@ -56,7 +58,7 @@ export class RPCClient {
 	private readonly headers: Record<string, string>;
 	private readonly bearerToken: string;
 	private readonly timeoutMs?: number;
-	private readonly fetchFn: typeof fetch;
+	private readonly fetchFn: FetchFn;
 
 	constructor(baseURL: string, options: RPCClientOptions = {}) {
 		this.baseURL = RPCClient.normalizeBaseURL(baseURL);

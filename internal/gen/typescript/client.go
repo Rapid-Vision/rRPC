@@ -167,7 +167,7 @@ func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 		}
 	}
 	b.WriteString("} from \"./models\";\n")
-	b.WriteString("export type { RPCClientOptions } from \"./client\";\n")
+	b.WriteString("export type { FetchFn, RPCClientOptions } from \"./client\";\n")
 	b.WriteString("export type { RPCErrorType, RPCError } from \"./errors\";\n")
 	return b.String()
 }
@@ -265,7 +265,7 @@ func zodBaseType(t parser.TypeRef) string {
 		if t.Value != nil {
 			valueType = zodType(*t.Value)
 		}
-		return "z.record(" + valueType + ")"
+		return "z.record(z.string(), " + valueType + ")"
 	default:
 		switch t.Name {
 		case "string":

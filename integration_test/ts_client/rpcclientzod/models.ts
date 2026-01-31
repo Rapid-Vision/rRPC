@@ -27,7 +27,7 @@ export const FlagsModelSchema = z.object({
 	enabled: z.boolean(),
 	retries: z.number().int(),
 	labels: z.array(z.string()),
-	meta: z.record(z.string()),
+	meta: z.record(z.string(), z.string()),
 });
 export interface NestedModel {
 	text: TextModel;
@@ -40,7 +40,7 @@ export const NestedModelSchema = z.object({
 	text: z.lazy(() => TextModelSchema),
 	flags: z.union([z.lazy(() => FlagsModelSchema), z.null()]).optional(),
 	items: z.array(z.lazy(() => TextModelSchema)),
-	lookup: z.record(z.lazy(() => TextModelSchema)),
+	lookup: z.record(z.string(), z.lazy(() => TextModelSchema)),
 });
 export interface PayloadModel {
 	data: any;
@@ -77,7 +77,7 @@ export interface TestListMapParams {
 
 export const TestListMapParamsSchema = z.object({
 	texts: z.array(z.lazy(() => TextModelSchema)),
-	flags: z.record(z.string()),
+	flags: z.record(z.string(), z.string()),
 });
 export interface TestListMapResult {
 	nested: NestedModel;

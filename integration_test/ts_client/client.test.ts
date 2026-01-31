@@ -5,13 +5,12 @@ import {
 	InputRPCError,
 	NotImplementedRPCError,
 	ForbiddenRPCError,
-	PayloadModel,
 	RPCClient,
 	RPCErrorException,
-	TextModel,
 	UnauthorizedRPCError,
 	ValidationRPCError,
 } from "./rpcclient";
+import type { PayloadModel, TextModel } from "./rpcclient";
 
 const baseURL = "http://localhost:8080";
 

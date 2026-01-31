@@ -38,5 +38,5 @@ export type {
 	TestMixedPayloadParams,
 	TestMixedPayloadResult,
 } from "./models";
-export type { RPCClientOptions } from "./client";
+export type { FetchFn, RPCClientOptions } from "./client";
 export type { RPCErrorType, RPCError } from "./errors";

@@ -20,7 +20,7 @@ describe("rpcclientzod", () => {
 
 		await expect(
 			rpc.testBasic({
-				text: { title: "missing-body" } as unknown as object,
+				text: { title: "missing-body" } as unknown as TextModel,
 				flag: true,
 				count: 1,
 			})

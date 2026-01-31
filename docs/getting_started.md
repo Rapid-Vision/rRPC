@@ -1,6 +1,6 @@
 # Getting Started
 
-rRPC is a small schema-first RPC generator for a Go server and Python/Go clients.
+rRPC is a small schema-first RPC generator for a Go server and Python/Go/TypeScript clients.
 
 ## Install
 ```bash
@@ -26,6 +26,7 @@ An `.rrpc` file can be formatted using the `rRPC format` command.
 rRPC server -o . hello.rrpc
 rRPC client -o . hello.rrpc
 rRPC client --lang go -o . hello.rrpc
+rRPC client --lang ts -o . hello.rrpc
 ```
 Generated code is written to `./<pkg>/` (default packages: `rpcserver` and `rpcclient`).
 
@@ -54,8 +55,16 @@ rpc = RPCClient("http://localhost:8080")
 greeting = rpc.hello(name="Ada")
 ```
 
+## Call from TypeScript
+```ts
+import { RPCClient } from "./rpcclient";
+
+const rpc = new RPCClient("http://localhost:8080");
+const greeting = await rpc.hello({ name: "Ada" });
+```
+
 ## Prefixes
-Routes are prefixed with `/rpc` by default. Override with:
+Routes are prefixed with `/rpc` by default. Override with `--prefix` flag
 ```bash
 rRPC server --prefix api hello.rrpc
 rRPC client --prefix api hello.rrpc

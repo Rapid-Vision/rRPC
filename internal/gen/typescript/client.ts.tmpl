@@ -1,0 +1,179 @@
+import { ERROR_EXCEPTIONS, RPCErrorException } from "./errors";
+import type { RPCError } from "./errors";
+{{- if hasTypes .}}
+import type {
+{{- range $model := .Models}}
+	{{className $model.Name}},
+{{- end}}
+{{- range $rpc := .RPCs}}
+{{- if hasParameters $rpc}}
+	{{rpcParamsName $rpc.Name}},
+{{- end}}
+{{- if hasReturn $rpc}}
+	{{rpcResultName $rpc.Name}},
+{{- end}}
+{{- end}}
+} from "./models";
+{{- end}}
+{{- if .Zod}}
+import {
+{{- range $rpc := .RPCs}}
+{{- if hasParameters $rpc}}
+	{{rpcParamsName $rpc.Name}}Schema,
+{{- end}}
+{{- end}}
+} from "./models";
+{{- end}}
+
+export type FetchResponse = {
+	ok: boolean;
+	status: number;
+	json(): Promise<unknown>;
+	text(): Promise<string>;
+};
+
+export type FetchInit = {
+	method?: string;
+	headers?: Record<string, string>;
+	body?: string;
+	signal?: AbortSignal | null;
+};
+
+export type FetchFn = (
+	input: string,
+	init?: FetchInit
+) => Promise<FetchResponse>;
+
+export interface RPCClientOptions {
+	prefix?: string;
+	headers?: Record<string, string>;
+	bearerToken?: string;
+	timeoutMs?: number;
+	fetchFn?: FetchFn;
+}
+
+export class RPCClient {
+	private readonly baseURL: string;
+	private readonly prefix: string;
+	private readonly headers: Record<string, string>;
+	private readonly bearerToken: string;
+	private readonly timeoutMs?: number;
+	private readonly fetchFn: FetchFn;
+
+	constructor(baseURL: string, options: RPCClientOptions = {}) {
+		this.baseURL = RPCClient.normalizeBaseURL(baseURL);
+		this.prefix = RPCClient.normalizePrefix(options.prefix ?? "{{.Prefix}}");
+		this.headers = { ...(options.headers ?? {}) };
+		this.bearerToken = options.bearerToken ?? "";
+		this.timeoutMs = options.timeoutMs;
+		this.fetchFn =
+			options.fetchFn ??
+			(async (input, init) =>
+				(fetch(input, init as unknown as RequestInit) as unknown as FetchResponse));
+	}
+
+	private static normalizeBaseURL(baseURL: string): string {
+		const trimmed = baseURL.trim();
+		const withScheme = trimmed.includes("://") ? trimmed : `http://${trimmed}`;
+		return withScheme.replace(/\/+$/g, "");
+	}
+
+	private static normalizePrefix(prefix: string): string {
+		const trimmed = prefix.trim();
+		if (trimmed === "") {
+			return "";
+		}
+		const withSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+		return withSlash.replace(/\/+$/g, "");
+	}
+
+	private buildURL(path: string): string {
+		if (this.prefix) {
+			return `${this.baseURL}${this.prefix}/${path}`;
+		}
+		return `${this.baseURL}/${path}`;
+	}
+
+	private async request(path: string, payload?: unknown): Promise<unknown> {
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+			...this.headers,
+		};
+		if (this.bearerToken && !hasHeader(this.headers, "Authorization")) {
+			headers.Authorization = `Bearer ${this.bearerToken}`;
+		}
+
+		const controller = this.timeoutMs ? new AbortController() : undefined;
+		const timeout = this.timeoutMs
+			? setTimeout(() => controller?.abort(), this.timeoutMs)
+			: undefined;
+		try {
+			const response = await this.fetchFn(this.buildURL(path), {
+				method: "POST",
+				headers,
+				body: payload === undefined ? undefined : JSON.stringify(payload),
+				signal: controller?.signal,
+			});
+
+			if (!response.ok) {
+				let parsed: RPCError | undefined;
+				try {
+					parsed = (await response.json()) as RPCError;
+				} catch {
+					parsed = undefined;
+				}
+				if (parsed && parsed.type) {
+					this.raiseError(parsed);
+				}
+				throw new RPCErrorException({
+					type: "custom",
+					message: `rpc error: status ${response.status}`,
+				});
+			}
+
+			const body = await response.text();
+			if (body.trim() === "") {
+				return undefined;
+			}
+			return JSON.parse(body);
+		} finally {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		}
+	}
+
+	private raiseError(error: RPCError): never {
+		const excType = ERROR_EXCEPTIONS[error.type];
+		if (excType) {
+			throw new excType(error);
+		}
+		throw new RPCErrorException(error);
+	}
+
+{{- range $rpc := .RPCs}}
+
+{{- if hasReturn $rpc}}
+	async {{rpcMethodName $rpc.Name}}({{- if hasParameters $rpc}}params: {{rpcParamsName $rpc.Name}}{{- end}}): Promise<{{tsType $rpc.Returns}}> {
+		const payload = {{- if hasParameters $rpc}}{{- if $.Zod}} {{rpcParamsName $rpc.Name}}Schema.parse(params) {{- else}} params {{- end}}{{- else}} undefined {{- end}};
+		const res = (await this.request("{{rpcPath $rpc.Name}}", payload)) as {{rpcResultName $rpc.Name}};
+		return res.{{resultField $rpc.Returns}};
+	}
+{{- else}}
+	async {{rpcMethodName $rpc.Name}}({{- if hasParameters $rpc}}params: {{rpcParamsName $rpc.Name}}{{- end}}): Promise<void> {
+		const payload = {{- if hasParameters $rpc}}{{- if $.Zod}} {{rpcParamsName $rpc.Name}}Schema.parse(params) {{- else}} params {{- end}}{{- else}} undefined {{- end}};
+		await this.request("{{rpcPath $rpc.Name}}", payload);
+	}
+{{- end}}
+{{- end}}
+}
+
+function hasHeader(headers: Record<string, string>, name: string): boolean {
+	const target = name.toLowerCase();
+	for (const key of Object.keys(headers)) {
+		if (key.toLowerCase() === target) {
+			return true;
+		}
+	}
+	return false;
+}

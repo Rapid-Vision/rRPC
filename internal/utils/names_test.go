@@ -1,6 +1,10 @@
-package utils
+package utils_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/Rapid-Vision/rRPC/internal/utils"
+)
 
 func TestIdentifierNamePascalCase(t *testing.T) {
 	tests := []struct {
@@ -20,7 +24,7 @@ func TestIdentifierNamePascalCase(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := NewIdentifierName(tt.in).PascalCase()
+		got := utils.NewIdentifierName(tt.in).PascalCase()
 		if got != tt.want {
 			t.Fatalf("PascalCase(%q) = %q, want %q", tt.in, got, tt.want)
 		}
@@ -46,7 +50,7 @@ func TestIdentifierNameSnakeCase(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		got := NewIdentifierName(tt.in).SnakeCase()
+		got := utils.NewIdentifierName(tt.in).SnakeCase()
 		if got != tt.want {
 			t.Fatalf("SnakeCase(%q) = %q, want %q", tt.in, got, tt.want)
 		}

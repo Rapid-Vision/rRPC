@@ -4,12 +4,19 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
+	"sort"
 	"strings"
 	"text/template"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
 	"github.com/Rapid-Vision/rRPC/internal/utils"
 )
+
+//go:embed errors.py.tmpl
+var errorsTemplate string
+
+//go:embed models.py.tmpl
+var modelsTemplate string
 
 //go:embed client.py.tmpl
 var clientTemplate string
@@ -18,21 +25,33 @@ type templateData struct {
 	Models []parser.Model
 	RPCs   []parser.RPC
 	Prefix string
+	Pydantic bool
 }
 
-func GenerateClient(schema *parser.Schema) (string, error) {
+func GenerateClient(schema *parser.Schema) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
-	return GenerateClientWithPrefix(schema, "rpc")
+	return GenerateClientWithPrefixAndPydantic(schema, "rpc", false)
 }
 
-func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, error) {
+func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (map[string]string, error) {
+	return GenerateClientWithPrefixAndPydantic(schema, prefix, false)
+}
+
+func GenerateClientWithPrefixAndPydantic(schema *parser.Schema, prefix string, pydantic bool) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
-	tmpl, err := template.New("client.py.tmpl").Funcs(template.FuncMap{
+	data := templateData{
+		Models: schema.Models,
+		RPCs:   schema.RPCs,
+		Prefix: prefixPath(prefix),
+		Pydantic: pydantic,
+	}
+	funcMap := template.FuncMap{
 		"className":      className,
+		"paramsClassName": paramsClassName,
 		"fieldName":      fieldName,
 		"jsonName":       jsonName,
 		"pythonType":     pythonType,
@@ -42,21 +61,45 @@ func GenerateClientWithPrefix(schema *parser.Schema, prefix string) (string, err
 		"hasParameters":  hasParameters,
 		"hasModelFields": hasModelFields,
 		"hasReturn":      hasReturn,
-	}).Parse(clientTemplate)
-	if err != nil {
-		return "", fmt.Errorf("parse template: %w", err)
+		"hasModels": func(data templateData) bool {
+			return len(data.Models) > 0
+		},
+		"isPydantic": func(data templateData) bool {
+			return data.Pydantic
+		},
 	}
 
-	data := templateData{
-		Models: schema.Models,
-		RPCs:   schema.RPCs,
-		Prefix: prefixPath(prefix),
+	templates := map[string]string{
+		"errors.py": errorsTemplate,
+		"models.py": modelsTemplate,
+		"client.py": clientTemplate,
 	}
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("execute template: %w", err)
+
+	files := make(map[string]string, len(templates))
+	for name, tmplText := range templates {
+		tmpl, err := template.New(name).Funcs(funcMap).Parse(tmplText)
+		if err != nil {
+			return nil, fmt.Errorf("parse template %s: %w", name, err)
+		}
+		var buf bytes.Buffer
+		buf.WriteString("# THIS CODE IS GENERATED\n\n")
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return nil, fmt.Errorf("execute template %s: %w", name, err)
+		}
+		files[name] = buf.String()
 	}
-	return buf.String(), nil
+
+	ordered := make([]string, 0, len(files))
+	for name := range files {
+		ordered = append(ordered, name)
+	}
+	sort.Strings(ordered)
+	for _, name := range ordered {
+		if strings.TrimSpace(files[name]) == "" {
+			delete(files, name)
+		}
+	}
+	return files, nil
 }
 
 func GeneratePythonInit(schema *parser.Schema) string {
@@ -64,17 +107,17 @@ func GeneratePythonInit(schema *parser.Schema) string {
 	b.WriteString("# THIS CODE IS GENERATED\n\n")
 
 	b.WriteString("from .client import RPCClient\n")
-	b.WriteString("from .client import RPCError\n")
-	b.WriteString("from .client import RPCErrorException\n")
-	b.WriteString("from .client import CustomRPCError\n")
-	b.WriteString("from .client import ValidationRPCError\n")
-	b.WriteString("from .client import InputRPCError\n")
-	b.WriteString("from .client import UnauthorizedRPCError\n")
-	b.WriteString("from .client import ForbiddenRPCError\n")
-	b.WriteString("from .client import NotImplementedRPCError\n")
+	b.WriteString("from .errors import RPCError\n")
+	b.WriteString("from .errors import RPCErrorException\n")
+	b.WriteString("from .errors import CustomRPCError\n")
+	b.WriteString("from .errors import ValidationRPCError\n")
+	b.WriteString("from .errors import InputRPCError\n")
+	b.WriteString("from .errors import UnauthorizedRPCError\n")
+	b.WriteString("from .errors import ForbiddenRPCError\n")
+	b.WriteString("from .errors import NotImplementedRPCError\n")
 	for _, model := range schema.Models {
 		className := utils.NewIdentifierName(model.Name).PascalCase() + "Model"
-		b.WriteString("from .client import ")
+		b.WriteString("from .models import ")
 		b.WriteString(className)
 		b.WriteString("\n")
 	}
@@ -100,6 +143,10 @@ func GeneratePythonInit(schema *parser.Schema) string {
 
 func className(name string) string {
 	return utils.NewIdentifierName(name).PascalCase() + "Model"
+}
+
+func paramsClassName(name string) string {
+	return utils.NewIdentifierName(name).PascalCase() + "Params"
 }
 
 func fieldName(name string) string {

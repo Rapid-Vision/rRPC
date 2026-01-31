@@ -25,6 +25,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -35,6 +49,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -45,6 +63,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -55,6 +77,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -65,6 +91,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -92,6 +122,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -102,6 +146,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -112,6 +160,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -122,6 +174,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -132,6 +188,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -169,6 +229,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -179,6 +253,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -189,6 +267,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -199,6 +281,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -209,6 +295,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -246,6 +336,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -256,6 +360,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -266,6 +374,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -276,6 +388,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -286,6 +402,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -323,6 +443,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -333,6 +467,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -343,6 +481,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -353,6 +495,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -363,6 +509,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -400,6 +550,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -410,6 +574,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -420,6 +588,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -430,6 +602,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -440,6 +616,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -467,6 +647,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -477,6 +671,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -487,6 +685,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -497,6 +699,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -507,6 +713,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -534,6 +744,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -544,6 +768,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -554,6 +782,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -564,6 +796,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -574,6 +810,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -601,6 +841,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -611,6 +865,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -621,6 +879,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -631,6 +893,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -641,6 +907,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -668,6 +938,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -678,6 +962,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -688,6 +976,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -698,6 +990,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -708,6 +1004,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -735,6 +1035,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -745,6 +1059,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -755,6 +1073,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -765,6 +1087,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -775,6 +1101,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -812,6 +1142,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -822,6 +1166,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -832,6 +1180,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -842,6 +1194,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -852,6 +1208,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -889,6 +1249,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -899,6 +1273,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -909,6 +1287,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -919,6 +1301,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -929,6 +1315,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }
@@ -966,6 +1356,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -976,6 +1380,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -986,6 +1394,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -996,6 +1408,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -1006,6 +1422,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RPCError"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }

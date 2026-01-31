@@ -3,6 +3,8 @@ package gogen
 import (
 	"bytes"
 	"fmt"
+	"sort"
+	"strings"
 	"text/template"
 
 	"github.com/Rapid-Vision/rRPC/internal/parser"
@@ -11,21 +13,38 @@ import (
 	"go/format"
 )
 
-//go:embed client.go.tmpl
-var clientTemplate string
+//go:embed client_models.go.tmpl
+var clientModelsTemplate string
 
-func GenerateClient(schema *parser.Schema, pkg string) (string, error) {
+//go:embed client_errors.go.tmpl
+var clientErrorsTemplate string
+
+//go:embed client_client.go.tmpl
+var clientClientTemplate string
+
+//go:embed client_transport.go.tmpl
+var clientTransportTemplate string
+
+//go:embed client_rpcs.go.tmpl
+var clientRPCsTemplate string
+
+func GenerateClient(schema *parser.Schema, pkg string) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
 	return GenerateClientWithPrefix(schema, pkg, "rpc")
 }
 
-func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (string, error) {
+func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (map[string]string, error) {
 	if schema == nil {
-		return "", fmt.Errorf("schema is nil")
+		return nil, fmt.Errorf("schema is nil")
 	}
-	tmpl, err := template.New("client.go.tmpl").Funcs(template.FuncMap{
+	data := templateData{
+		Package: pkg,
+		Models:  schema.Models,
+		RPCs:    schema.RPCs,
+	}
+	funcMap := template.FuncMap{
 		"modelTypeName": modelTypeName,
 		"fieldName":     fieldName,
 		"jsonName":      jsonName,
@@ -38,24 +57,55 @@ func GenerateClientWithPrefix(schema *parser.Schema, pkg, prefix string) (string
 		},
 		"resultField": resultField,
 		"hasReturn":   hasReturn,
-	}).Parse(clientTemplate)
-	if err != nil {
-		return "", fmt.Errorf("parse template: %w", err)
+		"usesRawInModels": func(data templateData) bool {
+			return parser.UsesRawInModels(*schema)
+		},
+		"usesRawInRPCs": func(data templateData) bool {
+			return parser.UsesRawInRPCs(*schema)
+		},
+		"hasRPCs": func(data templateData) bool {
+			return len(data.RPCs) > 0
+		},
 	}
 
-	data := templateData{
-		Package: pkg,
-		Models:  schema.Models,
-		RPCs:    schema.RPCs,
-	}
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return "", fmt.Errorf("execute template: %w", err)
+	templates := map[string]string{
+		"models.go":    clientModelsTemplate,
+		"errors.go":    clientErrorsTemplate,
+		"client.go":    clientClientTemplate,
+		"transport.go": clientTransportTemplate,
+		"rpcs.go":      clientRPCsTemplate,
 	}
 
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		return "", fmt.Errorf("formatting error: %w", err)
+	files := make(map[string]string, len(templates))
+	for name, tmplText := range templates {
+		tmpl, err := template.New(name).Funcs(funcMap).Parse(tmplText)
+		if err != nil {
+			return nil, fmt.Errorf("parse template %s: %w", name, err)
+		}
+		var buf bytes.Buffer
+		buf.WriteString("// THIS CODE IS GENERATED\n\n")
+		buf.WriteString("package ")
+		buf.WriteString(pkg)
+		buf.WriteString("\n\n")
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return nil, fmt.Errorf("execute template %s: %w", name, err)
+		}
+		formatted, err := format.Source(buf.Bytes())
+		if err != nil {
+			return nil, fmt.Errorf("formatting error %s: %w", name, err)
+		}
+		files[name] = string(formatted)
 	}
-	return string(formatted), nil
+
+	ordered := make([]string, 0, len(files))
+	for name := range files {
+		ordered = append(ordered, name)
+	}
+	sort.Strings(ordered)
+	for _, name := range ordered {
+		if strings.TrimSpace(files[name]) == "" {
+			delete(files, name)
+		}
+	}
+	return files, nil
 }

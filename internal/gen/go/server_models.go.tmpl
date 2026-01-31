@@ -1,0 +1,14 @@
+{{- if usesRawInModels .}}
+import "encoding/json"
+{{- end}}
+
+{{- range $index, $model := .Models}}
+{{- if gt $index 0}}
+
+{{- end}}
+type {{modelTypeName $model.Name}} struct {
+{{- range $field := $model.Fields}}
+	{{fieldName $field.Name}} {{goType $field.Type}} `json:"{{jsonName $field.Name}}"`
+{{- end}}
+}
+{{- end}}

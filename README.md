@@ -1,5 +1,5 @@
 # rRPC
-rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new procol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs.
+rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new protocol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs. Currently it supports generating a go server and clients for go, python and typescript.
 
 ## Motivation
 The industry standard for communication between services is [gRPC](https://grpc.io/). It may be good for Google-scale services, but has several disadvantages: 
@@ -10,19 +10,38 @@ The industry standard for communication between services is [gRPC](https://grpc.
 
 For small and medium-sized projects the performance and industrial adoption of the gRPC toolkit may not outweigh these problems.
 
-## Goals
+## Features
 This project aims to provide a simple tool with the following properties:
-- Generated code has strict typing
-- Single binary for everything
-- JSON over HTTP protocol
-- Generated code does not add dependencies
-- Capacity to generate an [OpenAPI](https://www.openapis.org/) schema
+- Server code generation in go
+- Client generation for go, python and typescript
+- Type validation in python using pydantic (with `--py-pydantic` flag)
+- Type validation in typescript using zod (with `--ts-zod` flag)
+- Simple JSON over HTTP protocol
+- Single portable binary
+- [OpenAPI](https://www.openapis.org/) schema generation
+- Generated code is human readable
+
+## Schema language
+Schema is defined in rrpc schema language
+```
+model GreetingMessage {
+    message: string
+}
+
+rpc HelloWorld(
+    name: string,
+    surname: string?,
+) GreetingMessage
+```
+
+View [vs code extension](https://marketplace.visualstudio.com/items?itemName=mishapankin.rrpc) for syntax highlighting.
 
 ## Language support
 | Language | Server | Client |
 | --- | --- | --- |
 | Go | ✅ | ✅ |
 | Python | ❌ | ✅ |
+| Typescript | ❌ | ✅ |
 
 Other languages can be supported via OpenAPI toolkits.
 
@@ -37,13 +56,11 @@ go install github.com/Rapid-Vision/rRPC
 - [Error handling](docs/errors.md)
 - [Go guide](docs/go.md)
 - [Python guide](docs/python.md)
+- [TypeScript guide](docs/typescript.md)
 - [Protocol description](docs/protocol.md)
 
 ## Usage examples
 See [`examples/`](examples/) directory for server, client and Makefile implemenation examples. Also [`integration_test/`](integration_test/) may be useful as reference too.
-
-## Editor support
-View [vs code extension](https://marketplace.visualstudio.com/items?itemName=mishapankin.rrpc) for syntax highlighting.
 
 ## Comparison & Fit
 This project focuses on a small, typed, JSON-over-HTTP RPC flow.
@@ -61,5 +78,5 @@ This project focuses on a small, typed, JSON-over-HTTP RPC flow.
 
 ### When this is not a good fit
 - You need streaming, bidirectional RPC, or advanced middleware.
-- You need multi-language support beyond Go/Python.
+- You need multi-language support beyond Go/Python/TypeScript.
 - You want REST or GraphQL semantics and tooling.

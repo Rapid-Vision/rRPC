@@ -52,6 +52,13 @@ except ValidationRPCError as err:
 Generated models are `@dataclass` types with `from_dict(...)` helpers, and the client
 uses dataclass serialization for payloads while handling nested lists/maps automatically.
 
+## Pydantic validation
+To enable input validation, generate the client with Pydantic models:
+```bash
+rRPC client --py-pydantic -o . hello.rrpc
+```
+The client validates RPC inputs with Pydantic before sending requests.
+
 ## Prefixes
 Routes are prefixed with `/rpc` by default. Override with:
 ```bash

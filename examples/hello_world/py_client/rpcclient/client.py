@@ -2,78 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict, is_dataclass
-from typing import Any, Dict, List, Optional, Literal
+from dataclasses import asdict, is_dataclass
+from typing import Any, Dict, List, Optional, Type
 import json
 import urllib.error
 import urllib.request
 
-
-RPCErrorType = Literal[
-    "custom",
-    "validation",
-    "input",
-    "unauthorized",
-    "forbidden",
-    "not_implemented",
-]
-
-
-@dataclass
-class RPCError:
-    type: RPCErrorType
-    message: str
-
-
-class RPCErrorException(Exception):
-    def __init__(self, error: RPCError) -> None:
-        super().__init__(error.message)
-        self.error = error
-
-
-class CustomRPCError(RPCErrorException):
-    pass
-
-
-class ValidationRPCError(RPCErrorException):
-    pass
-
-
-class InputRPCError(RPCErrorException):
-    pass
-
-
-class UnauthorizedRPCError(RPCErrorException):
-    pass
-
-
-class ForbiddenRPCError(RPCErrorException):
-    pass
-
-
-class NotImplementedRPCError(RPCErrorException):
-    pass
-
-
-_ERROR_EXCEPTIONS = {
-    "custom": CustomRPCError,
-    "validation": ValidationRPCError,
-    "input": InputRPCError,
-    "unauthorized": UnauthorizedRPCError,
-    "forbidden": ForbiddenRPCError,
-    "not_implemented": NotImplementedRPCError,
-}
-
-
-@dataclass
-class GreetingMessageModel:
-    message: str
-
-    @staticmethod
-    def from_dict(data: Dict[str, Any]) -> "GreetingMessageModel":
-        return GreetingMessageModel(
-            message=data.get("message"),
-        )
+from .errors import RPCError, RPCErrorException, _ERROR_EXCEPTIONS
+from .models import (
+    GreetingMessageModel,
+)
 
 
 class RPCClient:

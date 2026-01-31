@@ -1,0 +1,39 @@
+// THIS CODE IS GENERATED
+
+export type RPCErrorType =
+	| "custom"
+	| "validation"
+	| "input"
+	| "unauthorized"
+	| "forbidden"
+	| "not_implemented";
+
+export interface RPCError {
+	type: RPCErrorType;
+	message: string;
+}
+
+export class RPCErrorException extends Error {
+	readonly error: RPCError;
+
+	constructor(error: RPCError) {
+		super(error.message);
+		this.error = error;
+	}
+}
+
+export class CustomRPCError extends RPCErrorException {}
+export class ValidationRPCError extends RPCErrorException {}
+export class InputRPCError extends RPCErrorException {}
+export class UnauthorizedRPCError extends RPCErrorException {}
+export class ForbiddenRPCError extends RPCErrorException {}
+export class NotImplementedRPCError extends RPCErrorException {}
+
+export const ERROR_EXCEPTIONS: Record<string, typeof RPCErrorException> = {
+	custom: CustomRPCError,
+	validation: ValidationRPCError,
+	input: InputRPCError,
+	unauthorized: UnauthorizedRPCError,
+	forbidden: ForbiddenRPCError,
+	not_implemented: NotImplementedRPCError,
+};

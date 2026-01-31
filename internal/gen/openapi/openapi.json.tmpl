@@ -38,6 +38,20 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/{{errorSchemaName}}"
+                },
+                "examples": {
+                  "validation": {
+                    "value": {
+                      "type": "validation",
+                      "message": "validation error"
+                    }
+                  },
+                  "input": {
+                    "value": {
+                      "type": "input",
+                      "message": "input error"
+                    }
+                  }
                 }
               }
             }
@@ -48,6 +62,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/{{errorSchemaName}}"
+                },
+                "example": {
+                  "type": "unauthorized",
+                  "message": "unauthorized"
                 }
               }
             }
@@ -58,6 +76,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/{{errorSchemaName}}"
+                },
+                "example": {
+                  "type": "forbidden",
+                  "message": "forbidden"
                 }
               }
             }
@@ -68,6 +90,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/{{errorSchemaName}}"
+                },
+                "example": {
+                  "type": "custom",
+                  "message": "error"
                 }
               }
             }
@@ -78,6 +104,10 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/{{errorSchemaName}}"
+                },
+                "example": {
+                  "type": "not_implemented",
+                  "message": "not implemented"
                 }
               }
             }

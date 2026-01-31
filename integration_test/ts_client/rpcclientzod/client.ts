@@ -1,4 +1,5 @@
 // THIS CODE IS GENERATED
+import { z } from "zod";
 export type RPCErrorType =
 	| "custom"
 	| "validation"
@@ -38,26 +39,53 @@ const ERROR_EXCEPTIONS: Record<string, typeof RPCErrorException> = {
 };
 export interface EmptyModel {
 }
+
+export const EmptyModelSchema = z.object({
+});
 export interface TextModel {
 	title?: string | null;
 	body: string;
 }
+
+export const TextModelSchema = z.object({
+	title: z.union([z.string(), z.null()]).optional(),
+	body: z.string(),
+});
 export interface FlagsModel {
 	enabled: boolean;
 	retries: number;
 	labels: Array<string>;
 	meta: Record<string, string>;
 }
+
+export const FlagsModelSchema = z.object({
+	enabled: z.boolean(),
+	retries: z.number().int(),
+	labels: z.array(z.string()),
+	meta: z.record(z.string()),
+});
 export interface NestedModel {
 	text: TextModel;
 	flags?: FlagsModel | null;
 	items: Array<TextModel>;
 	lookup: Record<string, TextModel>;
 }
+
+export const NestedModelSchema = z.object({
+	text: z.lazy(() => TextModelSchema),
+	flags: z.union([z.lazy(() => FlagsModelSchema), z.null()]).optional(),
+	items: z.array(z.lazy(() => TextModelSchema)),
+	lookup: z.record(z.lazy(() => TextModelSchema)),
+});
 export interface PayloadModel {
 	data: any;
 	raw_data: any;
 }
+
+export const PayloadModelSchema = z.object({
+	data: z.any(),
+	raw_data: z.any(),
+});
 export interface TestEmptyResult {
 	empty: EmptyModel;
 }
@@ -67,6 +95,13 @@ export interface TestBasicParams {
 	count: number;
 	note?: string | null;
 }
+
+export const TestBasicParamsSchema = z.object({
+	text: z.lazy(() => TextModelSchema),
+	flag: z.boolean(),
+	count: z.number().int(),
+	note: z.union([z.string(), z.null()]).optional(),
+});
 export interface TestBasicResult {
 	text: TextModel;
 }
@@ -74,6 +109,11 @@ export interface TestListMapParams {
 	texts: Array<TextModel>;
 	flags: Record<string, string>;
 }
+
+export const TestListMapParamsSchema = z.object({
+	texts: z.array(z.lazy(() => TextModelSchema)),
+	flags: z.record(z.string()),
+});
 export interface TestListMapResult {
 	nested: NestedModel;
 }
@@ -81,12 +121,21 @@ export interface TestOptionalParams {
 	text?: TextModel | null;
 	flag?: boolean | null;
 }
+
+export const TestOptionalParamsSchema = z.object({
+	text: z.union([z.lazy(() => TextModelSchema), z.null()]).optional(),
+	flag: z.union([z.boolean(), z.null()]).optional(),
+});
 export interface TestOptionalResult {
 	flags: FlagsModel;
 }
 export interface TestValidationErrorParams {
 	text: TextModel;
 }
+
+export const TestValidationErrorParamsSchema = z.object({
+	text: z.lazy(() => TextModelSchema),
+});
 export interface TestValidationErrorResult {
 	text: TextModel;
 }
@@ -108,18 +157,30 @@ export interface TestMapReturnResult {
 export interface TestJsonParams {
 	data: any;
 }
+
+export const TestJsonParamsSchema = z.object({
+	data: z.any(),
+});
 export interface TestJsonResult {
 	json: any;
 }
 export interface TestRawParams {
 	payload: any;
 }
+
+export const TestRawParamsSchema = z.object({
+	payload: z.any(),
+});
 export interface TestRawResult {
 	raw: any;
 }
 export interface TestMixedPayloadParams {
 	payload: PayloadModel;
 }
+
+export const TestMixedPayloadParamsSchema = z.object({
+	payload: z.lazy(() => PayloadModelSchema),
+});
 export interface TestMixedPayloadResult {
 	payload: PayloadModel;
 }
@@ -237,22 +298,22 @@ export class RPCClient {
 		await this.request("test_no_return", payload);
 	}
 	async testBasic(params: TestBasicParams): Promise<TextModel> {
-		const payload = params;
+		const payload = TestBasicParamsSchema.parse(params);
 		const res = (await this.request("test_basic", payload)) as TestBasicResult;
 		return res.text;
 	}
 	async testListMap(params: TestListMapParams): Promise<NestedModel> {
-		const payload = params;
+		const payload = TestListMapParamsSchema.parse(params);
 		const res = (await this.request("test_list_map", payload)) as TestListMapResult;
 		return res.nested;
 	}
 	async testOptional(params: TestOptionalParams): Promise<FlagsModel> {
-		const payload = params;
+		const payload = TestOptionalParamsSchema.parse(params);
 		const res = (await this.request("test_optional", payload)) as TestOptionalResult;
 		return res.flags;
 	}
 	async testValidationError(params: TestValidationErrorParams): Promise<TextModel> {
-		const payload = params;
+		const payload = TestValidationErrorParamsSchema.parse(params);
 		const res = (await this.request("test_validation_error", payload)) as TestValidationErrorResult;
 		return res.text;
 	}
@@ -282,17 +343,17 @@ export class RPCClient {
 		return res.result;
 	}
 	async testJson(params: TestJsonParams): Promise<any> {
-		const payload = params;
+		const payload = TestJsonParamsSchema.parse(params);
 		const res = (await this.request("test_json", payload)) as TestJsonResult;
 		return res.json;
 	}
 	async testRaw(params: TestRawParams): Promise<any> {
-		const payload = params;
+		const payload = TestRawParamsSchema.parse(params);
 		const res = (await this.request("test_raw", payload)) as TestRawResult;
 		return res.raw;
 	}
 	async testMixedPayload(params: TestMixedPayloadParams): Promise<PayloadModel> {
-		const payload = params;
+		const payload = TestMixedPayloadParamsSchema.parse(params);
 		const res = (await this.request("test_mixed_payload", payload)) as TestMixedPayloadResult;
 		return res.payload;
 	}

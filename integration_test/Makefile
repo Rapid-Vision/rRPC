@@ -18,6 +18,7 @@ go-client: $(SCHEMA) $(RRPC)
 
 ts-client: $(SCHEMA) $(RRPC)
 	$(RRPC) client --lang ts -o ./ts_client -f $(SCHEMA)
+	$(RRPC) client --lang ts --ts-zod --pkg rpcclientzod -o ./ts_client -f $(SCHEMA)
 
 openapi: $(SCHEMA) $(RRPC)
 	$(RRPC) openapi -o . -f $(SCHEMA)

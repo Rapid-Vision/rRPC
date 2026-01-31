@@ -6,8 +6,6 @@ from __future__ import annotations
 from pydantic import BaseModel
 
 from typing import Any, Dict, List, Optional
-
-
 class EmptyModel(BaseModel):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "EmptyModel":
@@ -16,7 +14,7 @@ class EmptyModel(BaseModel):
 
 
 class TextModel(BaseModel):
-    title: Optional[str]
+    title: Optional[str] = None
     body: str
 
     @classmethod
@@ -25,7 +23,6 @@ class TextModel(BaseModel):
             return cls.model_validate(data)
         except AttributeError:
             return cls.parse_obj(data)
-
 
 class FlagsModel(BaseModel):
     enabled: bool
@@ -40,10 +37,9 @@ class FlagsModel(BaseModel):
         except AttributeError:
             return cls.parse_obj(data)
 
-
 class NestedModel(BaseModel):
     text: TextModel
-    flags: Optional[FlagsModel]
+    flags: Optional[FlagsModel] = None
     items: List[TextModel]
     lookup: Dict[str, TextModel]
 
@@ -53,7 +49,6 @@ class NestedModel(BaseModel):
             return cls.model_validate(data)
         except AttributeError:
             return cls.parse_obj(data)
-
 
 class PayloadModel(BaseModel):
     data: Any
@@ -65,3 +60,4 @@ class PayloadModel(BaseModel):
             return cls.model_validate(data)
         except AttributeError:
             return cls.parse_obj(data)
+

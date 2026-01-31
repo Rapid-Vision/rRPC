@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 class {{className $model.Name}}(BaseModel):
 {{- if hasModelFields $model}}
 {{- range $field := $model.Fields}}
-    {{fieldName $field.Name}}: {{pythonType $field.Type}}
+    {{fieldName $field.Name}}: {{pythonType $field.Type}}{{if $field.Type.Optional}} = None{{end}}
 {{- end}}
 
     @classmethod

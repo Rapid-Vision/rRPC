@@ -1,8 +1,9 @@
-package formatter
+package formatter_test
 
 import (
 	"testing"
 
+	"github.com/Rapid-Vision/rRPC/internal/formatter"
 	"github.com/Rapid-Vision/rRPC/internal/parser"
 	"github.com/pmezard/go-difflib/difflib"
 
@@ -24,7 +25,7 @@ rpc GetUser(
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -41,7 +42,7 @@ rpc Ping() # trailing
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -60,7 +61,7 @@ rpc Get() User # comment
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -79,7 +80,7 @@ rpc FindUser() User # comment
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -101,7 +102,7 @@ rpc Hello(
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -125,7 +126,7 @@ rpc Echo(
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	first, err := FormatSchema(schema)
+	first, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -133,7 +134,7 @@ rpc Echo(
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	second, err := FormatSchema(schema2)
+	second, err := formatter.FormatSchema(schema2)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -153,7 +154,7 @@ func TestFormatFromTestFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -177,7 +178,7 @@ func TestFormatIdempotanceFromTestFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	formatted, err := FormatSchema(schema)
+	formatted, err := formatter.FormatSchema(schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -187,7 +188,7 @@ func TestFormatIdempotanceFromTestFile(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	formatted_twice, err := FormatSchema(formatted_schema)
+	formatted_twice, err := formatter.FormatSchema(formatted_schema)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -19,6 +19,7 @@ This project aims to provide a simple tool with the following properties:
 - Simple JSON over HTTP protocol
 - Single portable binary
 - [OpenAPI](https://www.openapis.org/) schema generation
+- Generated code is human readable
 
 ## Schema language
 Schema is defined in rrpc schema language

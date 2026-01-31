@@ -18,7 +18,7 @@ const baseURL = "http://localhost:8080";
 describe("rpcclient", () => {
 	it("handles empty response", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const empty = await rpc.testEmpty();
 		expect(empty).toEqual({});
@@ -26,7 +26,7 @@ describe("rpcclient", () => {
 
 	it("handles no return", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const result = await rpc.testNoReturn();
 		expect(result).toBeUndefined();
@@ -34,7 +34,7 @@ describe("rpcclient", () => {
 
 	it("handles basic payload", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const text: TextModel = { title: null, body: "  hello  " };
 		const result = await rpc.testBasic({
@@ -49,7 +49,7 @@ describe("rpcclient", () => {
 
 	it("handles list/map payload", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const result = await rpc.testListMap({
 			texts: [
@@ -65,7 +65,7 @@ describe("rpcclient", () => {
 
 	it("handles optional payloads", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const result = await rpc.testOptional({ text: null, flag: null });
 		expect(result.enabled).toBe(false);
@@ -73,7 +73,7 @@ describe("rpcclient", () => {
 
 	it("maps validation error", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		await expect(
 			rpc.testValidationError({ text: { title: null, body: "" } })
@@ -82,7 +82,7 @@ describe("rpcclient", () => {
 
 	it("maps input error", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		await expect(
 			rpc.testBasic({ text: "bad" as unknown as TextModel, flag: true, count: 1 })
@@ -98,7 +98,7 @@ describe("rpcclient", () => {
 
 	it("maps forbidden error", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		await expect(rpc.testForbiddenError()).rejects.toBeInstanceOf(
 			ForbiddenRPCError
@@ -107,7 +107,7 @@ describe("rpcclient", () => {
 
 	it("maps not implemented error", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		await expect(rpc.testNotImplementedError()).rejects.toBeInstanceOf(
 			NotImplementedRPCError
@@ -116,14 +116,14 @@ describe("rpcclient", () => {
 
 	it("maps custom error", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		await expect(rpc.testCustomError()).rejects.toBeInstanceOf(CustomRPCError);
 	});
 
 	it("handles map return", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const result = await rpc.testMapReturn();
 		expect(result.a?.body).toBe("mapped");
@@ -131,7 +131,7 @@ describe("rpcclient", () => {
 
 	it("handles json payload", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const result = await rpc.testJson({ data: { count: 2, tags: ["a", "b"] } });
 		expect(result.count).toBe(2);
@@ -139,7 +139,7 @@ describe("rpcclient", () => {
 
 	it("handles raw payload", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const result = await rpc.testRaw({ payload: { ok: true } });
 		expect(result.ok).toBe(true);
@@ -147,7 +147,7 @@ describe("rpcclient", () => {
 
 	it("handles mixed payload", async () => {
 		const rpc = new RPCClient(baseURL, {
-			headers: { Authorization: "Bearer test_token" },
+			bearerToken: "test_token",
 		});
 		const payload: PayloadModel = { data: { value: "x" }, raw_data: { id: 1 } };
 		const result = await rpc.testMixedPayload({ payload });
@@ -158,6 +158,15 @@ describe("rpcclient", () => {
 	it("normalizes base url and prefix", async () => {
 		const rpc = new RPCClient("localhost:8080/", {
 			prefix: "rpc",
+			bearerToken: "test_token",
+		});
+		const empty = await rpc.testEmpty();
+		expect(empty).toEqual({});
+	});
+
+	it("uses headers Authorization over bearerToken", async () => {
+		const rpc = new RPCClient(baseURL, {
+			bearerToken: "bad_token",
 			headers: { Authorization: "Bearer test_token" },
 		});
 		const empty = await rpc.testEmpty();

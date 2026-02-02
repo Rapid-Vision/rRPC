@@ -12,7 +12,7 @@ For small and medium-sized projects the performance and industrial adoption of t
 
 ## Features
 This project aims to provide a simple tool with the following properties:
-- Server code generation in go
+- Server code generation in go or python
 - Client generation for go, python and typescript
 - Type validation in python using pydantic (with `--py-pydantic` flag)
 - Type validation in typescript using zod (with `--ts-zod` flag)

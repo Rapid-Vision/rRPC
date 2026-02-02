@@ -1,7 +1,7 @@
 [project]
 name = "py-server"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python rrpc server example"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["fastapi>=0.128.0", "pydantic>=2.12.5", "uvicorn>=0.40.0"]

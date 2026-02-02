@@ -1,0 +1,95 @@
+from __future__ import annotations
+
+import inspect
+from typing import Any
+
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse, Response
+from pydantic import BaseModel, ValidationError
+
+from .errors import (
+    ERROR_TYPE_CUSTOM,
+    ERROR_TYPE_VALIDATION,
+    RPCErrorException,
+    error_payload,
+    error_dict,
+)
+from .handlers import RPCHandlers
+{{- if or (hasModels .) (hasParamModels .) }}
+from .models import (
+{{- range $model := .Models}}
+    {{className $model.Name}},
+{{- end}}
+{{- range $rpc := .RPCs}}
+{{- if hasParameters $rpc}}
+    {{paramsClassName $rpc.Name}},
+{{- end}}
+{{- end}}
+)
+{{- end}}
+
+
+def _normalize_prefix(prefix: str) -> str:
+    prefix = prefix.strip()
+    if prefix == "":
+        return ""
+    if not prefix.startswith("/"):
+        prefix = "/" + prefix
+    return prefix.rstrip("/")
+
+
+def _encode_payload(value: Any) -> Any:
+    if isinstance(value, BaseModel):
+        try:
+            return value.model_dump()
+        except AttributeError:
+            return value.dict()
+    if isinstance(value, dict):
+        return {k: _encode_payload(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_encode_payload(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_encode_payload(item) for item in value)
+    return value
+
+
+def create_app(handlers: RPCHandlers, prefix: str = "{{.Prefix}}") -> FastAPI:
+    app = FastAPI()
+    prefix = _normalize_prefix(prefix)
+
+{{- range $rpc := .RPCs}}
+    @app.post(f"{prefix}/{{rpcMethodName $rpc.Name}}")
+    async def {{rpcMethodName $rpc.Name}}({{if hasParameters $rpc}}params: {{paramsClassName $rpc.Name}}{{end}}):
+        try:
+{{- if hasParameters $rpc}}
+            result = handlers.{{rpcMethodName $rpc.Name}}({{range $param := $rpc.Parameters}}{{fieldName $param.Name}}=params.{{fieldName $param.Name}}, {{end}})
+{{- else}}
+            result = handlers.{{rpcMethodName $rpc.Name}}()
+{{- end}}
+            if inspect.isawaitable(result):
+                result = await result
+        except ValidationError as err:
+            return JSONResponse(
+                status_code=400,
+                content=error_payload(ERROR_TYPE_VALIDATION, str(err)),
+            )
+        except RPCErrorException as err:
+            return JSONResponse(
+                status_code=err.status_code,
+                content=error_dict(err.error),
+            )
+        except Exception as err:
+            return JSONResponse(
+                status_code=500,
+                content=error_payload(ERROR_TYPE_CUSTOM, str(err)),
+            )
+{{- if hasReturn $rpc}}
+        return JSONResponse(
+            content={"{{resultField $rpc.Returns}}": _encode_payload(result)}
+        )
+{{- else}}
+        return Response(status_code=204)
+{{- end}}
+
+{{- end}}
+    return app

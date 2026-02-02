@@ -3,12 +3,15 @@ ROOT   := ..
 RRPC := $(ROOT)/rRPC
 
 # It is easier to always rebuild everything
-.PHONY: all $(RRPC) go-server py-client ts-client openapi clean
+.PHONY: all $(RRPC) go-server py-server py-client ts-client openapi clean
 
-all: go-server go-client py-client ts-client openapi
+all: go-server py-server go-client py-client ts-client openapi
 
 go-server: $(SCHEMA) $(RRPC)
 	$(RRPC) server -o ./go_server -f $(SCHEMA)
+
+py-server: $(SCHEMA) $(RRPC)
+	$(RRPC) server --lang py -o ./py_server -f $(SCHEMA)
 
 py-client: $(SCHEMA) $(RRPC)
 	$(RRPC) client --lang py -o ./py_client -f $(SCHEMA)

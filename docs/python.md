@@ -1,12 +1,34 @@
 # Python Guide
 
-This page covers generating a Python client. See [schema_language.md](docs/schema_language.md) for schema syntax.
+This page covers generating Python clients and servers. See [schema_language.md](docs/schema_language.md) for schema syntax.
 
 ## Generate code
 ```bash
 rRPC client -o . hello.rrpc
 ```
 The default output package is `rpcclient`.
+
+## Generate a FastAPI server
+```bash
+rRPC server --lang py -o . hello.rrpc
+```
+The default output package is `rpcserver`. The generated server uses FastAPI and Pydantic.
+
+Example `server.py`:
+```python
+from rpcserver import create_app, RPCHandlers
+from rpcserver.models import GreetingModel
+
+class Service(RPCHandlers):
+    def hello(self, name: str) -> GreetingModel:
+        return GreetingModel(message=f"Hello, {name}!")
+
+app = create_app(Service())
+```
+Run with:
+```bash
+uvicorn server:app --host 127.0.0.1 --port 8080
+```
 
 ## Client usage
 ```python

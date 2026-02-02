@@ -1,0 +1,21 @@
+from __future__ import annotations
+
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional
+
+{{- if hasModels .}}
+from .models import (
+{{- range $model := .Models}}
+    {{className $model.Name}},
+{{- end}}
+)
+{{- end}}
+
+
+class RPCHandlers(ABC):
+{{- range $rpc := .RPCs}}
+
+    @abstractmethod
+    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{if hasReturn $rpc}}{{pythonType $rpc.Returns}}{{else}}None{{end}}:
+        raise NotImplementedError
+{{- end}}

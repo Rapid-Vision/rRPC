@@ -83,3 +83,8 @@ model Spacing {
 # Another empty model
 model AnotherEmpty {
 }
+
+# Single-line model with fields and trailing comment
+model InlineUser {
+    name: string
+} # model trailing comment

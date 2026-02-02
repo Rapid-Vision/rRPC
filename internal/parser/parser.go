@@ -67,6 +67,7 @@ type Model struct {
 	Line    int
 	Col     int
 	EndLine int
+	EndCol  int
 }
 
 type RPC struct {
@@ -228,6 +229,7 @@ func (p *Parser) parseModel() (Model, error) {
 		Line:    modelToken.Line,
 		Col:     modelToken.Col,
 		EndLine: rbrace.Line,
+		EndCol:  rbrace.Col,
 	}, nil
 }
 

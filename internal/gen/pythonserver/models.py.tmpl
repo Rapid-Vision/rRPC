@@ -1,0 +1,30 @@
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel
+
+{{- range $model := .Models}}
+
+
+class {{className $model.Name}}(BaseModel):
+{{- if hasModelFields $model}}
+{{- range $field := $model.Fields}}
+    {{fieldName $field.Name}}: {{pythonType $field.Type}}{{if $field.Type.Optional}} = None{{end}}
+{{- end}}
+{{- else}}
+    pass
+{{- end}}
+
+{{- end}}
+
+{{- range $rpc := .RPCs}}
+{{- if hasParameters $rpc}}
+
+
+class {{paramsClassName $rpc.Name}}(BaseModel):
+{{- range $param := $rpc.Parameters}}
+    {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}
+{{- end}}
+{{- end}}
+{{- end}}

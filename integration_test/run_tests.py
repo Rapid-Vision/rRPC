@@ -122,34 +122,38 @@ def codegen(
     )
 
 
-def main() -> int:
-    selected = parse_tests()
-    run_go = "go" in selected
-    run_py = "py" in selected
-    run_ts_all = "ts-all" in selected
-    run_ts_bare = run_ts_all or "ts-bare" in selected
-    run_ts_zod = run_ts_all or "ts-zod" in selected
+def run_with_server(
+    workdir: Path,
+    server_lang: str,
+    run_go: bool,
+    run_py: bool,
+    run_ts_all: bool,
+    run_ts_bare: bool,
+    run_ts_zod: bool,
+) -> None:
+    if server_lang == "go":
+        server_cmd = ["go", "run", "."]
+        server_cwd = workdir / "go_server"
+    elif server_lang == "py":
+        server_cmd = [
+            "uv",
+            "run",
+            "server.py",
+        ]
+        server_cwd = workdir / "py_server"
+    else:
+        raise RuntimeError(f"unknown server lang: {server_lang}")
 
-    root = Path(__file__).resolve().parents[1]
-    workdir = Path(__file__).resolve().parent
-    rrpc = root / "rRPC"
-
-    codegen(rrpc=rrpc, workdir=workdir, root=root)
-
-    server = subprocess.Popen(
-        ["go", "run", "."],
-        cwd=workdir / "go_server",
-        start_new_session=True,
-    )
+    server = subprocess.Popen(server_cmd, cwd=server_cwd, start_new_session=True)
     try:
         wait_for_port("127.0.0.1", 8080, timeout=5.0)
         if run_go:
-            print("Running go tests:")
+            print(f"Running go tests (server={server_lang}):")
             run(["go", "test", "."], cwd=workdir / "go_client")
             print("\n")
 
         if run_py:
-            print("Running python tests:")
+            print(f"Running python tests (server={server_lang}):")
             run(
                 [
                     sys.executable,
@@ -163,7 +167,7 @@ def main() -> int:
             print("\n")
 
         if run_ts_bare or run_ts_zod:
-            print("Running typescript tests:")
+            print(f"Running typescript tests (server={server_lang}):")
             run(["bun", "install"], cwd=workdir / "ts_client")
             if run_ts_all:
                 run(["bun", "test"], cwd=workdir / "ts_client")
@@ -188,6 +192,40 @@ def main() -> int:
             except ProcessLookupError:
                 sys.exit(1)
             server.wait(timeout=3.0)
+
+
+def main() -> int:
+    selected = parse_tests()
+    run_go = "go" in selected
+    run_py = "py" in selected
+    run_ts_all = "ts-all" in selected
+    run_ts_bare = run_ts_all or "ts-bare" in selected
+    run_ts_zod = run_ts_all or "ts-zod" in selected
+
+    root = Path(__file__).resolve().parents[1]
+    workdir = Path(__file__).resolve().parent
+    rrpc = root / "rRPC"
+
+    codegen(rrpc=rrpc, workdir=workdir, root=root)
+
+    run_with_server(
+        workdir=workdir,
+        server_lang="go",
+        run_go=run_go,
+        run_py=run_py,
+        run_ts_all=run_ts_all,
+        run_ts_bare=run_ts_bare,
+        run_ts_zod=run_ts_zod,
+    )
+    run_with_server(
+        workdir=workdir,
+        server_lang="py",
+        run_go=run_go,
+        run_py=run_py,
+        run_ts_all=run_ts_all,
+        run_ts_bare=run_ts_bare,
+        run_ts_zod=run_ts_zod,
+    )
     return 0
 
 

@@ -1,5 +1,5 @@
 # rRPC
-rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new protocol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs. Currently it supports generating a go server and clients for go, python and typescript.
+rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new protocol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs. Currently it supports generating a go or python server and clients for go, python and typescript.
 
 ## Motivation
 The industry standard for communication between services is [gRPC](https://grpc.io/). It may be good for Google-scale services, but has several disadvantages: 
@@ -12,7 +12,7 @@ For small and medium-sized projects the performance and industrial adoption of t
 
 ## Features
 This project aims to provide a simple tool with the following properties:
-- Server code generation in go
+- Server code generation in go or python
 - Client generation for go, python and typescript
 - Type validation in python using pydantic (with `--py-pydantic` flag)
 - Type validation in typescript using zod (with `--ts-zod` flag)
@@ -40,7 +40,7 @@ View [vs code extension](https://marketplace.visualstudio.com/items?itemName=mis
 | Language | Server | Client |
 | --- | --- | --- |
 | Go | ✅ | ✅ |
-| Python | ❌ | ✅ |
+| Python | ✅ | ✅ |
 | Typescript | ❌ | ✅ |
 
 Other languages can be supported via OpenAPI toolkits.

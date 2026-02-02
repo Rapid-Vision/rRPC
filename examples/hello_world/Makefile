@@ -9,20 +9,24 @@ RRPC := rRPC
 NEED_GO_BUILD :=
 endif
 
-.PHONY: all server client openapi clean go-build
+.PHONY: all go_server py_server py_client openapi clean go-build
 
-all: server client openapi
+all: go_server py_server py_client openapi
 
 ifeq ($(NEED_GO_BUILD),1)
-server: go-build
-client: go-build
+go_server: go-build
+py_server: go-build
+py_client: go-build
 openapi: go-build
 endif
 
-server: $(SCHEMA)
-	$(RRPC) server -o ./go_server -f $(SCHEMA)
+go_server: $(SCHEMA)
+	$(RRPC) server --lang go -o ./go_server -f $(SCHEMA)
 
-client: $(SCHEMA)
+py_server: $(SCHEMA)
+	$(RRPC) server --lang py -o ./py_server -f $(SCHEMA)
+
+py_client: $(SCHEMA)
 	$(RRPC) client -o ./py_client -f $(SCHEMA)
 
 openapi: $(SCHEMA)
@@ -32,4 +36,4 @@ go-build:
 	cd $(ROOT) && go build
 
 clean:
-	rm -rf ./go_server/rpcserver ./py_client/rpcclient openapi.json
+	rm -rf ./go_server/rpcserver ./py_server/rpcserver ./py_client/rpcclient openapi.json

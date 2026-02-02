@@ -255,14 +255,13 @@ func modelAnchorKey(model parser.Model) anchorKey {
 
 func modelEndAnchorKey(model parser.Model) anchorKey {
 	if model.EndLine == model.Line && model.Line > 0 {
-		return anchorKey{line: model.EndLine, col: modelSingleLineEndCol(model), kind: "model_end"}
+		endCol := model.EndCol
+		if endCol == 0 {
+			endCol = model.Col
+		}
+		return anchorKey{line: model.EndLine, col: endCol, kind: "model_end"}
 	}
 	return anchorKey{line: model.EndLine, col: 1, kind: "model_end"}
-}
-
-func modelSingleLineEndCol(model parser.Model) int {
-	nameLen := len([]rune(model.Name))
-	return model.Col + len([]rune("model ")) + nameLen + 2
 }
 
 func fieldAnchorKey(field parser.Field) anchorKey {

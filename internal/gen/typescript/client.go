@@ -130,43 +130,63 @@ func GenerateTypeScriptIndexWithZod(schema *parser.Schema, zod bool) string {
 	b.WriteString("\tForbiddenRPCError,\n")
 	b.WriteString("\tNotImplementedRPCError,\n")
 	b.WriteString("} from \"./errors\";\n")
+	hasModelsExports := len(schema.Models) > 0
+	hasZodExports := false
+	hasTypesExports := false
+	for _, rpc := range schema.RPCs {
+		if len(rpc.Parameters) > 0 {
+			hasZodExports = true
+			hasTypesExports = true
+		}
+		if rpc.HasReturn {
+			hasTypesExports = true
+		}
+	}
+	if hasModelsExports {
+		hasTypesExports = true
+		hasZodExports = true
+	}
 	if zod {
-		b.WriteString("export {\n")
+		if hasZodExports {
+			b.WriteString("export {\n")
+			for _, model := range schema.Models {
+				b.WriteString("\t")
+				b.WriteString(className(model.Name))
+				b.WriteString("Schema,\n")
+			}
+			for _, rpc := range schema.RPCs {
+				if len(rpc.Parameters) > 0 {
+					b.WriteString("\t")
+					b.WriteString(rpcParamsName(rpc.Name))
+					b.WriteString("Schema,\n")
+				}
+			}
+			b.WriteString("} from \"./models\";\n")
+		}
+	}
+	b.WriteString("\n")
+
+	if hasTypesExports {
+		b.WriteString("export type {\n")
 		for _, model := range schema.Models {
 			b.WriteString("\t")
 			b.WriteString(className(model.Name))
-			b.WriteString("Schema,\n")
+			b.WriteString(",\n")
 		}
 		for _, rpc := range schema.RPCs {
 			if len(rpc.Parameters) > 0 {
 				b.WriteString("\t")
 				b.WriteString(rpcParamsName(rpc.Name))
-				b.WriteString("Schema,\n")
+				b.WriteString(",\n")
+			}
+			if rpc.HasReturn {
+				b.WriteString("\t")
+				b.WriteString(rpcResultName(rpc.Name))
+				b.WriteString(",\n")
 			}
 		}
 		b.WriteString("} from \"./models\";\n")
 	}
-	b.WriteString("\n")
-
-	b.WriteString("export type {\n")
-	for _, model := range schema.Models {
-		b.WriteString("\t")
-		b.WriteString(className(model.Name))
-		b.WriteString(",\n")
-	}
-	for _, rpc := range schema.RPCs {
-		if len(rpc.Parameters) > 0 {
-			b.WriteString("\t")
-			b.WriteString(rpcParamsName(rpc.Name))
-			b.WriteString(",\n")
-		}
-		if rpc.HasReturn {
-			b.WriteString("\t")
-			b.WriteString(rpcResultName(rpc.Name))
-			b.WriteString(",\n")
-		}
-	}
-	b.WriteString("} from \"./models\";\n")
 	b.WriteString("export type { FetchFn, FetchInit, FetchResponse, RPCClientOptions } from \"./client\";\n")
 	b.WriteString("export type { RPCErrorType, RPCError } from \"./errors\";\n")
 	return b.String()

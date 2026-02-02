@@ -114,7 +114,8 @@ app = create_app(Service())
 async def auth_middleware(request: Request, call_next):
     if request.headers.get("Authorization") != f"Bearer {BEARER_TOKEN}":
         return JSONResponse(
-            status_code=401, content={"type": "auth", "message": "missing or invalid token"}
+            status_code=401,
+            content={"type": "unauthorized", "message": "missing or invalid token"},
         )
     response = await call_next(request)
     if response.status_code == 204:

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 ERROR_TYPE_VALIDATION = "validation"
 ERROR_TYPE_INPUT = "input"
-ERROR_TYPE_AUTH = "auth"
+ERROR_TYPE_UNAUTHORIZED = "unauthorized"
 ERROR_TYPE_FORBIDDEN = "forbidden"
 ERROR_TYPE_NOT_IMPLEMENTED = "not_implemented"
 ERROR_TYPE_CUSTOM = "custom"
@@ -16,7 +16,7 @@ ERROR_TYPE_CUSTOM = "custom"
 ERROR_STATUS: Dict[str, int] = {
     ERROR_TYPE_VALIDATION: 400,
     ERROR_TYPE_INPUT: 400,
-    ERROR_TYPE_AUTH: 401,
+    ERROR_TYPE_UNAUTHORIZED: 401,
     ERROR_TYPE_FORBIDDEN: 403,
     ERROR_TYPE_NOT_IMPLEMENTED: 501,
     ERROR_TYPE_CUSTOM: 500,
@@ -47,7 +47,7 @@ class InputRPCError(RPCErrorException):
 
 class UnauthorizedRPCError(RPCErrorException):
     def __init__(self, message: str) -> None:
-        super().__init__(RPCError(type=ERROR_TYPE_AUTH, message=message), 401)
+        super().__init__(RPCError(type=ERROR_TYPE_UNAUTHORIZED, message=message), 401)
 
 
 class ForbiddenRPCError(RPCErrorException):

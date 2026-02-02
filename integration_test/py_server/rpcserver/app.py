@@ -6,11 +6,13 @@ import inspect
 from typing import Any
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ValidationError
 
 from .errors import (
     ERROR_TYPE_CUSTOM,
+    ERROR_TYPE_INPUT,
     ERROR_TYPE_VALIDATION,
     RPCErrorException,
     error_payload,
@@ -60,6 +62,13 @@ def _encode_payload(value: Any) -> Any:
 def create_app(handlers: RPCHandlers, prefix: str = "/rpc") -> FastAPI:
     app = FastAPI()
     prefix = _normalize_prefix(prefix)
+
+    @app.exception_handler(RequestValidationError)
+    async def _request_validation_handler(_request, exc: RequestValidationError):
+        return JSONResponse(
+            status_code=400,
+            content=error_payload(ERROR_TYPE_INPUT, str(exc)),
+        )
     @app.post(f"{prefix}/test_empty")
     async def test_empty():
         try:

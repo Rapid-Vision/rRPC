@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.0.6"
+const version = "0.0.7"
 
 var (
 	rootVersionFlag bool

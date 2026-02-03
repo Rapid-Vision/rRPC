@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union
 from .models import (
     EmptyModel,
     TextModel,
@@ -13,60 +12,46 @@ from .models import (
 )
 
 
-class RPCHandlers(ABC):
+class RPCHandlers(Protocol):
 
-    @abstractmethod
-    def test_empty(self) -> EmptyModel:
-        raise NotImplementedError
+    def test_empty(self) -> Union[EmptyModel, Awaitable[EmptyModel]]:
+        ...
 
-    @abstractmethod
-    def test_no_return(self) -> None:
-        raise NotImplementedError
+    def test_no_return(self) -> Union[None, Awaitable[None]]:
+        ...
 
-    @abstractmethod
-    def test_basic(self, text: TextModel, flag: bool, count: int, note: Optional[str] = None) -> TextModel:
-        raise NotImplementedError
+    def test_basic(self, text: TextModel, flag: bool, count: int, note: Optional[str] = None) -> Union[TextModel, Awaitable[TextModel]]:
+        ...
 
-    @abstractmethod
-    def test_list_map(self, texts: List[TextModel], flags: Dict[str, str]) -> NestedModel:
-        raise NotImplementedError
+    def test_list_map(self, texts: List[TextModel], flags: Dict[str, str]) -> Union[NestedModel, Awaitable[NestedModel]]:
+        ...
 
-    @abstractmethod
-    def test_optional(self, text: Optional[TextModel] = None, flag: Optional[bool] = None) -> FlagsModel:
-        raise NotImplementedError
+    def test_optional(self, text: Optional[TextModel] = None, flag: Optional[bool] = None) -> Union[FlagsModel, Awaitable[FlagsModel]]:
+        ...
 
-    @abstractmethod
-    def test_validation_error(self, text: TextModel) -> TextModel:
-        raise NotImplementedError
+    def test_validation_error(self, text: TextModel) -> Union[TextModel, Awaitable[TextModel]]:
+        ...
 
-    @abstractmethod
-    def test_unauthorized_error(self) -> EmptyModel:
-        raise NotImplementedError
+    def test_unauthorized_error(self) -> Union[EmptyModel, Awaitable[EmptyModel]]:
+        ...
 
-    @abstractmethod
-    def test_forbidden_error(self) -> EmptyModel:
-        raise NotImplementedError
+    def test_forbidden_error(self) -> Union[EmptyModel, Awaitable[EmptyModel]]:
+        ...
 
-    @abstractmethod
-    def test_not_implemented_error(self) -> EmptyModel:
-        raise NotImplementedError
+    def test_not_implemented_error(self) -> Union[EmptyModel, Awaitable[EmptyModel]]:
+        ...
 
-    @abstractmethod
-    def test_custom_error(self) -> EmptyModel:
-        raise NotImplementedError
+    def test_custom_error(self) -> Union[EmptyModel, Awaitable[EmptyModel]]:
+        ...
 
-    @abstractmethod
-    def test_map_return(self) -> Dict[str, TextModel]:
-        raise NotImplementedError
+    def test_map_return(self) -> Union[Dict[str, TextModel], Awaitable[Dict[str, TextModel]]]:
+        ...
 
-    @abstractmethod
-    def test_json(self, data: Any) -> Any:
-        raise NotImplementedError
+    def test_json(self, data: Any) -> Union[Any, Awaitable[Any]]:
+        ...
 
-    @abstractmethod
-    def test_raw(self, payload: Any) -> Any:
-        raise NotImplementedError
+    def test_raw(self, payload: Any) -> Union[Any, Awaitable[Any]]:
+        ...
 
-    @abstractmethod
-    def test_mixed_payload(self, payload: PayloadModel) -> PayloadModel:
-        raise NotImplementedError
+    def test_mixed_payload(self, payload: PayloadModel) -> Union[PayloadModel, Awaitable[PayloadModel]]:
+        ...

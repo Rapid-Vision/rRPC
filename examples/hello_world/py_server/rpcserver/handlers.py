@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union
 from .models import (
     GreetingMessageModel,
 )
 
 
-class RPCHandlers(ABC):
+class RPCHandlers(Protocol):
 
-    @abstractmethod
-    def hello_world(self, name: str, surname: Optional[str] = None) -> GreetingMessageModel:
-        raise NotImplementedError
+    def hello_world(self, name: str, surname: Optional[str] = None) -> Union[GreetingMessageModel, Awaitable[GreetingMessageModel]]:
+        ...

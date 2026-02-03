@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union
 
 {{- if hasModels .}}
 from .models import (
@@ -12,10 +11,9 @@ from .models import (
 {{- end}}
 
 
-class RPCHandlers(ABC):
+class RPCHandlers(Protocol):
 {{- range $rpc := .RPCs}}
 
-    @abstractmethod
-    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> {{if hasReturn $rpc}}{{pythonType $rpc.Returns}}{{else}}None{{end}}:
-        raise NotImplementedError
+    def {{rpcMethodName $rpc.Name}}(self{{- range $param := $rpc.Parameters}}, {{fieldName $param.Name}}: {{pythonType $param.Type}}{{if $param.Type.Optional}} = None{{end}}{{- end}}) -> Union[{{if hasReturn $rpc}}{{pythonType $rpc.Returns}}{{else}}None{{end}}, Awaitable[{{if hasReturn $rpc}}{{pythonType $rpc.Returns}}{{else}}None{{end}}]]:
+        ...
 {{- end}}

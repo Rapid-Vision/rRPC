@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Dict, List, Optional, Protocol, Union
 from .models import (
     TextModel,
     SliceModel,
@@ -11,12 +10,10 @@ from .models import (
 )
 
 
-class RPCHandlers(ABC):
+class RPCHandlers(Protocol):
 
-    @abstractmethod
-    def submit_text(self, text: TextModel) -> int:
-        raise NotImplementedError
+    def submit_text(self, text: TextModel) -> Union[int, Awaitable[int]]:
+        ...
 
-    @abstractmethod
-    def compute_stats(self, text_id: int) -> StatsModel:
-        raise NotImplementedError
+    def compute_stats(self, text_id: int) -> Union[StatsModel, Awaitable[StatsModel]]:
+        ...

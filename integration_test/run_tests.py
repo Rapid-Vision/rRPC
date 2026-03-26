@@ -156,7 +156,9 @@ def run_with_server(
             print(f"Running python tests (server={server_lang}):")
             run(
                 [
-                    sys.executable,
+                    "uv",
+                    "run",
+                    "python",
                     "-m",
                     "unittest",
                     "test_client.py",

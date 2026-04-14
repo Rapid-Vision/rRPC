@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	gogen "github.com/Rapid-Vision/rRPC/internal/gen/go"
-	pygen "github.com/Rapid-Vision/rRPC/internal/gen/python"
-	tsgen "github.com/Rapid-Vision/rRPC/internal/gen/typescript"
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	gogen "github.com/Rapid-Vision/rrpc/internal/gen/go"
+	pygen "github.com/Rapid-Vision/rrpc/internal/gen/python"
+	tsgen "github.com/Rapid-Vision/rrpc/internal/gen/typescript"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 	"github.com/spf13/cobra"
 )
 

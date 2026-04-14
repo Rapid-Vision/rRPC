@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Rapid-Vision/rRPC/cmd"
+	"github.com/Rapid-Vision/rrpc/cmd"
 )
 
 func main() {

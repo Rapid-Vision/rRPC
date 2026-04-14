@@ -1,6 +1,6 @@
 # Schema Language
 
-rRPC schemas define models and RPCs.
+rrpc schemas define models and RPCs.
 
 ## Models
 ```rrpc

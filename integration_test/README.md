@@ -1,9 +1,9 @@
 # Integration tests
 
-This directory contains a full end-to-end test setup for rRPC. It generates a server and clients for all supported languages.
+This directory contains a full end-to-end test setup for rrpc. It generates a server and clients for all supported languages.
 
 ## How it works
-- `integration_test/run_tests.py` builds the CLI (`./rRPC`) and regenerates test artifacts.
+- `integration_test/run_tests.py` builds the CLI (`./rrpc`) and regenerates test artifacts.
 - It generates:
   - Go server into `integration_test/go_server`
   - Go client into `integration_test/go_client`
@@ -48,9 +48,9 @@ python integration_test/run_tests.py --test ts-all
 
 ## Run manually
 
-Build rRPC tool
+Build rrpc tool
 ```bash
-go build -o rRPC .
+go build -o rrpc .
 ```
 
 Generate code

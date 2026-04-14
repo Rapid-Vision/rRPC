@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/Rapid-Vision/rRPC/internal/utils"
+	"github.com/Rapid-Vision/rrpc/internal/utils"
 )
 
 func TestIdentifierNamePascalCase(t *testing.T) {

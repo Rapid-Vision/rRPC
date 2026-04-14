@@ -1,4 +1,4 @@
-# rRPC docs
+# rrpc docs
 
 Core references:
 - [Getting started](getting_started.md)

@@ -9,8 +9,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/Rapid-Vision/rRPC/internal/parser"
-	"github.com/Rapid-Vision/rRPC/internal/utils"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/utils"
 )
 
 //go:embed errors.ts.tmpl

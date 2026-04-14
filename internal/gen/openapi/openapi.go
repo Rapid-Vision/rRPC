@@ -8,8 +8,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Rapid-Vision/rRPC/internal/parser"
-	"github.com/Rapid-Vision/rRPC/internal/utils"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/utils"
 )
 
 //go:embed openapi.json.tmpl
@@ -35,7 +35,7 @@ func GenerateWithPrefix(schema *parser.Schema, title, version, prefix string) (s
 		return "", fmt.Errorf("schema is nil")
 	}
 	if title == "" {
-		title = "rRPC API"
+		title = "rrpc API"
 	}
 	if version == "" {
 		version = "0.1.0"

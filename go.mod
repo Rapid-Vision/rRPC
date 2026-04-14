@@ -1,4 +1,4 @@
-module github.com/Rapid-Vision/rRPC
+module github.com/Rapid-Vision/rrpc
 
 go 1.25.5
 

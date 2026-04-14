@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.3]
 ### Fixed
-- Fix line comment toggle to use `#` for rRPC schemas
+- Fix line comment toggle to use `#` for rrpc schemas
 
 ## [0.0.2]
 ### Added

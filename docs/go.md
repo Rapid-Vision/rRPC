@@ -4,8 +4,8 @@ This page covers server and Go client usage. See [schema_language.md](docs/schem
 
 ## Generate code
 ```bash
-rRPC server -o . hello.rrpc
-rRPC client --lang go -o . hello.rrpc
+rrpc server -o . hello.rrpc
+rrpc client --lang go -o . hello.rrpc
 ```
 Default packages are `rpcserver` for servers and `rpcclient` for clients.
 
@@ -72,6 +72,6 @@ rpcserver.WriteUnauthorizedError(w, "missing token")
 ## Prefixes
 Routes are prefixed with `/rpc` by default. Override with:
 ```bash
-rRPC server --prefix api hello.rrpc
-rRPC client --lang go --prefix api hello.rrpc
+rrpc server --prefix api hello.rrpc
+rrpc client --lang go --prefix api hello.rrpc
 ```

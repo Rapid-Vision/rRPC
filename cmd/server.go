@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	gogen "github.com/Rapid-Vision/rRPC/internal/gen/go"
-	pyserver "github.com/Rapid-Vision/rRPC/internal/gen/pythonserver"
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	gogen "github.com/Rapid-Vision/rrpc/internal/gen/go"
+	pyserver "github.com/Rapid-Vision/rrpc/internal/gen/pythonserver"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 	"github.com/spf13/cobra"
 )
 

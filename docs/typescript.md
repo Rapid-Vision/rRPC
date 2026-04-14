@@ -4,12 +4,12 @@ This page covers generating a TypeScript client. See [schema_language.md](docs/s
 
 ## Generate a client
 ```bash
-rRPC client --lang ts -o . hello.rrpc
+rrpc client --lang ts -o . hello.rrpc
 ```
 The default output package is `rpcclient`.
 For zod input validation:
 ```bash
-rRPC client --lang ts --ts-zod -o . hello.rrpc
+rrpc client --lang ts --ts-zod -o . hello.rrpc
 ```
 
 ## Basic usage
@@ -23,7 +23,7 @@ const greeting = await rpc.hello({ name: "Ada" });
 ## Prefixes
 Routes are prefixed with `/rpc` by default. Override with:
 ```bash
-rRPC client --lang ts --prefix api hello.rrpc
+rrpc client --lang ts --prefix api hello.rrpc
 ```
 
 ## Options

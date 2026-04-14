@@ -7,8 +7,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Rapid-Vision/rRPC/internal/parser"
-	"github.com/Rapid-Vision/rRPC/internal/utils"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/utils"
 
 	_ "embed"
 	"go/format"
@@ -24,7 +24,7 @@ var serverErrorsTemplate string
 var serverUtilsTemplate string
 
 //go:embed server_rpcs.go.tmpl
-var serverRPCsTemplate string
+var serverrpcsTemplate string
 
 type templateData struct {
 	Package string
@@ -80,7 +80,7 @@ func GenerateWithPrefix(schema *parser.Schema, pkg, prefix string) (map[string]s
 		"models.go": serverModelsTemplate,
 		"errors.go": serverErrorsTemplate,
 		"utils.go":  serverUtilsTemplate,
-		"rpcs.go":   serverRPCsTemplate,
+		"rpcs.go":   serverrpcsTemplate,
 	}
 
 	files := make(map[string]string, len(templates))

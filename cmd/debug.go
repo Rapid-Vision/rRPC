@@ -48,7 +48,7 @@ func RunDebugCmd(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("write output: %w", err)
 			}
 		}
-		w.Flush()
+		_ = w.Flush()
 	case "ast", "parser":
 		schema, err := parser.Parse(string(data))
 		if err != nil {

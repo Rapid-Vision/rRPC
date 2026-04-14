@@ -16,8 +16,7 @@ type TestEmptyResult struct {
 func (c *RPCClient) TestEmpty(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestEmptyResult
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_empty", payload, &res); err != nil {
 		return zero, err
 	}
@@ -28,8 +27,7 @@ type TestNoReturnParams struct {
 }
 
 func (c *RPCClient) TestNoReturn(ctx context.Context) error {
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_no_return", payload, nil); err != nil {
 		return err
 	}
@@ -49,8 +47,7 @@ type TestBasicResult struct {
 func (c *RPCClient) TestBasic(ctx context.Context, params TestBasicParams) (TextModel, error) {
 	var zero TextModel
 	var res TestBasicResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_basic", payload, &res); err != nil {
 		return zero, err
 	}
@@ -68,8 +65,7 @@ type TestListMapResult struct {
 func (c *RPCClient) TestListMap(ctx context.Context, params TestListMapParams) (NestedModel, error) {
 	var zero NestedModel
 	var res TestListMapResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_list_map", payload, &res); err != nil {
 		return zero, err
 	}
@@ -87,8 +83,7 @@ type TestOptionalResult struct {
 func (c *RPCClient) TestOptional(ctx context.Context, params TestOptionalParams) (FlagsModel, error) {
 	var zero FlagsModel
 	var res TestOptionalResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_optional", payload, &res); err != nil {
 		return zero, err
 	}
@@ -105,8 +100,7 @@ type TestValidationErrorResult struct {
 func (c *RPCClient) TestValidationError(ctx context.Context, params TestValidationErrorParams) (TextModel, error) {
 	var zero TextModel
 	var res TestValidationErrorResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_validation_error", payload, &res); err != nil {
 		return zero, err
 	}
@@ -122,8 +116,7 @@ type TestUnauthorizedErrorResult struct {
 func (c *RPCClient) TestUnauthorizedError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestUnauthorizedErrorResult
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_unauthorized_error", payload, &res); err != nil {
 		return zero, err
 	}
@@ -139,8 +132,7 @@ type TestForbiddenErrorResult struct {
 func (c *RPCClient) TestForbiddenError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestForbiddenErrorResult
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_forbidden_error", payload, &res); err != nil {
 		return zero, err
 	}
@@ -156,8 +148,7 @@ type TestNotImplementedErrorResult struct {
 func (c *RPCClient) TestNotImplementedError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestNotImplementedErrorResult
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_not_implemented_error", payload, &res); err != nil {
 		return zero, err
 	}
@@ -173,8 +164,7 @@ type TestCustomErrorResult struct {
 func (c *RPCClient) TestCustomError(ctx context.Context) (EmptyModel, error) {
 	var zero EmptyModel
 	var res TestCustomErrorResult
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_custom_error", payload, &res); err != nil {
 		return zero, err
 	}
@@ -190,8 +180,7 @@ type TestMapReturnResult struct {
 func (c *RPCClient) TestMapReturn(ctx context.Context) (map[string]TextModel, error) {
 	var zero map[string]TextModel
 	var res TestMapReturnResult
-	var payload any
-	payload = nil
+	var payload any = nil
 	if err := c.doRequest(ctx, "/rpc/test_map_return", payload, &res); err != nil {
 		return zero, err
 	}
@@ -208,8 +197,7 @@ type TestJsonResult struct {
 func (c *RPCClient) TestJson(ctx context.Context, params TestJsonParams) (any, error) {
 	var zero any
 	var res TestJsonResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_json", payload, &res); err != nil {
 		return zero, err
 	}
@@ -226,8 +214,7 @@ type TestRawResult struct {
 func (c *RPCClient) TestRaw(ctx context.Context, params TestRawParams) (json.RawMessage, error) {
 	var zero json.RawMessage
 	var res TestRawResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_raw", payload, &res); err != nil {
 		return zero, err
 	}
@@ -244,8 +231,7 @@ type TestMixedPayloadResult struct {
 func (c *RPCClient) TestMixedPayload(ctx context.Context, params TestMixedPayloadParams) (PayloadModel, error) {
 	var zero PayloadModel
 	var res TestMixedPayloadResult
-	var payload any
-	payload = params
+	var payload any = params
 	if err := c.doRequest(ctx, "/rpc/test_mixed_payload", payload, &res); err != nil {
 		return zero, err
 	}

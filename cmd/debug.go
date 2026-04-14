@@ -5,8 +5,8 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/Rapid-Vision/rRPC/internal/lexer"
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/lexer"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 	"github.com/spf13/cobra"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Rapid-Vision/rRPC/internal/lexer"
+	"github.com/Rapid-Vision/rrpc/internal/lexer"
 )
 
 type Schema struct {

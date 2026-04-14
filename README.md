@@ -1,5 +1,5 @@
-# rRPC
-rRPC is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new protocol. rRPC generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs. Currently it supports generating a go or python server and clients for go, python and typescript.
+# rrpc
+rrpc is a simple codegen tool for creating RPC APIs from a defined schema. It does not aim to create a new protocol. rrpc generates boilerplate code from a defined schema. It's like [sqlc](https://sqlc.dev) for APIs. Currently it supports generating a go or python server and clients for go, python and typescript.
 
 ## Motivation
 The industry standard for communication between services is [gRPC](https://grpc.io/). It may be good for Google-scale services, but has several disadvantages: 
@@ -47,7 +47,7 @@ Other languages can be supported via OpenAPI toolkits.
 
 ## Installation
 ```bash
-go install github.com/Rapid-Vision/rRPC
+go install github.com/Rapid-Vision/rrpc
 ```
 
 ## Docs
@@ -66,11 +66,11 @@ See [`examples/`](examples/) directory for server, client and Makefile implemena
 This project focuses on a small, typed, JSON-over-HTTP RPC flow.
 
 ### Compared to other tools
-- **[gRPC](https://grpc.io/)**: gRPC is a full-featured RPC system with strong tooling, streaming, and HTTP/2. rRPC is lighter and simpler but lacks streaming, interceptors, and a mature ecosystem.
-- **[OpenAPI](https://www.openapis.org/)**: OpenAPI is an API description format with broad tooling for REST-style endpoints. rRPC is RPC-oriented and does not target REST semantics or multiple transports.
-- **[GraphQL](https://graphql.org/)**: GraphQL offers flexible client queries and a rich type system. rRPC is schema-first but request/response shapes are fixed per method and not queryable.
-- **[CUE](https://cuelang.org/)**: CUE is a general configuration and validation language. rRPC is narrowly scoped to RPC schema + codegen rather than validation or policy.
-- **[TypeSpec](https://typespec.io/)**: TypeSpec is a rich API modeling language with multiple emitters. rRPC is smaller, has a simpler DSL, and targets a limited set of generators.
+- **[gRPC](https://grpc.io/)**: gRPC is a full-featured RPC system with strong tooling, streaming, and HTTP/2. rrpc is lighter and simpler but lacks streaming, interceptors, and a mature ecosystem.
+- **[OpenAPI](https://www.openapis.org/)**: OpenAPI is an API description format with broad tooling for REST-style endpoints. rrpc is RPC-oriented and does not target REST semantics or multiple transports.
+- **[GraphQL](https://graphql.org/)**: GraphQL offers flexible client queries and a rich type system. rrpc is schema-first but request/response shapes are fixed per method and not queryable.
+- **[CUE](https://cuelang.org/)**: CUE is a general configuration and validation language. rrpc is narrowly scoped to RPC schema + codegen rather than validation or policy.
+- **[TypeSpec](https://typespec.io/)**: TypeSpec is a rich API modeling language with multiple emitters. rrpc is smaller, has a simpler DSL, and targets a limited set of generators.
 
 ### When this may be useful
 - You want a small schema language and minimal runtime.

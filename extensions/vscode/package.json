@@ -1,7 +1,7 @@
 {
   "name": "rrpc",
-  "displayName": "rRPC",
-  "description": "rRPC schema language support",
+  "displayName": "rrpc",
+  "description": "rrpc schema language support",
   "version": "0.0.3",
   "publisher": "mishapankin",
   "engines": {
@@ -12,7 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rapid-Vision/rRPC",
+    "url": "https://github.com/Rapid-Vision/rrpc",
     "directory": "extensions/vscode"
   },
   "icon": "logo.png",
@@ -21,7 +21,7 @@
       {
         "id": "rrpc",
         "aliases": [
-          "rRPC",
+          "rrpc",
           "rrpc"
         ],
         "extensions": [

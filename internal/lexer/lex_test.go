@@ -3,7 +3,7 @@ package lexer_test
 import (
 	"testing"
 
-	"github.com/Rapid-Vision/rRPC/internal/lexer"
+	"github.com/Rapid-Vision/rrpc/internal/lexer"
 )
 
 func TestTokenizeExampleSchema(t *testing.T) {

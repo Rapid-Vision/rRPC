@@ -4,13 +4,13 @@ This page covers generating Python clients and servers. See [schema_language.md]
 
 ## Generate code
 ```bash
-rRPC client -o . hello.rrpc
+rrpc client -o . hello.rrpc
 ```
 The default output package is `rpcclient`.
 
 ## Generate a FastAPI server
 ```bash
-rRPC server --lang py -o . hello.rrpc
+rrpc server --lang py -o . hello.rrpc
 ```
 The default output package is `rpcserver`. The generated server uses FastAPI and Pydantic.
 
@@ -77,12 +77,12 @@ uses dataclass serialization for payloads while handling nested lists/maps autom
 ## Pydantic validation
 To enable input validation, generate the client with Pydantic models:
 ```bash
-rRPC client --py-pydantic -o . hello.rrpc
+rrpc client --py-pydantic -o . hello.rrpc
 ```
 The client validates RPC inputs with Pydantic before sending requests.
 
 ## Prefixes
 Routes are prefixed with `/rpc` by default. Override with:
 ```bash
-rRPC client --prefix api hello.rrpc
+rrpc client --prefix api hello.rrpc
 ```

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 )
 
 func TestParseSchema(t *testing.T) {

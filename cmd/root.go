@@ -12,8 +12,8 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:     "rrpc",
-	Short:   "rRPC is a code generation tool for creating an RPC API from a schema",
-	Version: "0.0.8",
+	Short:   "rrpc is a code generation tool for creating an RPC API from a schema",
+	Version: "0.0.9",
 }
 
 func Execute() {

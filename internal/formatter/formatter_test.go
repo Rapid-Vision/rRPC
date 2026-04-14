@@ -3,8 +3,8 @@ package formatter_test
 import (
 	"testing"
 
-	"github.com/Rapid-Vision/rRPC/internal/formatter"
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/formatter"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 	"github.com/pmezard/go-difflib/difflib"
 
 	_ "embed"

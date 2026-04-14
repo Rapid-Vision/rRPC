@@ -1,4 +1,4 @@
-# rRPC (LLM context)
+# rrpc (LLM context)
 
 Repository: schema-first RPC code generator for JSON-over-HTTP APIs.
 
@@ -16,10 +16,10 @@ Repository: schema-first RPC code generator for JSON-over-HTTP APIs.
 - `docs/errors.md`
 
 ## Common commands
-- Generate Go server: `rRPC server -o . schema.rrpc`
-- Generate Python client: `rRPC client -o . schema.rrpc`
-- Generate Go client: `rRPC client --lang go -o . schema.rrpc`
-- OpenAPI: `rRPC openapi -o . schema.rrpc`
+- Generate Go server: `rrpc server -o . schema.rrpc`
+- Generate Python client: `rrpc client -o . schema.rrpc`
+- Generate Go client: `rrpc client --lang go -o . schema.rrpc`
+- OpenAPI: `rrpc openapi -o . schema.rrpc`
 
 ## Examples
 - Hello world: `examples/hello_world/hello.rrpc`

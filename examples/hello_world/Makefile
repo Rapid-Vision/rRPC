@@ -2,10 +2,10 @@ SCHEMA := hello.rrpc
 ROOT   := ../..
 
 ifneq ("$(wildcard $(ROOT)/go.mod)","")
-RRPC := $(ROOT)/rRPC
+RRPC := $(ROOT)/rrpc
 NEED_GO_BUILD := 1
 else
-RRPC := rRPC
+RRPC := rrpc
 NEED_GO_BUILD :=
 endif
 

@@ -1,6 +1,6 @@
 SCHEMA := test.rrpc
 ROOT   := ..
-RRPC := $(ROOT)/rRPC
+RRPC := $(ROOT)/rrpc
 
 # It is easier to always rebuild everything
 .PHONY: all $(RRPC) go-server py-server py-client ts-client openapi clean

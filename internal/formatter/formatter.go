@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 )
 
 type anchorKey struct {

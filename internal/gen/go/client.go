@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 
 	_ "embed"
 	"go/format"

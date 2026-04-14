@@ -26,7 +26,7 @@ def wait_for_port(host: str, port: int, timeout: float) -> None:
 
 
 def parse_tests() -> set[str]:
-    parser = argparse.ArgumentParser(description="Run rRPC integration tests")
+    parser = argparse.ArgumentParser(description="Run rrpc integration tests")
     parser.add_argument(
         "--test",
         action="append",
@@ -54,7 +54,7 @@ def codegen(
     root: os.PathLike,
 ):
     run(
-        ["go", "build", "-o", "rRPC"],
+        ["go", "build", "-o", "rrpc"],
         cwd=root,
     )
 
@@ -206,7 +206,7 @@ def main() -> int:
 
     root = Path(__file__).resolve().parents[1]
     workdir = Path(__file__).resolve().parent
-    rrpc = root / "rRPC"
+    rrpc = root / "rrpc"
 
     codegen(rrpc=rrpc, workdir=workdir, root=root)
 

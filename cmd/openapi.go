@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Rapid-Vision/rRPC/internal/gen/openapi"
-	"github.com/Rapid-Vision/rRPC/internal/parser"
+	"github.com/Rapid-Vision/rrpc/internal/gen/openapi"
+	"github.com/Rapid-Vision/rrpc/internal/parser"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(openapiCmd)
-	openapiCmd.Flags().StringVar(&openapiTitle, "title", "rRPC API", "OpenAPI title")
+	openapiCmd.Flags().StringVar(&openapiTitle, "title", "rrpc API", "OpenAPI title")
 	openapiCmd.Flags().StringVar(&openapiVersion, "version", "0.1.0", "OpenAPI version")
 	openapiCmd.Flags().StringVarP(&openapiOut, "output", "o", ".", "Output base directory")
 	openapiCmd.Flags().BoolVarP(&openapiForce, "force", "f", false, "Overwrite output file if it exists")
